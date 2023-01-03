@@ -1,8 +1,8 @@
 #!/bin/bash
 
-conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
-conda_env=torch_1.7
-source $conda/bin/activate $conda_env
+#conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
+#conda_env=torch_1.7
+#source $conda/bin/activate $conda_env
 
 # speaker setting
 part="clean" # "clean" or "all"
