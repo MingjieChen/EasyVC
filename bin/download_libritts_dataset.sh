@@ -1,5 +1,8 @@
 #!/bin/bash
 
+conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
+conda_env=torch_1.7
+source $conda/bin/activate $conda_env
 
 # speaker setting
 part="clean" # "clean" or "all"
@@ -7,9 +10,9 @@ part="clean" # "clean" or "all"
              # if set to "all", use clean + other data
 
 # directory path setting
-download_dir=downloads # directory to save database
-dumpdir=dump           # directory to dump features
-
+download_dir=/share/mini1/res/t/vc/studio/tiresyn-en/libritts/ParallelWaveGAN/egs/libritts/voc1/downloads # directory to save database
+dumpdir=dump/libritts_clean           # directory to dump features
+datadir=data/libritts   # directory to store meta data (wav.scp, segments)
 
 train_set="train_nodev_${part}" # name of training data directory
 dev_set="dev_${part}"           # name of development data directory
@@ -18,7 +21,7 @@ eval_set="eval_${part}"         # name of evaluation data directory
 set -euo pipefail
     
 echo "Stage -1: Data download"
-local/data_download.sh "${download_dir}"
+dataset/libritts/data_download.sh "${download_dir}"
 
 
 echo "Stage 0: Data preparation"
@@ -36,24 +39,26 @@ fi
 train_data_dirs=""
 dev_data_dirs=""
 eval_data_dirs=""
+
+
 for train_part in ${train_parts}; do
-    local/data_prep.sh "${download_dir}/LibriTTS" \
-        "${train_part}" data "${download_dir}/LibriTTSLabel"
-    train_data_dirs+=" data/${train_part}"
+    dataset/libritts/data_prep.sh "${download_dir}/LibriTTS" \
+        "${train_part}" $datadir "${download_dir}/LibriTTSLabel"
+    train_data_dirs+=" ${datadir}/${train_part}"
 done
 for dev_part in ${dev_parts}; do
-    local/data_prep.sh "${download_dir}/LibriTTS" \
-        "${dev_part}" data "${download_dir}/LibriTTSLabel"
-    dev_data_dirs+=" data/${dev_part}"
+    dataset/libritts/data_prep.sh "${download_dir}/LibriTTS" \
+        "${dev_part}" $datadir "${download_dir}/LibriTTSLabel"
+    dev_data_dirs+=" ${datadir}/${dev_part}"
 done
 for eval_part in ${eval_parts}; do
-    local/data_prep.sh "${download_dir}/LibriTTS" \
-        "${eval_part}" data "${download_dir}/LibriTTSLabel"
-    eval_data_dirs+=" data/${eval_part}"
+    dataset/libritts/data_prep.sh "${download_dir}/LibriTTS" \
+        "${eval_part}" $datadir "${download_dir}/LibriTTSLabel"
+    eval_data_dirs+=" ${datadir}/${eval_part}"
 done
 # shellcheck disable=SC2086
-utils/combine_data.sh "data/${train_set}" ${train_data_dirs}
+dataset/libritts/combine_data.sh "${datadir}/${train_set}" ${train_data_dirs}
 # shellcheck disable=SC2086
-utils/combine_data.sh "data/${dev_set}" ${dev_data_dirs}
+dataset/libritts/combine_data.sh "${datadir}/${dev_set}" ${dev_data_dirs}
 # shellcheck disable=SC2086
-utils/combine_data.sh "data/${eval_set}" ${eval_data_dirs}
+dataset/libritts/combine_data.sh "${datadir}/${eval_set}" ${eval_data_dirs}
