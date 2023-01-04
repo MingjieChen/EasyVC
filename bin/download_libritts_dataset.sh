@@ -10,7 +10,7 @@ part="clean" # "clean" or "all"
              # if set to "all", use clean + other data
 
 # directory path setting
-download_dir=/share/mini1/res/t/vc/studio/tiresyn-en/libritts/ParallelWaveGAN/egs/libritts/voc1/downloads # directory to save database
+download_dir=downloads # directory to save database
 dumpdir=dump/libritts_clean           # directory to dump features
 datadir=data/libritts   # directory to store meta data (wav.scp, segments)
 

@@ -6,11 +6,6 @@ import numpy as np
 import librosa
 from scipy.io import wavfile
 
-if len(sys.argv) != 4:
-    raise Exception("three arguments needed")
-audio_dir=sys.argv[1]
-out_dir=sys.argv[2]
-scp_dir=sys.argv[3]
 import glob
 import os
 from concurrent.futures import ProcessPoolExecutor
@@ -18,81 +13,89 @@ from functools import partial
 import subprocess
 from tqdm import tqdm
 
+VQWAV2VEC_SAMPLING_RATE=16000
 def load_wav(path):
     sr, x = wavfile.read(path)
     signed_int16_max = 2**15
     if x.dtype == np.int16:
         x = x.astype(np.float32) / signed_int16_max
-    print(f'48khz wav {x.shape}')
-    #x,_ = librosa.effects.trim(x,top_db=60,frame_length=2048,hop_length=512)    
-    #print(f'after trim {x.shape}')
-    if sr != 16000:
-        x = librosa.resample(x, sr, 16000)
-    print(f'resample {x.shape}')
+    print(f'original wav {x.shape}')
+    if sr != VQWAV2VEC_SAMPLING_RATE:
+        x = librosa.resample(x, sr, VQWAV2VEC_SAMPLING_RATE)
+    print(f'resample to 16khz {x.shape}')
     x = np.clip(x, -1.0, 1.0)
 
-    #x,_ = librosa.core.load(path,hparams.sample_rate)
     return x
-def process(_audio_paths, audio_dir, out_dir, split):
-    cp = 'ckpt/vq-wav2vec_kmeans.pt'
-    model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([cp])
+def process_speaker(spk_meta, spk, args):
+    #cp = 'ckpt/vq-wav2vec_kmeans.pt'
+    model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([args.vqwav2vec_ckpt])
     model = model[0]
     model.eval()
-    for scp, seg in _audio_paths:
-        file_id = scp.split(' ')[0]
-        speaker = file_id.split('_')[0]
-        audio_path = os.path.join(audio_dir, speaker, file_id+'.wav')
-        wav = load_wav(audio_path)
-        start, end = seg.split(' ')[2], seg.split(' ')[3]
-        wav = wav[int(float(start) * 16000): int(float(end) * 16000)]
-        window_size=480
+    for row in spk_meta:
+        ID = row['ID']
+        wav_path = row['wav_path']
+
+        wav = load_wav(wav_path)
+
+        start, end = float(row['start']), float(row['end'])
+        wav = wav[int(float(start) * VQWAV2VEC_SAMPLING_RATE): int(float(end) * VQWAV2VEC_SAMPLING_RATE)]
         
-        wav_input_16khz = np.pad(wav, pad_width = (window_size//2,window_size//2), mode='reflect')
-        print(f"after pad {wav_input_16khz.shape}")
-        
-        wav_input_16khz = torch.FloatTensor(wav_input_16khz).unsqueeze(0)
-        z = model.feature_extractor(wav_input_16khz)
-        print(f"z {z.size()}")
+        wav_tensor = torch.FloatTensor(wav).unsqueeze(0)
+        z = model.feature_extractor(wav_tensor)
+        #print(f"z {z.size()}")
         dense, idxs = model.vector_quantizer.forward_idx(z)
 
         dense = dense[0].data.numpy()
-        idxs = idxs[0].data.numpy()
-        print(f" dense {dense.shape} idxs {idxs.shape}")
-        os.makedirs(os.path.join(out_dir,split, speaker), exist_ok = True)
-        np.save(os.path.join(out_dir, split, speaker, file_id+'_dense'), dense)
-        np.save(os.path.join(out_dir, split, speaker, file_id+'_idxs'), idxs)
+        #idxs = idxs[0].data.numpy()
+        print(f" dense {dense.shape} ")
+        dump_path=os.path.join(args.dump_dir,args.split, spk, ID+'_vqw2v.npy')
+        os.makedirs(os.path.dirname(dump_path), exist_ok = True)
+        np.save(dump_path, dense)
+        #np.save(os.path.join(out_dir, split, speaker, file_id+'_idxs'), idxs)
+    return 0    
 
-splits = ['eval']
 
-#wav_input_16khz = torch.randn(1,10000)
-#resampler = torchaudio.transforms.Resample(24000,16000)
-for split in splits:
-    scp = []
-    seg = []
-    for spk in ['p360','p361','p362','p363','p364','p374','p376']:
-        wav_scp = os.path.join(scp_dir,split+'_'+spk,'wav.scp')
-        segment = os.path.join(scp_dir, split+'_'+spk,'segments')
-        with open(wav_scp) as f:
-            scp_lines = f.readlines()
-            scp.extend(scp_lines)
-            f.close()
-        with open(segment) as f:
-            segment_lines = f.readlines()
-            seg.extend(segment_lines)
-            f.close()
-    process(zip(scp, seg), audio_dir, out_dir, split)    
-    '''        
-    executor = ProcessPoolExecutor(max_workers=20)
-    futures = []
-    stack = []
-    num_stacks = 0
-    for scp_line, segment_line in zip(scp_lines, segment_lines):
-        if len(stack) <=100:
-            stack += [(scp_line,segment_line)]
-        else:
-            futures.append(executor.submit(partial(process, stack, audio_dir, out_dir, split)))
-            stack = []
-            num_stacks += 1
-            print(f'stack {num_stacks}')
-    results = [future.result() for future in tqdm(futures)]    
-    '''
+if __name__ == '__main__':
+    
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--metadata', type = str)
+    parser.add_argument('--vqwav2vec_ckpt' type = str)
+    parser.add_argument('--dump_dir', type = str)
+    parser.add_argument('--split', type = str)
+    parser.add_argument('--max_workers', type = int, default = 20)
+    parser.add_argument('--speaker', type = str, default = None)
+    args = parser.parse_args()
+
+    # build a dict for spk2metadata
+    spk2meta = {}
+    with open(args.metadata) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            _spk = row['spk']
+            if _spk not in spk2meta:
+                spk2meta[_spk] = []
+            
+            spk2meta[_spk].append(row)         
+        
+        f.close()
+    
+    if args.speaker is not None:
+        # only for one speaker
+        if args.speaker not in spk2meta:
+            raise Exception(f"speaker {speaker} should be in the metadata")
+
+        spk_meta = spk2meta[args.speaker]
+        process_speaker(spk_meta, args.speaker, args)
+    else:
+        # process all speakers
+        
+        # set up processes    
+        executor = ProcessPoolExecutor(max_workers=args.max_workers)
+        futures = []
+        for spk in spk2meta:
+            spk_meta = spk2meta[spk]        
+        
+            futures.append(executor.submit(partial(process_speaker, spk_meta, spk, args)))
+        results = [future.result() for future in tqdm(futures)]    
+
