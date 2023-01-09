@@ -7,7 +7,7 @@ logs
 scripts/
 submit_cpu.sh
 downloads/
-content_encoder/vqwav2vec/vq-wav2vec_kmeans.pt
+ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
