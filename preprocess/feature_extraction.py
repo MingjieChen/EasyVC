@@ -48,7 +48,7 @@ def process_speaker(spk_meta, spk, config, args):
         # min-max normalization
         mel = (mel - config['mel_min']) / (config['mel_max'] - config['mel_min']) * 8.0 - 4.0 
         mel = np.clip(mel, -4. , 4.)
-        mel_path = os.path.join(args.dump_dir, args.split, spk, ID+'_mel.npy')
+        mel_path = os.path.join(args.dump_dir, args.split, 'mel', spk, ID+'.npy')
         os.makedirs(os.path.dirname(mel_path), exist_ok = True)
         np.save(mel_path, mel)
         # extract pitch
@@ -60,7 +60,7 @@ def process_speaker(spk_meta, spk, config, args):
             f0_ceil = config['f0_ceil']
         )
         pitch = pitch.astype(np.float32)
-        pitch_path = os.path.join(args.dump_dir, args.split, spk, ID+'_f0.npy')
+        pitch_path = os.path.join(args.dump_dir, args.split, 'f0', spk, ID+'.npy')
         os.makedirs(os.path.dirname(pitch_path), exist_ok = True)
         np.save(pitch_path, pitch )
     return 0    

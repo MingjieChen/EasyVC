@@ -48,10 +48,10 @@ def process_speaker(spk_meta, spk, args):
         #print(f"z {z.size()}")
         dense, idxs = model.vector_quantizer.forward_idx(z)
 
-        dense = dense[0].data.numpy()
+        dense = dense[0].data.numpy().T
         #idxs = idxs[0].data.numpy()
         print(f" dense {dense.shape} ")
-        dump_path=os.path.join(args.dump_dir,args.split, spk, ID+'_vqw2v.npy')
+        dump_path=os.path.join(args.dump_dir,args.split, 'vqwav2vec', spk, ID+'.npy')
         os.makedirs(os.path.dirname(dump_path), exist_ok = True)
         np.save(dump_path, dense)
         #np.save(os.path.join(out_dir, split, speaker, file_id+'_idxs'), idxs)

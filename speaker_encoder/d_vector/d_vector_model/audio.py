@@ -1,5 +1,5 @@
 from scipy.ndimage.morphology import binary_dilation
-from speaker_encoder.params_data import *
+from d_vector_model.params_data import *
 from pathlib import Path
 from typing import Optional, Union
 import numpy as np

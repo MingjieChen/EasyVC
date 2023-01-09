@@ -9,7 +9,6 @@ from blocks import (
     FCBlock,
     Conv1DBlock,
     SALNFFTBlock,
-    DYSABlock,
     BaseSABlock,
     BaseSALNBlock,
     AddSABlock,

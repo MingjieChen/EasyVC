@@ -55,7 +55,7 @@ def process_speaker(spk_meta, spk, args):
         #wav_tensor = torch.FloatTensor(wav).unsqueeze(0)
         # extract ppg
         ppg = extract_ppg(wav, CONFORMER_PPG_SAMPLING_RATE, ppg_model)
-        ppg_path = os.path.join(args.dump_dir, args.split, spk, ID+'_cppg.npy')
+        ppg_path = os.path.join(args.dump_dir, args.split, 'conformer_ppg', spk, ID+'.npy')
         os.makedirs(os.path.dirname(ppg_path), exist_ok = True)
         np.save(ppg_path, ppg)
     return 0    

@@ -56,14 +56,13 @@ class Trainer(object):
         """
         state_dict = {
             "optimizer": self.optimizer.state_dict(),
-            "scheduler": self.scheduler.state_dict(),
             "steps": self.steps,
             "epochs": self.epochs,
-            "model": self.model.state_dict(),
+            "model": {key: self.model[key].state_dict() for key in self.model},
             "iters": self.iters
         }
         if self.model_ema is not None:
-            state_dict['model_ema'] = self.model_ema.state_dict()
+            state_dict['model_ema'] = {key: self.model_ema[key].state_dict() for key in self.model_ema}
 
         if not os.path.exists(os.path.dirname(checkpoint_path)):
             os.makedirs(os.path.dirname(checkpoint_path))
@@ -78,17 +77,19 @@ class Trainer(object):
 
         """
         state_dict = torch.load(checkpoint_path, map_location="cpu")
-        self._load(state_dict["model"], self.model)
+        for key in self.model:
+            self._load(state_dict["model"][key], self.model[key])
 
         if self.model_ema is not None:
-            self._load(state_dict["model_ema"], self.model_ema)
+            for key in self.model_ema:
+                self._load(state_dict["model_ema"][key], self.model_ema[key])
         
         if not load_only_params:
             self.steps = state_dict["steps"]
             self.epochs = state_dict["epochs"]
             self.iters = state_dict['iters']
             self.optimizer.load_state_dict(state_dict["optimizer"])
-            self.scheduler.load_state_dict(state_dict['scheduler'])
+            self.optimizer.schedulers['generator'].current_step = self.iters
 
 
     def _load(self, states, model, force_load=True):
@@ -124,7 +125,7 @@ class Trainer(object):
         total_norm = np.sqrt(total_norm)
         return total_norm
     def _get_lr(self):
-        for param_group in self.optimizer.optimizers['model'].param_groups:
+        for param_group in self.optimizer.optimizers['generator'].param_groups:
             lr = param_group['lr']
             break
         return lr
@@ -139,34 +140,43 @@ class Trainer(object):
         self.epochs += 1
         
         train_losses = defaultdict(list)
-        self.model.train()
+        _ = [self.model[k].train() for k in self.model]
         scaler = torch.cuda.amp.GradScaler() if (('cuda' in str(self.device)) and self.fp16_run) else None
 
         
         for train_steps_per_epoch, batchs in tqdm(enumerate(self.train_dataloader, 1)):
             for batch in batchs:
+                #batch = [b.to(self.device) for b in batch ]
+                _batch = []
+                shapes = ""
+                for b in batch:
+                    if isinstance(b, torch.Tensor):
+                        _batch.append(b.to(self.device))
+                        #shapes += f' {b.size()}  '
+                    else:
+                        _batch.append(b)    
+                
+                #print(f'shapes {shapes}', flush = True)        
                 
                 self.optimizer.zero_grad()
                 if scaler is not None:
                     with torch.cuda.amp.autocast():
-                        loss, losses = compute_loss(self.model, batch)
+                        loss, losses = compute_loss(self.model, _batch)
                     scaler.scale(loss).backward()
-                    scaler.step(self.optimizer)
-                    scaler.update()
                 else:
-                    loss, losses = compute_loss(self.model, batch)        
+                    loss, losses = compute_loss(self.model, _batch)        
                     loss.backward()
-                    self.optimizer.step()
-                #self.optimizer.step('model', scaler=scaler)
-                
+                self.optimizer.step('generator', scaler=scaler)
                 loss_string = f" epoch {self.epochs}, iters {self.iters}" 
                 for key in losses:
                     train_losses["train/%s" % key].append(losses[key])
                     loss_string += f" {key}:{losses[key]:.5f} "
                     self.step_writer.add_scalar('step/'+key, losses[key], self.iters)
                 self.step_writer.add_scalar('step/lr', self._get_lr(), self.iters)    
+                #print(loss_string, flush = True)    
+                #print()
                 self.iters+=1
-                self.scheduler.step()
+                self.optimizer.scheduler()
         train_losses = {key: np.mean(value) for key, value in train_losses.items()}
         return train_losses
     
@@ -178,7 +188,13 @@ class Trainer(object):
         _ = [self.model[k].eval() for k in self.model]
         for eval_steps_per_epoch, batchs in enumerate(self.dev_dataloader, 1):
             for batch in batchs:
-                loss, losses = compute_loss(self.model, batch)        
+                _batch = []
+                for b in batch:
+                    if isinstance(b, torch.Tensor):
+                        _batch.append(b.to(self.device))
+                    else:
+                        _batch.append(b)    
+                loss, losses = compute_loss(self.model, _batch)        
                 for key in losses:
                     eval_losses["eval/%s" % key].append(losses[key])
         
@@ -186,5 +202,6 @@ class Trainer(object):
         eval_string = f"epoch {self.epochs}, eval: "
         for key, value in eval_losses.items():
             eval_string += f"{key}: {value:.6f} "
-        
+        #print(eval_string, flush = True)    
+        #print()
         return eval_losses
