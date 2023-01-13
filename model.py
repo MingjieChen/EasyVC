@@ -14,7 +14,7 @@ def print_network(model, name):
     print("The number of parameters: {}".format(num_params), flush=True)
 
 def build_model(config):
-    model = eval(config['model_name'], **config['model_params'])
-    print_network(model, config['model_name'])
+    model = eval(config['decoder'])(config['decoder_params'])
+    print_network(model, config['decoder'])
 
     return model

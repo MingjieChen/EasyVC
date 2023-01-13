@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 from torch.nn import functional as F
-from dynamic_conv import DynamicConv
-from wadain import WadaIN
 
 
 class Mish(nn.Module):
@@ -161,212 +159,27 @@ class ConvNorm(nn.Module):
         conv_signal = self.conv(signal)
 
         return conv_signal
-class AddHidSABlock(nn.Module):
-    """ FFT Block with SALN """
+class TransformerBlock(nn.Module):
 
-    def __init__(self, d_model, d_w, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, *args, **kwargs):
-        super(AddHidSABlock, self).__init__()
+    def __init__(self, d_model, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, *args, **kwargs):
+        super(TransformerBlock, self).__init__()
         self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
         self.pos_ffn = PositionwiseFeedForward(
             d_model, d_inner, kernel_size, dropout=dropout
         )
-        #self.layer_norm_1 = StyleAdaptiveLayerNorm(d_w, d_model)
         self.layer_norm_1 = nn.LayerNorm(d_model)
         self.layer_norm_2 = nn.LayerNorm(d_model)
-        self.style_linear = nn.Linear(d_w, d_model)
-        #self.layer_norm_2 = StyleAdaptiveLayerNorm(d_w, d_model)
-        self.d_w = d_w
-    def forward(self, enc_input, w, mask=None, slf_attn_mask=None):
-        
-        b,t,c = enc_input.size()
-        w = self.style_linear(w)
-        enc_input = enc_input + w.expand(b,t,self.d_w)
+
+    def forward(self, enc_input, mask=None, slf_attn_mask=None):
         enc_output, enc_slf_attn = self.slf_attn(
             enc_input, enc_input, enc_input, mask=slf_attn_mask
         )
-        #enc_output = self.layer_norm_1(enc_output, w)
         enc_output = self.layer_norm_1(enc_output)
         if mask is not None:
             enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
 
         enc_output = self.pos_ffn(enc_output)
-        #enc_output = selff.layer_norm_2(enc_output, w)
         enc_output = self.layer_norm_2(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        return enc_output, enc_slf_attn
-class AddSABlock(nn.Module):
-    """ FFT Block with SALN """
-
-    def __init__(self, d_model, d_w, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, *args, **kwargs):
-        super(AddSABlock, self).__init__()
-        self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
-        self.pos_ffn = PositionwiseFeedForward(
-            d_model, d_inner, kernel_size, dropout=dropout
-        )
-        #self.layer_norm_1 = StyleAdaptiveLayerNorm(d_w, d_model)
-        self.layer_norm_1 = nn.LayerNorm(d_model)
-        self.layer_norm_2 = nn.LayerNorm(d_model)
-        #self.layer_norm_2 = StyleAdaptiveLayerNorm(d_w, d_model)
-        self.d_w = d_w
-    def forward(self, enc_input, w, mask=None, slf_attn_mask=None):
-        
-        b,t,c = enc_input.size()
-        enc_input = enc_input + w.expand(b,t,self.d_w)
-        enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask
-        )
-        #enc_output = self.layer_norm_1(enc_output, w)
-        enc_output = self.layer_norm_1(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        enc_output = self.pos_ffn(enc_output)
-        #enc_output = selff.layer_norm_2(enc_output, w)
-        enc_output = self.layer_norm_2(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        return enc_output, enc_slf_attn
-class DYSABlock(nn.Module):
-    """ FFT Block with SALN """
-
-    def __init__(self, d_model, d_w, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, dyconv_kernel=9):
-        super(DYSABlock, self).__init__()
-        self.slf_attn = DynamicConv(n_head, d_model, d_k, d_v, dropout=dropout, kernel_size=dyconv_kernel)
-        self.pos_ffn = PositionwiseFeedForward(
-            d_model, d_inner, kernel_size, dropout=dropout
-        )
-        #self.layer_norm_1 = StyleAdaptiveLayerNorm(d_w, d_model)
-        self.layer_norm_1 = nn.LayerNorm(d_model)
-        self.layer_norm_2 = nn.LayerNorm(d_model)
-        #self.layer_norm_2 = StyleAdaptiveLayerNorm(d_w, d_model)
-
-    def forward(self, enc_input, w, mask=None, slf_attn_mask=None):
-        enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask
-        )
-        #enc_output = self.layer_norm_1(enc_output, w)
-        enc_output = self.layer_norm_1(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        enc_output = self.pos_ffn(enc_output)
-        #enc_output = selff.layer_norm_2(enc_output, w)
-        enc_output = self.layer_norm_2(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        return enc_output, enc_slf_attn
-class BaseSABlock(nn.Module):
-    """ FFT Block with SALN """
-
-    def __init__(self, d_model, d_w, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, *args, **kwargs):
-        super(BaseSABlock, self).__init__()
-        self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
-        self.pos_ffn = PositionwiseFeedForward(
-            d_model, d_inner, kernel_size, dropout=dropout
-        )
-        #self.layer_norm_1 = StyleAdaptiveLayerNorm(d_w, d_model)
-        self.layer_norm_1 = nn.LayerNorm(d_model)
-        self.layer_norm_2 = nn.LayerNorm(d_model)
-        #self.layer_norm_2 = StyleAdaptiveLayerNorm(d_w, d_model)
-
-    def forward(self, enc_input, w, mask=None, slf_attn_mask=None):
-        enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask
-        )
-        #enc_output = self.layer_norm_1(enc_output, w)
-        enc_output = self.layer_norm_1(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        enc_output = self.pos_ffn(enc_output)
-        #enc_output = selff.layer_norm_2(enc_output, w)
-        enc_output = self.layer_norm_2(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        return enc_output, enc_slf_attn
-class BaseSALNBlock(nn.Module):
-    """ FFT Block with SALN """
-
-    def __init__(self, d_model, d_w, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, *args, **kwargs):
-        super(BaseSALNBlock, self).__init__()
-        self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
-        self.pos_ffn = PositionwiseFeedForward(
-            d_model, d_inner, kernel_size, dropout=dropout
-        )
-        #self.layer_norm_1 = StyleAdaptiveLayerNorm(d_w, d_model)
-        self.layer_norm_1 = nn.LayerNorm(d_model)
-        self.layer_norm_2 = StyleAdaptiveLayerNorm(d_w, d_model)
-
-    def forward(self, enc_input, w, mask=None, slf_attn_mask=None):
-        enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask
-        )
-        #enc_output = self.layer_norm_1(enc_output, w)
-        enc_output = self.layer_norm_1(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        enc_output = self.pos_ffn(enc_output)
-        enc_output = self.layer_norm_2(enc_output, w)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        return enc_output, enc_slf_attn
-
-class SAWadaINBlock(nn.Module):
-    """ FFT Block with SALN """
-
-    def __init__(self, d_model, d_w, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, spk_emb_dim=256, *args, **kwargs):
-        super(SAWadaINBlock, self).__init__()
-        self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
-        self.pos_ffn = WadaINFeedForward(
-            d_model, d_inner, kernel_size, dropout=dropout, spk_emb_dim=spk_emb_dim
-        )
-        self.layer_norm_1 = nn.LayerNorm(d_model)
-
-    def forward(self, enc_input, w, mask=None, slf_attn_mask=None):
-        enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask
-        )
-        enc_output = self.layer_norm_1(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        enc_output = self.pos_ffn(enc_output, w.squeeze(1))
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        return enc_output, enc_slf_attn
-
-class SALNFFTBlock(nn.Module):
-    """ FFT Block with SALN """
-
-    def __init__(self, d_model, d_w, n_head, d_k, d_v, d_inner, kernel_size, dropout=0.1, *args, **kwargs):
-        super(SALNFFTBlock, self).__init__()
-        self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
-        self.pos_ffn = PositionwiseFeedForward(
-            d_model, d_inner, kernel_size, dropout=dropout
-        )
-        self.layer_norm_1 = StyleAdaptiveLayerNorm(d_w, d_model)
-        #self.layer_norm_1 = nn.LayerNorm(d_model)
-        self.layer_norm_2 = StyleAdaptiveLayerNorm(d_w, d_model)
-
-    def forward(self, enc_input, w, mask=None, slf_attn_mask=None):
-        enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask
-        )
-        enc_output = self.layer_norm_1(enc_output, w)
-        #enc_output = self.layer_norm_1(enc_output)
-        if mask is not None:
-            enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
-
-        enc_output = self.pos_ffn(enc_output)
-        enc_output = self.layer_norm_2(enc_output, w)
         if mask is not None:
             enc_output = enc_output.masked_fill(mask.unsqueeze(-1), 0)
 

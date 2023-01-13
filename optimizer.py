@@ -15,9 +15,9 @@ class GeneratorScheduler:
     def __init__(self, config, optimizer, current_step = 0):
         self.optimizer = optimizer
         
-        self.n_warmup_steps = config["optimizer"]["warm_up_step"]
-        self.anneal_steps = config["optimizer"]["anneal_steps"]
-        self.anneal_rate = config["optimizer"]["anneal_rate"]
+        self.n_warmup_steps = config["scheduler"]["warm_up_step"]
+        self.anneal_steps = config["scheduler"]["anneal_steps"]
+        self.anneal_rate = config["scheduler"]["anneal_rate"]
         self.init_lr = config['optimizer']['init_lr']
         self.current_step = current_step# if current_step <= meta_learning_warmup else current_step - meta_learning_warmup
 
@@ -87,11 +87,11 @@ class MultiOptimizer:
             _ = [self.schedulers[key].step(*args) for key in self.scheduler_keys]
 
 
-def build_optimizer(parameters_dict, config):
+def build_optimizer(params, config):
     #optim = dict([(key, AdamW(params, lr=config[key]['lr'], weight_decay = config[key]['weight_decay'], betas=config[key]['betas'], eps=1e-9))
     #               for key, params in parameters_dict.items()])
     
-    optim = Adam(params, lr = config['optimizer'][key]['init_lr'], weight_decay = config['optimizer'][key]['weight_decay'],  betas=config['optimizer'][key]['betas'], eps=1e-9)
+    optim = Adam(params, lr = config['optimizer']['init_lr'], weight_decay = config['optimizer']['weight_decay'],  betas=config['optimizer']['betas'], eps=1e-9)
     
     scheduler = GeneratorScheduler(config, optim)  # only generator need scheduler
     return optim, scheduler

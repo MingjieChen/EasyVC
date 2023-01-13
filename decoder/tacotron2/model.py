@@ -274,23 +274,38 @@ class RNNCell(nn.Module):
 ################################################################################
 
 class Model(nn.Module):
-    def __init__(self,
-                 input_dim,
-                 output_dim,
-                 ar,
-                 encoder_type,
-                 hidden_dim,
-                 lstmp_layers,
-                 lstmp_dropout_rate,
-                 lstmp_proj_dim,
-                 lstmp_layernorm,
-                 spk_emb_integration_type,
-                 spk_emb_dim,
-                 prenet_layers=2,
-                 prenet_dim=256,
-                 prenet_dropout_rate=0.5,
+    def __init__(self, config,
+                 #input_dim,
+                 #output_dim,
+                 #ar,
+                 #encoder_type,
+                 #hidden_dim,
+                 #lstmp_layers,
+                 #lstmp_dropout_rate,
+                 #lstmp_proj_dim,
+                 #lstmp_layernorm,
+                 #spk_emb_integration_type,
+                 #spk_emb_dim,
+                 #prenet_layers=2,
+                 #prenet_dim=256,
+                 #prenet_dropout_rate=0.5,
                  **kwargs):
         super(Model, self).__init__()
+        
+        ar = config['ar']
+        encoder_type = config['encoder_type']
+        hidden_dim = config['hidden_dim']
+        output_dim = config['output_dim']
+        spk_emb_intergration_type = config['spk_emb_intergration_type']
+        spk_emb_dim = config['spk_emb_dim']
+
+        lstmp_layers = config['lstmp_layers']
+        lstmp_dropout_rate = config['lstmp_dropout_rate']
+        lstmp_proj_dim = config['lstmp_proj_dim']
+        lstmp_layernorm = config['lstmp_layernorm']
+        prenet_layers = config['prenet_layers']
+        prenet_dim = config['prenet_dim']
+        prenet_dropout_rate = config['prenet_dropout_rate']    
 
         self.ar = ar
         self.encoder_type = encoder_type
@@ -298,18 +313,19 @@ class Model(nn.Module):
         self.output_dim = output_dim # acoustic feature dim
         self.spk_emb_integration_type = spk_emb_integration_type
         self.spk_emb_dim = spk_emb_dim
-        if spk_emb_integration_type == "add":
-            assert spk_emb_dim == hidden_dim
+        if self.spk_emb_integration_type == "add":
+            assert self.spk_emb_dim == self.hidden_dim
+        
 
         #self.register_buffer("target_mean", torch.from_numpy(stats.mean_).float())
         #self.register_buffer("target_scale", torch.from_numpy(stats.scale_).float())
 
         # define encoder
-        if encoder_type == "taco2":
-            self.encoder = Taco2Encoder(input_dim, eunits=hidden_dim)
-        elif encoder_type == "ffn":
+        if self.encoder_type == "taco2":
+            self.encoder = Taco2Encoder(self.input_dim, eunits=self.hidden_dim)
+        elif self.encoder_type == "ffn":
             self.encoder = torch.nn.Sequential(
-                torch.nn.Linear(input_dim, hidden_dim),
+                torch.nn.Linear(self.input_dim, self.hidden_dim),
                 torch.nn.ReLU()
             )
         else:
@@ -317,17 +333,17 @@ class Model(nn.Module):
         
         # define projection layer
         if self.spk_emb_integration_type == "add":
-            self.spk_emb_projection = torch.nn.Linear(spk_emb_dim, hidden_dim)
+            self.spk_emb_projection = torch.nn.Linear(self.spk_emb_dim, self.hidden_dim)
         elif self.spk_emb_integration_type == "concat": 
             self.spk_emb_projection = torch.nn.Linear(
-                hidden_dim + spk_emb_dim, hidden_dim
+                self.hidden_dim + self.spk_emb_dim, self.hidden_dim
             )
         else:
             raise ValueError("Integration type not supported.")
         
         # define prenet
         self.prenet = Taco2Prenet(
-            idim=output_dim,
+            idim=self.output_dim,
             n_layers=prenet_layers,
             n_units=prenet_dim,
             dropout_rate=prenet_dropout_rate,

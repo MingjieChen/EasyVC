@@ -10,8 +10,8 @@ import random
 from torch.utils.data import DataLoader
 from collections import defaultdict
 def get_dataloader(config):
-    train_dataset = eval(config['dataset'])(config, config['train_csv'], config['train_set'])
-    dev_dataset = eval(config['dataset'])(config, config['dev_csv'], config['dev_set'])
+    train_dataset = Dataset(config, config['train_meta'], config['train_set'])
+    dev_dataset = Dataset(config, config['dev_meta'], config['dev_set'])
 
     train_loader = DataLoader(
             train_dataset,
@@ -86,15 +86,9 @@ class Dataset(data.Dataset):
                         self.metadata.append(row)
             f.close()    
         
-        # load speakers
-        with open(config['speakers']) as f:
-            self.speakers = json.load(f)
-            f.close()
 
-        self.sort = config['sort_in_batch']
         self.batch_size = config['batch_size']
         self.drop_last = config['drop_last']
-        self.use_trg_spk = config['use_trg_spk']           
         
         # feature dirs
         self.mel_dir = os.path.join(config['dump_dir'], config['dataset'], split, 'mel')
@@ -115,7 +109,7 @@ class Dataset(data.Dataset):
     
     def __getitem__(self, idx):
         row = self.metadata[idx]
-        file_id = row['ID']
+        ID = row['ID']
         spk = row['spk']
         
         # feature path
@@ -123,12 +117,12 @@ class Dataset(data.Dataset):
         
         ling_rep_path = os.path.join(self.ling_rep_dir, spk, ID+'.npy')
         spk_emb_path = os.path.join(self.spk_emb_dir, spk, ID+'.npy')
-        pros_rep_path = os.path.join(self.f0_dir, spk, ID + '.npy')
+        pros_rep_path = os.path.join(self.pros_rep_dir, spk, ID + '.npy')
 
-        assert os.path.exists(mel_path)
-        assert os.path.exists(ling_rep_path)
-        assert os.path.exists(spk_emb_path)
-        assert os.path.exists(pros_reppath)
+        assert os.path.exists(mel_path), f"{mel_path}"
+        assert os.path.exists(ling_rep_path), f'{ling_rep_path}'
+        assert os.path.exists(spk_emb_path), f'{spk_emb_path}'
+        assert os.path.exists(pros_rep_path), f'{pros_rep_path}'
         
         # load feature
         mel = np.load(mel_path)    
@@ -136,20 +130,20 @@ class Dataset(data.Dataset):
         ling_rep = np.load(ling_rep_path)
         ling_duration = ling_rep.shape[0]
         spk_emb = np.load(spk_emb_path)
-        pros_rep = np.load(pros_rep_path)
+        pros_rep = np.expand_dims(np.load(pros_rep_path), axis = 1)
         pros_duration = pros_rep.shape[0]
         
         # match length between mel and ling_rep
         if mel_duration > ling_duration:
-            pad_vec = ling_rep[-1,:]
-            ling_rep = np.concatenate((ling_rep, np.repeat(pad_vec, mel_duration - ling_duration, 0)),1)
+            pad_vec = np.expand_dims(ling_rep[-1,:], axis = 0)
+            ling_rep = np.concatenate((ling_rep, np.repeat(pad_vec, mel_duration - ling_duration, 0)),0)
         elif mel_duration < ling_duration:
             ling_rep = ling_rep[:mel_duration,:]
         
         # match length between mel and pros_rep
         if mel_duration > pros_duration:
-            pad_vec = pros_rep[-1,:]
-            pros_rep = np.concatenate((pros_rep, np.repeat(pad_vec, mel_duration - pros_duration, 0)),1)
+            pad_vec = np.expand_dims(pros_rep[-1,:],axis = 0)
+            pros_rep = np.concatenate((pros_rep, np.repeat(pad_vec, mel_duration - pros_duration, 0)),0)
         elif mel_duration < pros_duration:
             pros_rep = pros_rep[:mel_duration,:]
         
@@ -160,9 +154,9 @@ class Dataset(data.Dataset):
         # sort in batch
         mel = [ data[id][0] for id in range(batch_size)]
         ling_rep = [ data[id][1] for id in range(batch_size)]
-        pros_rep = [ data[id][1] for id in range(batch_size)]
+        pros_rep = [ data[id][2] for id in range(batch_size)]
         spk_emb = [ data[id][3] for id in range(batch_size)]
-        length = [ data[id][4] for id in idx ]
+        length = [ data[id][4] for id in range(batch_size) ]
         
         max_len = max(length)
         padded_mel = torch.FloatTensor(pad_2D(mel))
@@ -170,6 +164,6 @@ class Dataset(data.Dataset):
         padded_pros_rep = torch.FloatTensor(pad_2D(pros_rep))
         spk_emb_tensor = torch.FloatTensor(np.array(spk_emb)).unsqueeze(1)
         length = torch.LongTensor(np.array(length)) 
-        output.append((padded_mel, padded_ling_rep, padded_pros_rep, spk_emb_tensor, length, max_len))
+        output = (padded_mel, padded_ling_rep, padded_pros_rep, spk_emb_tensor, length, max_len)
         
         return output    

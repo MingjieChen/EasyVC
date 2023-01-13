@@ -41,7 +41,7 @@ def main(args, config):
     model = build_model(config)
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu') 
-    mode.to(device)
+    model.to(device)
     # optimizer
 
     optimizer, scheduler = build_optimizer(model.parameters(), config)
@@ -100,5 +100,5 @@ if __name__ == "__main__":
     # Read Config
     model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
     print(model_config)
-    set_seed(1234)
+    set_seed(model_config['seed'])
     main(args, model_config)

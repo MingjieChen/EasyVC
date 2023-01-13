@@ -81,7 +81,7 @@ if __name__ == '__main__':
     for _wav_scp, _segments in zip(wav_scp, segments):
         assert _wav_scp.split()[0] == _segments.split()[0]
         fid = _wav_scp.split()[0]
-        spk = fid.split('_')[1]
+        spk = fid.split('_')[0]
         if spk not in spk2scp:
             spk2scp[spk] = []
         spk2scp[spk].append((_wav_scp, _segments))

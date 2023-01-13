@@ -11,7 +11,7 @@ from torch import nn
 from tqdm import tqdm
 from munch import Munch
 import torch.nn.functional as F
-from loss import compute_loss
+from .loss import compute_loss
 
 
 
@@ -124,7 +124,7 @@ class Trainer(object):
         total_norm = np.sqrt(total_norm)
         return total_norm
     def _get_lr(self):
-        for param_group in self.optimizer.optimizers['model'].param_groups:
+        for param_group in self.optimizer.param_groups:
             lr = param_group['lr']
             break
         return lr
@@ -143,30 +143,35 @@ class Trainer(object):
         scaler = torch.cuda.amp.GradScaler() if (('cuda' in str(self.device)) and self.fp16_run) else None
 
         
-        for train_steps_per_epoch, batchs in tqdm(enumerate(self.train_dataloader, 1)):
-            for batch in batchs:
+        for train_steps_per_epoch, batch in tqdm(enumerate(self.train_dataloader, 1)):
                 
-                self.optimizer.zero_grad()
-                if scaler is not None:
-                    with torch.cuda.amp.autocast():
-                        loss, losses = compute_loss(self.model, batch)
-                    scaler.scale(loss).backward()
-                    scaler.step(self.optimizer)
-                    scaler.update()
+            _batch = []
+            for b in batch:
+                if isinstance(b, torch.Tensor):
+                    _batch.append(b.to(self.device))
                 else:
-                    loss, losses = compute_loss(self.model, batch)        
-                    loss.backward()
-                    self.optimizer.step()
-                #self.optimizer.step('model', scaler=scaler)
-                
-                loss_string = f" epoch {self.epochs}, iters {self.iters}" 
-                for key in losses:
-                    train_losses["train/%s" % key].append(losses[key])
-                    loss_string += f" {key}:{losses[key]:.5f} "
-                    self.step_writer.add_scalar('step/'+key, losses[key], self.iters)
-                self.step_writer.add_scalar('step/lr', self._get_lr(), self.iters)    
-                self.iters+=1
-                self.scheduler.step()
+                    _batch.append(b)    
+            self.optimizer.zero_grad()
+            if scaler is not None:
+                with torch.cuda.amp.autocast():
+                    loss, losses = compute_loss(self.model, _batch)
+                scaler.scale(loss).backward()
+                scaler.step(self.optimizer)
+                scaler.update()
+            else:
+                loss, losses = compute_loss(self.model, _batch)        
+                loss.backward()
+                self.optimizer.step()
+            #self.optimizer.step('model', scaler=scaler)
+            
+            loss_string = f" epoch {self.epochs}, iters {self.iters}" 
+            for key in losses:
+                train_losses["train/%s" % key].append(losses[key])
+                loss_string += f" {key}:{losses[key]:.5f} "
+                self.step_writer.add_scalar('step/'+key, losses[key], self.iters)
+            self.step_writer.add_scalar('step/lr', self._get_lr(), self.iters)    
+            self.iters+=1
+            self.scheduler.step()
         train_losses = {key: np.mean(value) for key, value in train_losses.items()}
         return train_losses
     
@@ -175,12 +180,17 @@ class Trainer(object):
     def _eval_epoch(self):
         
         eval_losses = defaultdict(list)
-        _ = [self.model[k].eval() for k in self.model]
-        for eval_steps_per_epoch, batchs in enumerate(self.dev_dataloader, 1):
-            for batch in batchs:
-                loss, losses = compute_loss(self.model, batch)        
-                for key in losses:
-                    eval_losses["eval/%s" % key].append(losses[key])
+        self.model.eval()
+        for eval_steps_per_epoch, batch in enumerate(self.dev_dataloader, 1):
+            _batch = []
+            for b in batch:
+                if isinstance(b, torch.Tensor):
+                    _batch.append(b.to(self.device))
+                else:
+                    _batch.append(b)    
+            loss, losses = compute_loss(self.model, _batch)        
+            for key in losses:
+                eval_losses["eval/%s" % key].append(losses[key])
         
         eval_losses = {key: np.mean(value) for key, value in eval_losses.items()}
         eval_string = f"epoch {self.epochs}, eval: "

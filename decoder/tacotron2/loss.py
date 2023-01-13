@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
-from utils import make_non_pad_mask
+from .utils import make_non_pad_mask
 
 class Loss(nn.Module):
     """
@@ -32,9 +32,9 @@ class Loss(nn.Module):
 
 def compute_loss(model, batch, objective, *args, **kwargs ) :
     
-    mel, vq, speaker, length, max_len = batch
+    mel, ling_rep, pros_rep, spk_emb, length, max_len = batch
     device = mel.device
-    predicted_features, predicted_feature_lengths = model(vq, length, speaker, mel)
+    predicted_features, predicted_feature_lengths = model(ling_rep, length, spk_emb, mel)
     # loss calculation (masking and normalization are done inside)
     loss = objective(predicted_features,
                         mel,
