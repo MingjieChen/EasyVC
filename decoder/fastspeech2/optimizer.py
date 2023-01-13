@@ -87,11 +87,11 @@ class MultiOptimizer:
             _ = [self.schedulers[key].step(*args) for key in self.scheduler_keys]
 
 
-def build_optimizer(params, config):
+def build_optimizer(model, config):
     #optim = dict([(key, AdamW(params, lr=config[key]['lr'], weight_decay = config[key]['weight_decay'], betas=config[key]['betas'], eps=1e-9))
     #               for key, params in parameters_dict.items()])
     
-    optim = Adam(params, lr = config['optimizer']['init_lr'], weight_decay = config['optimizer']['weight_decay'],  betas=config['optimizer']['betas'], eps=1e-9)
+    optim = Adam(model.parameters(), lr = config['optimizer']['init_lr'], weight_decay = config['optimizer']['weight_decay'],  betas=config['optimizer']['betas'], eps=1e-9)
     
     scheduler = GeneratorScheduler(config, optim)  # only generator need scheduler
     return optim, scheduler

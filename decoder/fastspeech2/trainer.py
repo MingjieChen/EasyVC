@@ -21,8 +21,6 @@ class Trainer(object):
                  args = None,
                  model=None,
                  model_ema=None,
-                 optimizer=None,
-                 scheduler=None,
                  config={},
                  device=torch.device("cpu"),
                  train_dataloader=None,
@@ -38,8 +36,6 @@ class Trainer(object):
         self.epochs = initial_epochs
         self.model = model
         self.model_ema = model_ema
-        self.optimizer = optimizer
-        self.scheduler = scheduler
         self.train_dataloader = train_dataloader
         self.dev_dataloader = dev_dataloader
         self.config = config
@@ -49,7 +45,7 @@ class Trainer(object):
         self.step_writer = step_writer
         print(f'trainer device {self.device}')
         self.iters = 0
-        self.optimizer, self.scheduer = build_optimizer(model, config)
+        self.optimizer, self.scheduler = build_optimizer(model, config)
 
     def save_checkpoint(self, checkpoint_path):
         """Save checkpoint.

@@ -24,6 +24,6 @@ def build_optimizer(model, config):
                 betas = config['optimizer']['betas'],
                 eps = 1e-9
     )
-    scheduler = get_linear_schedule_with_warmup(optimizer, num_training_steps=config['total_steps'], **config['scheduler_config'])
+    scheduler = get_linear_schedule_with_warmup(optimizer, **config['scheduler'])
 
     return optimizer, scheduler

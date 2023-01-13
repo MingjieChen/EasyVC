@@ -10,6 +10,7 @@ from tqdm import tqdm
 from dataset import get_dataloader
 from model  import build_model
 from decoder.fastspeech2.trainer import Trainer as FS2Trainer
+from decoder.taco_ar.trainer import Trainer as TacoARTrainer
 import random
 import numpy as np
 import os.path as osp

@@ -89,7 +89,7 @@ class Dataset(data.Dataset):
 
         self.batch_size = config['batch_size']
         self.drop_last = config['drop_last']
-        
+        self.sort = config['sort']
         # feature dirs
         self.mel_dir = os.path.join(config['dump_dir'], config['dataset'], split, 'mel')
 
@@ -150,13 +150,18 @@ class Dataset(data.Dataset):
         return (mel, ling_rep, pros_rep,  spk_emb, mel_duration)
     
     def collate_fn(self, data):
-        batch_size = len(data)        
         # sort in batch
-        mel = [ data[id][0] for id in range(batch_size)]
-        ling_rep = [ data[id][1] for id in range(batch_size)]
-        pros_rep = [ data[id][2] for id in range(batch_size)]
-        spk_emb = [ data[id][3] for id in range(batch_size)]
-        length = [ data[id][4] for id in range(batch_size) ]
+        batch_size = len(data)
+        if self.sort:
+            len_arr = np.array([d[-1] for d in data])
+            idx_arr = np.argsort(~len_arr)
+        else:
+            idx_arr = np.arange(batch_size)    
+        mel = [ data[id][0] for id in idx_arr]
+        ling_rep = [ data[id][1] for id in idx_arr]
+        pros_rep = [ data[id][2] for id in idx_arr]
+        spk_emb = [ data[id][3] for id in idx_arr]
+        length = [ data[id][4] for id in idx_arr ]
         
         max_len = max(length)
         padded_mel = torch.FloatTensor(pad_2D(mel))

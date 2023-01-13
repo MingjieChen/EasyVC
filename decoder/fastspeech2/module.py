@@ -28,6 +28,33 @@ class VarianceAdaptor(nn.Module):
 
 
         return x, mask
+class PreNet(nn.Module):
+    """ Encoder PreNet """
+
+    def __init__(self, config):
+        super(PreNet, self).__init__()
+        d_model = config["transformer"]["encoder_hidden"]
+        kernel_size = config["prenet"]["conv_kernel_size"]
+        input_dim = config['prenet']['input_dim']
+        dropout = config["prenet"]["dropout"]
+
+        self.prenet_layer = nn.Sequential(
+            Conv1DBlock(
+                input_dim, d_model, kernel_size, activation=Mish(), dropout=dropout
+            ),
+            #Conv1DBlock(
+            #    d_model, d_model, kernel_size, activation=Mish(), dropout=dropout
+            #),
+            #FCBlock(d_model, d_model, dropout=dropout),
+        )
+
+    def forward(self, x, mask=None):
+        residual = x
+        x = self.prenet_layer(x)
+        if mask is not None:
+            x = x.masked_fill(mask.unsqueeze(-1), 0)
+        #x = residual + x
+        return x
 
 class Encoder(nn.Module):
     """ Encoder """
@@ -51,7 +78,7 @@ class Encoder(nn.Module):
         self.max_seq_len = config["max_seq_len"]
         self.d_model = d_model
 
-        self.encoder_prenet = EncoderPreNet(config)
+        self.encoder_prenet = PreNet(config)
         self.position_enc = nn.Parameter(
             get_sinusoid_encoding_table(n_position, d_word_vec).unsqueeze(0),
             requires_grad=False,
@@ -100,34 +127,7 @@ class Encoder(nn.Module):
                 enc_slf_attn_list += [enc_slf_attn]
 
         return enc_output, mask
-class EncoderPreNet(nn.Module):
-    """ Phoneme Encoder PreNet """
-
-    def __init__(self, config):
-        super(EncoderPreNet, self).__init__()
-        d_model = config["transformer"]["encoder_hidden"]
-        kernel_size = config["prenet"]["conv_kernel_size"]
-        input_dim = config['prenet']['input_dim']
-        dropout = config["prenet"]["dropout"]
-
-        self.prenet_layer = nn.Sequential(
-            Conv1DBlock(
-                input_dim, d_model, kernel_size, activation=Mish(), dropout=dropout
-            ),
-            Conv1DBlock(
-                d_model, d_model, kernel_size, activation=Mish(), dropout=dropout
-            ),
-            FCBlock(d_model, d_model, dropout=dropout),
-        )
-
-    def forward(self, x, mask=None):
-        residual = x
-        x = self.prenet_layer(x)
-        if mask is not None:
-            x = x.masked_fill(mask.unsqueeze(-1), 0)
-        #x = residual + x
-        return x
-class Postnet(torch.nn.Module):
+class PostNet(torch.nn.Module):
     """Postnet module for Spectrogram prediction network.
 
     This is a module of Postnet in Spectrogram prediction network,
@@ -164,7 +164,7 @@ class Postnet(torch.nn.Module):
             dropout_rate (float, optional): Dropout rate..
 
         """
-        super(Postnet, self).__init__()
+        super(PostNet, self).__init__()
         self.postnet = torch.nn.ModuleList()
         for layer in six.moves.range(n_layers - 1):
             ichans = odim if layer == 0 else n_chans
@@ -241,29 +241,11 @@ class Postnet(torch.nn.Module):
             Tensor: Batch of padded output tensor. (B, odim, Tmax).
 
         """
+        xs = xs.contiguous().transpose(1,2)
         for i in six.moves.range(len(self.postnet)):
             xs = self.postnet[i](xs)
+        xs = xs.contiguous().transpose(1,2)    
         return xs
-class DecoderPreNet(nn.Module):
-    """ Mel-spectrogram Decoder PreNet """
-
-    def __init__(self, config):
-        super(DecoderPreNet, self).__init__()
-        input_dim = config["transformer"]["encoder_hidden"]
-        d_encoder = config["transformer"]["encoder_hidden"]
-        d_out = config['transformer']['decoder_hidden']
-        dropout = config["prenet"]["dropout"]
-
-        self.prenet_layer = nn.Sequential(
-            FCBlock(input_dim, d_encoder, activation=Mish(), dropout=dropout),
-            FCBlock(d_encoder, d_out, activation=Mish(), dropout=dropout),
-        )
-
-    def forward(self, x, mask=None):
-        x = self.prenet_layer(x)
-        if mask is not None:
-            x = x.masked_fill(mask.unsqueeze(-1), 0)
-        return x
 def get_sinusoid_encoding_table(n_position, d_hid, padding_idx=None):
     """ Sinusoid position encoding table """
 
@@ -308,7 +290,6 @@ class Decoder(nn.Module):
         self.max_seq_len = config["max_seq_len"]
         self.d_model = d_model
 
-        self.decoder_prenet = DecoderPreNet(config)
         self.position_enc = nn.Parameter(
             get_sinusoid_encoding_table(n_position, d_word_vec).unsqueeze(0),
             requires_grad=False,
@@ -330,8 +311,6 @@ class Decoder(nn.Module):
         batch_size, max_len = x.shape[0], x.shape[1]
         
 
-        # -- PreNet
-        x = self.decoder_prenet(x)
         # -- Forward
         if not self.training and x.shape[1] > self.max_seq_len:
             # -- Prepare masks

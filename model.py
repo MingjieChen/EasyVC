@@ -1,7 +1,7 @@
 from munch import Munch
 import copy
 from decoder.fastspeech2.fastspeech2 import FastSpeech2
-from decoder.tacotron2.model import Model as TacoAR 
+from decoder.taco_ar.model import Model as TacoAR 
 
 
 def print_network(model, name):

@@ -1,6 +1,0 @@
-batch_size: !!int 10
-drop_last: !!bool False
-train_csv: train_nodev.csv
-dev_csv: dev.csv 
-sort_in_batch: !!bool True
-speakers: ../../speakers.json # it has 109 speakers, but only use 108, no use p315

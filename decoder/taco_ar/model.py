@@ -292,11 +292,12 @@ class Model(nn.Module):
                  **kwargs):
         super(Model, self).__init__()
         
+        input_dim = config['input_dim']
         ar = config['ar']
         encoder_type = config['encoder_type']
         hidden_dim = config['hidden_dim']
         output_dim = config['output_dim']
-        spk_emb_intergration_type = config['spk_emb_intergration_type']
+        spk_emb_integration_type = config['spk_emb_integration_type']
         spk_emb_dim = config['spk_emb_dim']
 
         lstmp_layers = config['lstmp_layers']
@@ -322,10 +323,10 @@ class Model(nn.Module):
 
         # define encoder
         if self.encoder_type == "taco2":
-            self.encoder = Taco2Encoder(self.input_dim, eunits=self.hidden_dim)
+            self.encoder = Taco2Encoder(input_dim, eunits=hidden_dim)
         elif self.encoder_type == "ffn":
             self.encoder = torch.nn.Sequential(
-                torch.nn.Linear(self.input_dim, self.hidden_dim),
+                torch.nn.Linear(input_dim, hidden_dim),
                 torch.nn.ReLU()
             )
         else:
@@ -333,17 +334,17 @@ class Model(nn.Module):
         
         # define projection layer
         if self.spk_emb_integration_type == "add":
-            self.spk_emb_projection = torch.nn.Linear(self.spk_emb_dim, self.hidden_dim)
+            self.spk_emb_projection = torch.nn.Linear(spk_emb_dim, hidden_dim)
         elif self.spk_emb_integration_type == "concat": 
             self.spk_emb_projection = torch.nn.Linear(
-                self.hidden_dim + self.spk_emb_dim, self.hidden_dim
+                hidden_dim + spk_emb_dim, hidden_dim
             )
         else:
             raise ValueError("Integration type not supported.")
         
         # define prenet
         self.prenet = Taco2Prenet(
-            idim=self.output_dim,
+            idim=output_dim,
             n_layers=prenet_layers,
             n_units=prenet_dim,
             dropout_rate=prenet_dropout_rate,
@@ -395,7 +396,7 @@ class Model(nn.Module):
             hs = hs + spembs.unsqueeze(1)
         elif self.spk_emb_integration_type == "concat":
             # concat hidden states with spk embeds and then apply projection
-            spembs = F.normalize(spembs).unsqueeze(1).expand(-1, hs.size(1), -1)
+            spembs = F.normalize(spembs).expand(-1, hs.size(1), -1)
             hs = self.spk_emb_projection(torch.cat([hs, spembs], dim=-1))
         else:
             raise NotImplementedError("support only add or concat.")
