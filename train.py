@@ -12,7 +12,6 @@ from model  import build_model
 from decoder.fastspeech2.trainer import Trainer as FS2Trainer
 import random
 import numpy as np
-from optimizer import build_optimizer
 import os.path as osp
 import shutil
 def set_seed(seed):
@@ -42,9 +41,6 @@ def main(args, config):
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu') 
     model.to(device)
-    # optimizer
-
-    optimizer, scheduler = build_optimizer(model.parameters(), config)
 
     # trainer
     trainer_class = config['trainer']
@@ -53,8 +49,6 @@ def main(args, config):
                         config = config,
                         model = model,
                         model_ema = None,
-                        optimizer = optimizer,
-                        scheduler = scheduler,
                         device = device,
                         train_dataloader = train_loader,
                         dev_dataloader = dev_loader,

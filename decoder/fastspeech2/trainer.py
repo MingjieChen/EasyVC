@@ -12,6 +12,7 @@ from tqdm import tqdm
 from munch import Munch
 import torch.nn.functional as F
 from .loss import compute_loss
+from .optimizer import build_optimizer
 
 
 
@@ -48,6 +49,7 @@ class Trainer(object):
         self.step_writer = step_writer
         print(f'trainer device {self.device}')
         self.iters = 0
+        self.optimizer, self.scheduer = build_optimizer(model, config)
 
     def save_checkpoint(self, checkpoint_path):
         """Save checkpoint.
@@ -56,7 +58,6 @@ class Trainer(object):
         """
         state_dict = {
             "optimizer": self.optimizer.state_dict(),
-            "scheduler": self.scheduler.state_dict(),
             "steps": self.steps,
             "epochs": self.epochs,
             "model": self.model.state_dict(),
@@ -88,7 +89,7 @@ class Trainer(object):
             self.epochs = state_dict["epochs"]
             self.iters = state_dict['iters']
             self.optimizer.load_state_dict(state_dict["optimizer"])
-            self.scheduler.load_state_dict(state_dict['scheduler'])
+            self.scheduler.current_step = self.steps
 
 
     def _load(self, states, model, force_load=True):

@@ -36,8 +36,6 @@ class Trainer(object):
         self.epochs = initial_epochs
         self.model = model
         self.model_ema = model_ema
-        self.optimizer = optimizer
-        self.scheduler = scheduler
         self.train_dataloader = train_dataloader
         self.dev_dataloader = dev_dataloader
         self.config = config
@@ -49,6 +47,7 @@ class Trainer(object):
         self.iters = 0
 
         self.objective = Loss()
+        self.optimizer, self.scheduler = build_optimizer(model, config)
 
     def save_checkpoint(self, checkpoint_path):
         """Save checkpoint.
