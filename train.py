@@ -5,6 +5,7 @@ import torch
 import yaml
 import torch.nn as nn
 from torch.utils.data import DataLoader
+import torch.backends.cudnn as cudnn
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from dataset import get_dataloader
@@ -15,6 +16,12 @@ import random
 import numpy as np
 import os.path as osp
 import shutil
+import torch.multiprocessing as mp
+import torch.distributed as dist
+def _get_free_port():
+    import socketserver
+    with socketserver.TCPServer(('localhost',0),None) as s:
+        return s.server_address[1]
 def set_seed(seed):
     random.seed(seed)
     torch.manual_seed(seed)
@@ -22,8 +29,21 @@ def set_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
 
-def main(args, config):
+def main(replica_id = None, replica_count = None, port = None, args = None, config = None):
     
+    set_seed(config['seed'])
+    # ddp set up
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = str(port)
+    if replica_id is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    else:
+        dist.init_process_group(backend = 'nccl', world_size = replica_count, rank = replica_id)
+        device = torch.device("cuda", replica_id )
+
+    torch.cuda.set_device(device)
+
     # create exp dir
     log_dir = config['log_dir']
     exp_dir = osp.join(log_dir, config['model_name'], config['exp_name'])
@@ -40,8 +60,11 @@ def main(args, config):
     # model
     model = build_model(config)
     
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu') 
     model.to(device)
+
+    if replica_id is not None:
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[replica_id])
+        cudnn.benchmark = True
 
     # trainer
     trainer_class = config['trainer']
@@ -57,8 +80,8 @@ def main(args, config):
                         step_writer = step_writer
                 )
     
-    if config.get('pretrained_model', '') != '':
-        trainer.load_checkpoint(config['pretrained_model'],
+    if args.pretrained_model != '':
+        trainer.load_checkpoint(args.pretrained_model,
                                 load_only_params=config.get('load_only_params', True))
 
     # start training
@@ -79,7 +102,7 @@ def main(args, config):
             else:
                 for v in value:
                     writer.add_figure('eval_spec', v, epoch)
-        if (epoch % config['save_freq']) == 0:
+        if replica_id == 0 and (epoch % config['save_freq']) == 0:
             trainer.save_checkpoint(osp.join(exp_dir, f'epoch_{epoch}.pth'))
 
 
@@ -90,10 +113,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c", "--model_config", type=str, required=True, help="path to model.yaml"
     )
+    parser.add_argument("-p","--pretrained_model", type = str, default = "", help = "model checkpoint to be resumed for training")
     args = parser.parse_args()
 
     # Read Config
     model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
     print(model_config)
-    set_seed(model_config['seed'])
-    main(args, model_config)
+    if model_config['ngpu'] > 1:
+        replica_count = torch.cuda.device_count()
+        print(f'Using {replica_count} GPUs')
+        if replica_count >1:
+            port = _get_free_port()
+            mp.spawn(main, args=(replica_count, port, args, model_config), nprocs = replica_count, join = True)
+    else:
+        main(args = args, config = model_config)

@@ -12,20 +12,34 @@ from collections import defaultdict
 def get_dataloader(config):
     train_dataset = Dataset(config, config['train_meta'], config['train_set'])
     dev_dataset = Dataset(config, config['dev_meta'], config['dev_set'])
+    
+    if config['ngpu'] >1:
+        shuffle = False
+        train_sampler = torch.utils.data.distributed.DistributedSampler(
+             train_dataset)
+        dev_sampler = torch.utils.data.distributed.DistributedSampler(
+             dev_dataset)
+    else:
+        shuffle = True    
+        train_sampler = None
+        dev_sampler = None
 
     train_loader = DataLoader(
             train_dataset,
             batch_size = config['batch_size'],
-            shuffle = True,
+            shuffle = shuffle,
             collate_fn = train_dataset.collate_fn,
-            num_workers = config['num_workers']        
+            num_workers = config['num_workers'],
+            sampler = train_sampler
+                   
         )
     dev_loader = DataLoader(
             dev_dataset,
             batch_size = config['batch_size'],
             shuffle = False,
             collate_fn = dev_dataset.collate_fn,        
-            num_workers = config['num_workers']        
+            num_workers = config['num_workers'],
+            sampler = dev_sampler        
         )
     return train_loader, dev_loader
 

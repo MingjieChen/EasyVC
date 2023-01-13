@@ -17,7 +17,6 @@ def process_speaker(spk_scp, spk, args):
         # load wav
         ID = scp_line.split(' ')[0]
         wav_path = scp_line.split(' ')[1].strip()
-        wav_path = os.path.join(args.data_root, wav_path)
         #text_path = wav_path.replace('.wav', '.normalized.txt')
         #assert os.path.exists(text_path)
         #with open(text_path) as text_f:

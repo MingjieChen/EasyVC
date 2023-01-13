@@ -6,7 +6,7 @@ train_set: train_nodev_clean
 dev_set: dev_clean
 log_dir: exp
 model_name: vqw2v_dvec_fs2
-exp_name: test
+exp_name: test_multi
 
 
 # encoder-decoder
@@ -24,12 +24,13 @@ load_only_params: !!bool False
 seed: !!int 1234
 trainer: FS2Trainer
 pretrained_model: ""
+ngpu: 2
 
 #dataloader
 sort: !!bool False
 dump_dir: dump
 num_workers: !!int 8
-batch_size: 32
+batch_size: 64
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
