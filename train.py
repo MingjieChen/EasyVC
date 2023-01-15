@@ -18,6 +18,7 @@ import os.path as osp
 import shutil
 import torch.multiprocessing as mp
 import torch.distributed as dist
+from util import Timer
 def _get_free_port():
     import socketserver
     with socketserver.TCPServer(('localhost',0),None) as s:
@@ -67,6 +68,8 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
         cudnn.benchmark = True
 
     # trainer
+    timer = Timer()
+    timer.set()
     trainer_class = config['trainer']
     trainer = eval(trainer_class)(  
                         args = Munch(config['loss']),
@@ -77,7 +80,8 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
                         train_dataloader = train_loader,
                         dev_dataloader = dev_loader,
                         fp16_run = config['fp16_run'],
-                        step_writer = step_writer
+                        step_writer = step_writer,
+                        timer = timer
                 )
     
     if args.pretrained_model != '':

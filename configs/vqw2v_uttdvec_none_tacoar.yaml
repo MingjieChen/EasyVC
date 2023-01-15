@@ -4,9 +4,6 @@ train_meta: data/libritts/train_nodev_clean/metadata.csv
 dev_meta: data/libritts/dev_clean/metadata.csv
 train_set: train_nodev_clean
 dev_set: dev_clean
-log_dir: exp
-model_name: vqw2v_dvec_tacoar
-exp_name: test
 
 
 # encoder-decoder
@@ -19,17 +16,18 @@ decoder: TacoAR
 # training 
 fp16_run: !!bool False
 epochs: 200
-save_freq: 2 # save ckpt frequency
+save_freq: 5 # save ckpt frequency
+show_freq: 10
 load_only_params: !!bool False
 seed: !!int 1234
 trainer: TacoARTrainer
-pretrained_model: ""
+ngpu: 2
 
 #dataloader
 sort: !!bool True
 dump_dir: dump
 num_workers: !!int 8
-batch_size: 32
+batch_size: 64
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)

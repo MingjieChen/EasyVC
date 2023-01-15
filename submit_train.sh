@@ -5,17 +5,23 @@ conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
 conda_env=torch_1.7
 
 #exp setup
+#ling=vqw2v
+ling=conformerppg
+spk=uttdvec
+pros=none
+#dec=fastspeech2
+dec=tacoar
 
-log_dir=exp
-model_name=vqw2v_uttdvec_none_fs2
-exp_name=test_submit_train
-exp=$log_dir/$model_name/$exp_name
-njobs=1
+exp_name=first_train
+config=configs/${ling}_${spk}_${pros}_${dec}.yaml
+exp_dir=exp
+model_name=${ling}_${spk}_${pros}_${dec}
+exp=$exp_dir/$model_name/$exp_name
+njobs=12
 ngpus=2
 slots=8
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 gputypes="GeForceRTX3090"
-config=configs/train_vqw2v_fastspeech2.yaml
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp
@@ -44,7 +50,7 @@ if [ ! -e \${ckpt_dir} ] ; then
     python train.py  \
         -c $exp_config \
         -e $exp_name \
-        -l $log_dir \
+        -l $exp_dir \
         -m $model_name 
 else
     ckpt=\$(ls -t \$ckpt_dir/*.pth | head -n 1)     
@@ -55,7 +61,7 @@ else
         -p \$ckpt \
         -c $exp_config \
         -e $exp_name \
-        -l $log_dir \
+        -l $exp_dir \
         -m $model_name 
 fi
 EOF

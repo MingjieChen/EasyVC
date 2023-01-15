@@ -29,7 +29,8 @@ class Trainer(object):
                  initial_steps=0,
                  initial_epochs=0,
                  fp16_run=False,
-                 step_writer = None
+                 step_writer = None,
+                 timer = None
     ):
         
         self.args = args
@@ -44,6 +45,7 @@ class Trainer(object):
         self.finish_train = False
         self.fp16_run = fp16_run
         self.step_writer = step_writer
+        self.timer = timer
         print(f'trainer device {self.device}')
         self.iters = 0
 
@@ -154,26 +156,28 @@ class Trainer(object):
                     #shapes += f' {b.size()}  '
                 else:
                     _batch.append(b)    
-            
+            self.timer.cnt("rd")           
             #print(f'shapes {shapes}', flush = True)        
             
             self.optimizer.zero_grad()
             loss, losses = compute_loss(self.model, _batch, self.objective)        
+            self.timer.cnt('fw')
             loss.backward()
             self.optimizer.step()
-            loss_string = f" epoch {self.epochs}, iters {self.iters}" 
+            self.timer.cnt('bw')
+            
+            loss_string = f"epoch: {self.epochs}| iters: {self.iters}| timer: {self.timer.show()}|" 
             for key in losses:
                 train_losses["train/%s" % key].append(losses[key])
-                loss_string += f" {key}:{losses[key]:.5f} "
+                loss_string += f" {key}:{losses[key]:.3f} "
                 self.step_writer.add_scalar('step/'+key, losses[key], self.iters)
             self.step_writer.add_scalar('step/lr', self._get_lr(), self.iters)    
             #print(loss_string, flush = True)    
             self.iters+=1
+            if self.iters % self.config['show_freq'] == 0:
+                print(loss_string, flush = True)
             self.scheduler.step()
                 
-            if (self.iters % self.config['save_freq']) == 0:
-                exp_dir = osp.join(self.config['log_dir'],self.config['model_name'],self.config['exp_name'])
-                self.save_checkpoint(osp.join(exp_dir, f'epoch_{self.iters}.pth'))
         train_losses = {key: np.mean(value) for key, value in train_losses.items()}
         return train_losses
     

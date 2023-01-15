@@ -28,7 +28,8 @@ class Trainer(object):
                  initial_steps=0,
                  initial_epochs=0,
                  fp16_run=False,
-                 step_writer = None
+                 step_writer = None,
+                 timer = None
     ):
         
         self.args = args
@@ -43,6 +44,7 @@ class Trainer(object):
         self.finish_train = False
         self.fp16_run = fp16_run
         self.step_writer = step_writer
+        self.timer = timer
         print(f'trainer device {self.device}')
         self.iters = 0
         self.optimizer, self.scheduler = build_optimizer(model, config)
@@ -141,33 +143,38 @@ class Trainer(object):
 
         
         for train_steps_per_epoch, batch in tqdm(enumerate(self.train_dataloader, 1)):
-                
             _batch = []
             for b in batch:
                 if isinstance(b, torch.Tensor):
                     _batch.append(b.to(self.device))
                 else:
                     _batch.append(b)    
+            self.timer.cnt("rd")        
             self.optimizer.zero_grad()
             if scaler is not None:
                 with torch.cuda.amp.autocast():
                     loss, losses = compute_loss(self.model, _batch)
+                self.timer.cnt('fw')    
                 scaler.scale(loss).backward()
                 scaler.step(self.optimizer)
                 scaler.update()
+                self.timer.cnt('bw')    
             else:
                 loss, losses = compute_loss(self.model, _batch)        
+                self.timer.cnt('fw')    
                 loss.backward()
                 self.optimizer.step()
-            #self.optimizer.step('model', scaler=scaler)
+                self.timer.cnt('bw')    
             
-            loss_string = f" epoch {self.epochs}, iters {self.iters}" 
+            loss_string = f"epoch: {self.epochs}| iters: {self.iters}| timer: {self.timer.show()}|" 
             for key in losses:
                 train_losses["train/%s" % key].append(losses[key])
-                loss_string += f" {key}:{losses[key]:.5f} "
+                loss_string += f" {key}:{losses[key]:.3f} "
                 self.step_writer.add_scalar('step/'+key, losses[key], self.iters)
             self.step_writer.add_scalar('step/lr', self._get_lr(), self.iters)    
             self.iters+=1
+            if self.iters % self.config['show_freq'] == 0:
+                print(loss_string, flush = True)
             self.scheduler.step()
         train_losses = {key: np.mean(value) for key, value in train_losses.items()}
         return train_losses
