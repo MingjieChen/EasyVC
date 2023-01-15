@@ -4,9 +4,6 @@ train_meta: data/libritts/train_nodev_clean/metadata.csv
 dev_meta: data/libritts/dev_clean/metadata.csv
 train_set: train_nodev_clean
 dev_set: dev_clean
-log_dir: exp
-model_name: vqw2v_dvec_fs2
-exp_name: test_multi
 
 
 # encoder-decoder
@@ -17,13 +14,12 @@ decoder: FastSpeech2
 
 
 # training 
-fp16_run: !!bool False
+fp16_run: !!bool True
 epochs: 200
 save_freq: 2 # save ckpt frequency
 load_only_params: !!bool False
 seed: !!int 1234
 trainer: FS2Trainer
-pretrained_model: ""
 ngpu: 2
 
 #dataloader

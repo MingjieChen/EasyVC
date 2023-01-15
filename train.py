@@ -45,8 +45,8 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
     torch.cuda.set_device(device)
 
     # create exp dir
-    log_dir = config['log_dir']
-    exp_dir = osp.join(log_dir, config['model_name'], config['exp_name'])
+    log_dir = args.log_dir
+    exp_dir = osp.join(log_dir, args.model_name, args.exp_name)
     if not osp.exists(exp_dir): os.makedirs(exp_dir, exist_ok=True)
     # back up config yaml to exp dir
     if not osp.exists(osp.join(exp_dir, osp.basename(args.model_config))):
@@ -90,20 +90,21 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
     start_epoch = trainer.epochs
     for _ in range(start_epoch+1, epochs+1):
         epoch = trainer.epochs+1
-        print(f'epoch {epoch}')
+        print(f'start epoch {epoch}')
         train_results = trainer._train_epoch()
         eval_results = trainer._eval_epoch()
         results = train_results.copy()
         results.update(eval_results)
+        loss_string = f"epoch {epoch} |"
         for key, value in results.items():
             if isinstance(value, float):
-                print(f"{key}: {value:.4f}")
+                loss_string += f" {key}: {value:.4f} "
                 writer.add_scalar(key, value, epoch)
             else:
                 for v in value:
                     writer.add_figure('eval_spec', v, epoch)
         if replica_id == 0 and (epoch % config['save_freq']) == 0:
-            trainer.save_checkpoint(osp.join(exp_dir, f'epoch_{epoch}.pth'))
+            trainer.save_checkpoint(osp.join(exp_dir, 'ckpt',f'epoch_{epoch}.pth'))
 
 
 
@@ -114,11 +115,15 @@ if __name__ == "__main__":
         "-c", "--model_config", type=str, required=True, help="path to model.yaml"
     )
     parser.add_argument("-p","--pretrained_model", type = str, default = "", help = "model checkpoint to be resumed for training")
+    parser.add_argument("-e", "--exp_name", type = str, default = "", help="experiment name")
+    parser.add_argument("-l", "--log_dir", type = str, default = "exp", help="experiment root dir")
+    parser.add_argument("-m", "--model_name", type = str, default = "", help="model name, e.g. vqw2v_uttdev_f0_fs2")
     args = parser.parse_args()
 
     # Read Config
     model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
     print(model_config)
+    print(args)
     if model_config['ngpu'] > 1:
         replica_count = torch.cuda.device_count()
         print(f'Using {replica_count} GPUs')
