@@ -187,7 +187,7 @@ class Trainer(object):
         
         eval_losses = defaultdict(list)
         self.model
-        for eval_steps_per_epoch, batchs in enumerate(self.dev_dataloader, 1):
+        for eval_steps_per_epoch, batch in enumerate(self.dev_dataloader, 1):
             _batch = []
             for b in batch:
                 if isinstance(b, torch.Tensor):

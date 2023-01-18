@@ -33,7 +33,6 @@ class Trainer(object):
     ):
         
         self.args = args
-        self.steps = initial_steps
         self.epochs = initial_epochs
         self.model = model
         self.model_ema = model_ema
@@ -56,7 +55,6 @@ class Trainer(object):
         """
         state_dict = {
             "optimizer": self.optimizer.state_dict(),
-            "steps": self.steps,
             "epochs": self.epochs,
             "model": self.model.state_dict(),
             "iters": self.iters
@@ -83,11 +81,10 @@ class Trainer(object):
             self._load(state_dict["model_ema"], self.model_ema)
         
         if not load_only_params:
-            self.steps = state_dict["steps"]
             self.epochs = state_dict["epochs"]
             self.iters = state_dict['iters']
             self.optimizer.load_state_dict(state_dict["optimizer"])
-            self.scheduler.current_step = self.steps
+            self.scheduler.current_step = self.iters
 
 
     def _load(self, states, model, force_load=True):
