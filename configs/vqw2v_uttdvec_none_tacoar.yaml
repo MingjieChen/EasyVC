@@ -16,7 +16,7 @@ decoder: TacoAR
 # training 
 fp16_run: !!bool False
 epochs: 200
-save_freq: 5 # save ckpt frequency
+save_freq: 4 # save ckpt frequency
 show_freq: 10
 load_only_params: !!bool False
 seed: !!int 1234

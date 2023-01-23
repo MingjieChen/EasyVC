@@ -10,7 +10,8 @@ ling=conformerppg
 spk=uttdvec
 pros=none
 #dec=fastspeech2
-dec=tacoar
+#dec=tacoar
+dec=tacomol
 
 exp_name=first_train
 config=configs/${ling}_${spk}_${pros}_${dec}.yaml
@@ -37,7 +38,7 @@ cp $config $exp_config
 #jid=$(submitjob -m 10000 -g${ngpus} -M${slots} -o -l gputype=$gputypes  -eo  $log_dir/train.log  ./bin/train.sh | grep -E [0-9]+)
 jid=""
 # create following jobs
-for ((n=0;n<=${njobs};n++)); do
+for ((n=0;n<${njobs};n++)); do
     job=$job_dir/train${n}.sh
     cat <<EOF > $job
 #!/bin/bash

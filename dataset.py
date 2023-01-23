@@ -114,6 +114,8 @@ class Dataset(data.Dataset):
         self.pros_enc = config['pros_enc']
         self.pros_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.pros_enc)
         
+        # frames per step (only work for TacoMOL)
+        self.frames_per_step = config['frames_per_step'] if 'frames_per_step' in config else 1
 
 
 
@@ -161,6 +163,7 @@ class Dataset(data.Dataset):
         elif mel_duration < pros_duration:
             pros_rep = pros_rep[:mel_duration,:]
         
+        
         return (mel, ling_rep, pros_rep,  spk_emb, mel_duration)
     
     def collate_fn(self, data):
@@ -178,9 +181,11 @@ class Dataset(data.Dataset):
         length = [ data[id][4] for id in idx_arr ]
         
         max_len = max(length)
-        padded_mel = torch.FloatTensor(pad_2D(mel))
-        padded_ling_rep = torch.FloatTensor(pad_2D(ling_rep))
-        padded_pros_rep = torch.FloatTensor(pad_2D(pros_rep))
+        if max_len % self.frames_per_step != 0:
+            max_len += (self.frames_per_step - max_len % self.frames_per_step)
+        padded_mel = torch.FloatTensor(pad_2D(mel, max_len))
+        padded_ling_rep = torch.FloatTensor(pad_2D(ling_rep, max_len))
+        padded_pros_rep = torch.FloatTensor(pad_2D(pros_rep, max_len))
         spk_emb_tensor = torch.FloatTensor(np.array(spk_emb)).unsqueeze(1)
         length = torch.LongTensor(np.array(length)) 
         output = (padded_mel, padded_ling_rep, padded_pros_rep, spk_emb_tensor, length, max_len)
