@@ -43,7 +43,7 @@ decoder_params:
 optimizer:
     weight_decay: !!float 1e-6
     betas: [0.9,0.99]  
-    lr: !!float 1e-3
+    lr: !!float 1e-4
 scheduler:    
     num_training_steps: 500000
     num_warmup_steps: 4000
