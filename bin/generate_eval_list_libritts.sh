@@ -15,8 +15,8 @@ python3 evaluation/generate_eval_list.py \
         --spk_enc utt_dvec \
         --speakers_path data/libritts/eval_clean/speakers.txt \
         --eval_metadata_path data/libritts/eval_clean/metadata_with_wrd.csv \
-        --eval_list_out_path data/libritts/eval_clean/eval_list_a2a_vc.json \
-        --n_samples_per_trg_speaker 10 \
-        --n_eval_speakers 20 \
-        --n_samples_per_src_speaker 25
+        --eval_list_out_path data/libritts/eval_clean/eval_list_oneshot_vc_small.json \
+        --n_samples_per_trg_speaker 1 \
+        --n_eval_speakers 10 \
+        --n_samples_per_src_speaker 4
 echo "done!"

@@ -1,6 +1,5 @@
 import random
 import yaml
-#from munch import Munch
 import numpy as np
 import torch
 from torch import nn
@@ -8,23 +7,20 @@ import torch.nn.functional as F
 import torchaudio
 import librosa
 import sys
-#from utils import read_hdf5, write_hdf5
-from model import build_model
 import argparse
 import os
 import json
 import glob
 import soundfile as sf
-#from utils import load_wav, logmelspectrogram, to_categorical
-from sklearn.preprocessing import StandardScaler
-#from data_loader import load_stats
 import csv
 from tqdm import tqdm
-from vocoders.hifigan_model  import load_hifigan_generator
-from conformer_ppg_model.build_ppg_model import load_ppg_model
-import fairseq
 from scipy.io import wavfile
 import resampy
+from ling_encoder.interface import *
+from speaker_encoder.interface import *
+from decoder.interface import *
+from vocoder.interface import *
+
 def load_wav(path, sample_rate = 16000):
     sr, x = wavfile.read(path)
     signed_int16_max = 2**15
@@ -39,116 +35,95 @@ def load_wav(path, sample_rate = 16000):
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('--out_feat_dir', type = str)
-    parser.add_argument('--out_wav_dir', type = str)
-    parser.add_argument('--model_path', type = str)
+    # path
+    parser.add_argument('--exp_dir', type = str)
     parser.add_argument('--eval_list',type = str)
-    parser.add_argument('--out_eval_list', type = str)
-    parser.add_argument('--speakers', type = str, default = '../../speaker.json')
     parser.add_argument('--device', type = str, default = 'cpu')
-    parser.add_argument('--iters', type = int)
-    args = parser.parse_args()
-    
-    # make dir
-    os.makedirs(args.out_wav_dir, exist_ok = True)
-    # load config
-    config_file_path = glob.glob(os.path.join(os.path.dirname(args.model_path),'*.yaml'))[0]
-    with open(config_file_path) as f:
-        config = yaml.safe_load(f)
-    print(config)    
-    # speaker list
-    speakers_f = open(config['speakers'])
-    speakers = json.load(speakers_f)
-    
-    # build model
-    model = build_model(config)
-    # load model
-    params = torch.load(args.model_path, map_location=torch.device(args.device))    
-    params = params['model']
-    
-    model.generator.load_state_dict(params['generator'])
-    model.generator.to(torch.device(args.device))
-    model.generator.eval()
-    
-    
-    # build vocoder
-    hifigan_model = load_hifigan_generator(args.device)    
-    # load scaler
-    #scaler = load_stats(config['data_loader']['stats'])
+    # encoder decoder configs
+    parser.add_argument('--enc_dec_config', type = str)
+    #exp 
+    parser.add_argument('--epochs', type = int)
+    parser.add_argument('--task', type = str) 
+    # vocoder
+    parser.add_argument('--vocoder', type = str, default = 'ppg_vc_hifigan')
+    # sge task 
+    parser.add_argument('--sge_n_jobs', type = int, default = 1)
+    parser.add_argument('--seg_job_idx', type = int, default = 0)
 
-    if config['input_type'] == 'vqw2v':
-        # build vq extractor
-        
-        cp = '/share/mini1/res/t/vc/studio/timap-en/vctk/fairseq/examples/wav2vec/ckpt/vq-wav2vec_kmeans.pt'
-        vq_model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([cp])
-        vq_model = vq_model[0]
-        vq_model.eval()
-        vq_model = vq_model.to(args.device)
-    elif config['input_type'] == 'ppg':
-        ppg_config = '/share/mini1/res/t/vc/studio/timap-en/vctk/model/transformer_adversarial/conformer_ppg_model/en_conformer_ctc_att/config.yaml'
-        ppg_ckpt = '/share/mini1/res/t/vc/studio/timap-en/vctk/model/transformer_adversarial/conformer_ppg_model/en_conformer_ctc_att/24epoch.pth'
-        ppg_model = load_ppg_model(ppg_config, ppg_ckpt, args.device)    
+    # arguments
+    args = parser.parse_args()
+    print(args)
+
+    # load encoder decoder configs
+    with open(args.enc_dec_config) as f:
+        enc_dec_config = yaml.safe_load(f)
+        f.close()
     
-    # source feats files
+    # load exp config
+    exp_config_path = glob.glob(os.path.join(args.exp_dir,'*.yaml'))[0]
+    with open(exp_config_path) as f:
+        exp_config = yaml.safe_load(f)
+        f.close()
+
+    # make dir
+    os.makedirs(os.path.join(args.exp_dir, 'inference', args.task, args.epochs), exist_ok = True)
+    out_wav_dir = os.path.join(args.exp_dir, 'inference', args.task, args.epochs)
+    # load eval_list
+    with open(args.eval_list ) as f:
+        eval_list = json.load(f)
+        f.close()
     
-    with open(args.eval_list) as csv_f, open( os.path.join(os.path.dirname(args.out_feat_dir), args.out_eval_list),'w') as out_f:
-        csv_reader = csv.DictReader(csv_f, delimiter = ',', quotechar = '"')
-        csvwriter = csv.writer(out_f, delimiter = ',', quotechar = '"')
+    print(f'generating {len(eval_list)} samples')
+    # split eval_list by sge_job_idx
+    n_jobs_per_task = round(len(eval_list) / args.sge_n_jobs, 0)    
+    selected_eval_list = eval_list[int(args.sge_job_idx * n_jobs_per_task): int((args.sge_job_idx+1) * n_jobs_per_task)]
         
-        csvwriter.writerow(['ID','duration','wav','spk_id','wrd'])
-        for row in tqdm(csv_reader):
-            wav_path = row['wav']
-            ID = row['ID']
-            src_spk = ID.split('_')[0]
-            trg_spk = row['spk_id']
-            # extract mel features
-            if not os.path.exists(wav_path):
-                raise Exception
-            
-            # load wav
-            
-            wav_input_16khz = load_wav(wav_path)
-            #window_size=480
-            
-            #wav_input_16khz = np.pad(wav, pad_width = (window_size//2,window_size//2), mode='reflect')
-            wav_input_16khz = torch.FloatTensor(wav_input_16khz).to(args.device).unsqueeze(0)
-            wav_length = torch.LongTensor([wav_input_16khz.size(1)]).to(args.device)
-            if config['input_type'] == 'vqw2v':
-                z = vq_model.feature_extractor(wav_input_16khz)
-                dense, idxs = vq_model.vector_quantizer.forward_idx(z)
-                ling_features = dense.transpose(1,2)
-                print(f"vq {ling_features.size()}")
-            elif config['input_type'] == 'ppg':
-                ling_features = ppg_model(wav_input_16khz, wav_length)
-                
-            
-            if 'use_spk_embs' in config['generator'] and config['generator']['use_spk_embs']:
-                if 'spk_emb' in row:
-                    spk_emb = np.load(row['spk_emb'])   
-                else:
-                    #spk_emb = np.load(os.path.join(config['speaker_embs'], trg_spk,trg_spk+'_023.npy'))    
-                    spk_emb_path = sorted(glob.glob(os.path.join(config['speaker_embs'],trg_spk,'*.npy')))[-1]
-                    print(f'spk_emb_path {spk_emb_path}')
-                    spk_emb = np.load(spk_emb_path)
-                y_trg = torch.FloatTensor([spk_emb]).unsqueeze(1).to(args.device)
-            else:    
-                trg_id = speakers.index(row['spk_id'])
-                src_id = speakers.index(src_spk)
-                y_trg = torch.LongTensor([trg_id]).unsqueeze(0).to(args.device)
-            length = torch.LongTensor([ling_features.size(1)]).to(args.device)
-            
-            mel,  _ = model.generator(ling_features, y_trg, length, ling_features.size(1))
-            converted_feat = mel    
-            print(f"converted_feat {converted_feat.shape}")
-            
-            converted_wav = hifigan_model(converted_feat.transpose(1,2)).view(-1) 
-            #converted_feat = converted_feat.squeeze(0).squeeze(0).data.numpy().T
-            #converted_feat = scaler.inverse_transform(converted_feat)
-            #out_path = os.path.join(args.out_feat_dir, f'{ID}-feats')
-            converted_wav_basename = f'{ID}_gen.wav'
-            #np.save(out_path+'.npy', converted_feat)    
-            sf.write(os.path.join(args.out_wav_dir,converted_wav_basename), converted_wav.data.cpu().numpy(), 24000, "PCM_16")
-            csvwriter.writerow([row['ID'],row['duration'],os.path.join(args.out_wav_dir,converted_wav_basename),row['spk_id'],row['wrd']])
+    # load encoders
+    ling_encoder = exp_config['ling_enc']
+    speaker_encoder = exp_config['spk_enc']
+    prosodic_encoder = exp_config['pros_enc']
+    
+    ling_enc_load_func = f'load_{ling_encoder}'
+    speaker_enc_load_func = f'load_{speaker_encoder}'
+    
+    
+    ling_enc_model = eval(ling_enc_load_func)(**enc_dec_config[ling_encoder])
+    speaker_enc_model = eval(speaker_enc_load_func)(**enc_dec_config[speaker_encoder])
+    print(ling_enc_model)
+    print(speaker_enc_model)
+    # load decoder
+    decoder = exp_config['decoder']
+    decoder_load_func = f'load_{decoder}'
+    
+    decoder_model = eval(decoder_load_func)(**enc_dec_config[decoder])
+    print(decoder_model)
+    # load vocoder
+    vocoder = args.vocoder
+    vocoder_load_func = f'load_{vocoder}'
+    
+    vocoder_model = eval(vocoder_load_func)(**enc_dec_config[vocoder])
+    print(vocoder_model)
+
+    # conduct inference
+
+    for meta in eval_list:
+        # load eval_list metadata
+        ID = meta['ID']
+        src_wav_path = meta['src_wav']
+        trg_wav_path = meta['trg_wav']
+        # load src wav & trg wav
+        src_wav = load_wav(src_wav, 16000)
+
+        # to tensor
+        src_wav_tensor = torch.FloatTensor(src_wav).unsqueeze(0) 
+
+
+
+    
+
+
+    
+    
 
 
 

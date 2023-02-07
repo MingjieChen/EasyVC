@@ -185,8 +185,8 @@ class MelDecoderMOLv2(AbsMelDecoder):
         use_stop_tokens: bool = True,
     ):
         decoder_inputs = self.bnf_prenet(bottle_neck_features.transpose(1, 2)).transpose(1, 2)
-        logf0_uv = self.pitch_convs(logf0_uv.transpose(1, 2)).transpose(1, 2)
-        decoder_inputs = decoder_inputs + logf0_uv
+        #logf0_uv = self.pitch_convs(logf0_uv.transpose(1, 2)).transpose(1, 2)
+        #decoder_inputs = decoder_inputs + logf0_uv
         if self.multi_speaker:
             assert spembs is not None
             # spk_embeds = self.speaker_embedding_table(spembs)
