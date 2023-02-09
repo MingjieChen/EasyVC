@@ -94,11 +94,11 @@ if __name__ == '__main__':
     if args.task == 'vc':
         for src_spk in selected_speakers:
             src_metas = selected_src_metas[src_spk]
-            for trg_spk in selected_speakers:
-                if src_spk != trg_spk:
-                    trg_metas = selected_trg_metas[trg_spk]
-                    trg_wavs = [_trg_meta['wav_path'] for _trg_meta in trg_metas]
-                    for _meta in src_metas:
+            for _meta in src_metas:
+                for trg_spk in selected_speakers:
+                    if src_spk != trg_spk:
+                        trg_metas = selected_trg_metas[trg_spk]
+                        trg_wavs = [_trg_meta['wav_path'] for _trg_meta in trg_metas]
                         
                         ID = _meta['ID']
                         src_wav = meta['wav_path']

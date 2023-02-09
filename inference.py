@@ -1,3 +1,4 @@
+import time
 import random
 import yaml
 import numpy as np
@@ -39,25 +40,19 @@ if __name__ == '__main__':
     parser.add_argument('--exp_dir', type = str)
     parser.add_argument('--eval_list',type = str)
     parser.add_argument('--device', type = str, default = 'cpu')
-    # encoder decoder configs
-    parser.add_argument('--enc_dec_config', type = str)
     #exp 
-    parser.add_argument('--epochs', type = int)
+    parser.add_argument('--epochs', type = str)
     parser.add_argument('--task', type = str) 
     # vocoder
     parser.add_argument('--vocoder', type = str, default = 'ppg_vc_hifigan')
     # sge task 
-    parser.add_argument('--sge_n_jobs', type = int, default = 1)
-    parser.add_argument('--seg_job_idx', type = int, default = 0)
+    parser.add_argument('--sge_task_id', type = int, default = 1)
+    parser.add_argument('--sge_n_tasks', type = int, default = 1)
 
     # arguments
     args = parser.parse_args()
     print(args)
 
-    # load encoder decoder configs
-    with open(args.enc_dec_config) as f:
-        enc_dec_config = yaml.safe_load(f)
-        f.close()
     
     # load exp config
     exp_config_path = glob.glob(os.path.join(args.exp_dir,'*.yaml'))[0]
@@ -75,47 +70,75 @@ if __name__ == '__main__':
     
     print(f'generating {len(eval_list)} samples')
     # split eval_list by sge_job_idx
-    n_jobs_per_task = round(len(eval_list) / args.sge_n_jobs, 0)    
-    selected_eval_list = eval_list[int(args.sge_job_idx * n_jobs_per_task): int((args.sge_job_idx+1) * n_jobs_per_task)]
+    n_per_task = round(len(eval_list) / args.sge_n_tasks, 0)    
+    start = int(( args.sge_task_id -1 ) * n_per_task)
+    if int( args.sge_task_id * n_per_task) >= len(eval_list):
+        end = len(eval_list) -1
+    else:
+        end = int(args.sge_task_id  * n_per_task)    
+    print(f'selected_eval_list from {start} to {end}')    
+    selected_eval_list = eval_list[start: end]
         
-    # load encoders
+    # encoders types
     ling_encoder = exp_config['ling_enc']
     speaker_encoder = exp_config['spk_enc']
     prosodic_encoder = exp_config['pros_enc']
     
+    # load ling_encoder
     ling_enc_load_func = f'load_{ling_encoder}'
-    speaker_enc_load_func = f'load_{speaker_encoder}'
-    
-    
-    ling_enc_model = eval(ling_enc_load_func)(**enc_dec_config[ling_encoder])
-    speaker_enc_model = eval(speaker_enc_load_func)(**enc_dec_config[speaker_encoder])
-    print(ling_enc_model)
-    print(speaker_enc_model)
+    ling_enc_model = eval(ling_enc_load_func)(device = args.device)
+    ling_encoder_func = f'{ling_encoder}'
+    # load speaker encoder
+    speaker_enc_model = load_speaker_encoder(speaker_encoder, device = args.device)
+    speaker_encoder_func = load_speaker_encoder_func(args.task, speaker_encoder)
+    print(f'load ling_encoder {ling_encoder} done')
+    print(f'load speaker_encoder {speaker_encoder} done')
     # load decoder
     decoder = exp_config['decoder']
     decoder_load_func = f'load_{decoder}'
-    
-    decoder_model = eval(decoder_load_func)(**enc_dec_config[decoder])
-    print(decoder_model)
+    decoder_func = f'infer_{decoder}'
+    decoder_model_path = os.path.join(args.exp_dir, 'ckpt', f'epoch_{args.epochs}.pth')
+    decoder_model = eval(decoder_load_func)(decoder_model_path, exp_config_path, device = args.device)
+    print(f'load decoder {decoder} done')
     # load vocoder
     vocoder = args.vocoder
     vocoder_load_func = f'load_{vocoder}'
-    
-    vocoder_model = eval(vocoder_load_func)(**enc_dec_config[vocoder])
-    print(vocoder_model)
-
+    vocoder_model = eval(vocoder_load_func)(device = args.device)
+    vocoder_func = f'{vocoder}'
+    print(f'load vocoder {vocoder} done')
     # conduct inference
 
-    for meta in eval_list:
+    total_rtf = 0.0
+    cnt = 0
+    for meta in tqdm(selected_eval_list):
         # load eval_list metadata
         ID = meta['ID']
         src_wav_path = meta['src_wav']
         trg_wav_path = meta['trg_wav']
         # load src wav & trg wav
-        src_wav = load_wav(src_wav, 16000)
-
+        src_wav = load_wav(src_wav_path, 16000)
+        
         # to tensor
-        src_wav_tensor = torch.FloatTensor(src_wav).unsqueeze(0) 
+        src_wav_tensor = torch.FloatTensor(src_wav).unsqueeze(0).to(args.device) 
+        start_time = time.time()
+        # extract ling representations
+        ling_rep = eval(ling_encoder_func)(ling_enc_model, src_wav_tensor)
+        # trg spk emb
+        spk_emb = speaker_encoder_func(speaker_enc_model, trg_wav_path)
+        spk_emb_tensor = torch.FloatTensor(spk_emb).unsqueeze(0).unsqueeze(0).to(args.device)
+        # generate mel
+        mel = eval(decoder_func)(decoder_model, ling_rep, None, spk_emb_tensor)
+        # vocoder
+        wav = eval(vocoder_func)(vocoder_model, mel)
+        end_time = time.time()
+        rtf = (end_time - start_time) / (0.01 * ling_rep.size(1))
+        total_rtf += rtf
+        cnt += 1
+        converted_wav_basename = f'{ID}_gen.wav'
+        sf.write(os.path.join(out_wav_dir, converted_wav_basename), wav.data.cpu().numpy(), 24000, "PCM_16")
+    print(f"RTF: {total_rtf/cnt :.2f}")    
+
+
 
 
 

@@ -1,5 +1,5 @@
-from d_vector_model.hparams import *
-from d_vector_model import audio
+from .hparams import *
+from . import audio
 from pathlib import Path
 from typing import Union, List
 from torch import nn

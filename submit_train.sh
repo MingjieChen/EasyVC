@@ -68,7 +68,7 @@ fi
 EOF
 
     chmod +x $job
-    log=$log_dir/train${n}.log
+    log=$log_dir/train.log
     if [[ "$jid" == "" ]] ; then
         jid=$(submitjob -m 10000  -g${ngpus} -M${slots} -o -l gputype=$gputypes  -eo  $log  $job | grep -E [0-9]+)
     else    

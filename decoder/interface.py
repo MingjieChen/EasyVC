@@ -1,11 +1,18 @@
-from decoder.fastspeech2.fastspeech2 import FastSpeech2
-from decoder.taco_ar.model import Model as TacoAR
-from decoder.taco_mol.model import MelDecoderMOLv2 as TacoMOL
+from .fastspeech2.fastspeech2 import FastSpeech2
+from .taco_ar.model import Model as TacoAR
+from .taco_mol.model import MelDecoderMOLv2 as TacoMOL
 import torch
 import yaml
 
+def remove_module_from_state_dict(state_dict):
+    from collections import OrderedDict
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        name = k[7:] # remove `module.`
+        new_state_dict[name] = v
+    return new_state_dict        
 
-def load_fastspeech2(ckpt = None, config = None, device = 'cpu'):
+def load_FastSpeech2(ckpt = None, config = None, device = 'cpu'):
     with open(config) as f:
         model_config = yaml.safe_load(f)
         f.close()
@@ -14,6 +21,7 @@ def load_fastspeech2(ckpt = None, config = None, device = 'cpu'):
     model = FastSpeech2(model_config['decoder_params'])
     params = torch.load(ckpt, map_location = torch.device(device))
     params = params['model']
+    params = remove_module_from_state_dict(params)
 
     model.load_state_dict(params)
     model.to(device)
@@ -21,13 +29,13 @@ def load_fastspeech2(ckpt = None, config = None, device = 'cpu'):
     return model
 
 
-def fastspeech2(model, ling, pros, spk):
+def infer_FastSpeech2(model, ling, pros, spk):
     
     _, mel, _ = model(ling, pros, spk, torch.LongTensor([ling.size(1)]).to(ling.device), ling.size(1))
     return mel
 
 
-def load_taco_ar(ckpt = None, config = None, device = 'cpu'):
+def load_TacoAR(ckpt = None, config = None, device = 'cpu'):
     with open(config) as f:
         model_config = yaml.safe_load(f)
         f.close()
@@ -35,6 +43,7 @@ def load_taco_ar(ckpt = None, config = None, device = 'cpu'):
     model = TacoAR(model_config['decoder_params'])
     params = torch.load(ckpt, map_location = torch.device(device))
     params = params['model']
+    params = remove_module_from_state_dict(params)
 
     model.load_state_dict(params)
     model.to(device)
@@ -42,18 +51,19 @@ def load_taco_ar(ckpt = None, config = None, device = 'cpu'):
 
     return model
 
- def taco_ar(model, ling, pros, spk):
+def infer_TacoAR(model, ling, pros, spk):
      
      mel, _ = model(ling, torch.LongTensor([ling.size(1)]).to(ling.device), spk)
      return mel      
 
-def load_taco_mol(ckpt = None, config = None, device = 'cpu'):
+def load_TacoMOL(ckpt = None, config = None, device = 'cpu'):
     with open(config) as f:
         model_config = yaml.safe_load(f)
         f.close()
     model = TacoMOL(model_config['decoder_params'])
     params = torch.load(ckpt, map_location = torch.device(device))
     params = params['model']
+    params = remove_module_from_state_dict(params)
 
     model.load_state_dict(params)
     model.to(device)
@@ -61,7 +71,7 @@ def load_taco_mol(ckpt = None, config = None, device = 'cpu'):
 
     return model
 
-def taco_mol(model, ling, pros, spk):
+def infer_TacoMOL(model, ling, pros, spk):
     
     _, mel, _ = model.inference(ling, pros, spk)    
     return mel

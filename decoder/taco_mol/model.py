@@ -198,7 +198,7 @@ class MelDecoderMOLv2(AbsMelDecoder):
                     spk_embeds).unsqueeze(1).expand(-1, decoder_inputs.size(1), -1)
             else:
                 spk_embeds = F.normalize(
-                    spembs).unsqueeze(1).expand(-1, decoder_inputs.size(1), -1)
+                    spembs.squeeze(1)).unsqueeze(1).expand(-1, decoder_inputs.size(1), -1)
             bottle_neck_features = torch.cat([decoder_inputs, spk_embeds], dim=-1)
             bottle_neck_features = self.reduce_proj(bottle_neck_features)
 
@@ -212,4 +212,4 @@ class MelDecoderMOLv2(AbsMelDecoder):
         mel_outputs_postnet = mel_outputs + mel_outputs_postnet
         # outputs = mel_outputs_postnet[0]
         
-        return mel_outputs[0], mel_outputs_postnet[0], alignments[0]
+        return mel_outputs, mel_outputs_postnet, alignments
