@@ -1,0 +1,84 @@
+# experiment
+dataset: libritts
+train_meta: data/libritts/train_nodev_clean/metadata.csv
+dev_meta: data/libritts/dev_clean/metadata.csv
+train_set: train_nodev_clean
+dev_set: dev_clean
+
+
+# encoder-decoder
+ling_enc: hubert_soft
+spk_enc: utt_dvec
+pros_enc: f0
+decoder: FastSpeech2
+
+
+# training 
+fp16_run: !!bool True
+epochs: 200
+save_freq: 5 # save ckpt frequency
+show_freq: 100 # show training information frequency
+load_only_params: !!bool False
+seed: !!int 1234
+trainer: FS2Trainer
+ngpu: 2
+
+#dataloader
+sort: !!bool True
+dump_dir: dump
+num_workers: !!int 8
+batch_size: 32
+drop_last: !!bool True
+rm_long_utt: !!bool True # remove too long utterances from metadata
+max_utt_duration: !!float 10.0 # max utterance duration (seconds)
+
+
+# decoder params
+decoder_params: 
+    max_len: 1000
+    max_seq_len: 1000
+    spk_emb_dim: 256
+   
+    prenet:
+        conv_kernel_size: 3
+        input_dim: 256
+        dropout: 0.1
+    postnet:
+        idim: 80
+        odim: 80
+        n_layers: 5
+        n_filts: 5
+        n_chans: 256
+        dropout_rate: 0.5
+    transformer:
+        encoder_layer: 4
+        encoder_head: 2
+        encoder_hidden: 256
+        decoder_layer: 4
+        decoder_head: 2
+        decoder_hidden: 256
+        conv_filter_size: 1024
+        conv_kernel_size: [3, 1]
+        encoder_dropout: 0.1
+        decoder_dropout: 0.1
+
+#optimizer & scheduler
+optimizer:
+    init_lr: !!float 1e-2
+    betas: [0.9,0.99]
+    weight_decay: 0.0        
+scheduler:    
+    warm_up_step: 4000
+    anneal_steps: [800000, 900000, 1000000]
+    anneal_rate: 0.3
+
+# loss hyper-parameters
+loss:
+   alpha: 1. 
+    
+
+
+
+
+
+

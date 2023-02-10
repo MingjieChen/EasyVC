@@ -143,7 +143,7 @@ class Trainer(object):
         
         train_losses = defaultdict(list)
         self.model.train() 
-        #scaler = torch.cuda.amp.GradScaler() if (('cuda' in str(self.device)) and self.fp16_run) else None
+        scaler = torch.cuda.amp.GradScaler() if (('cuda' in str(self.device)) and self.fp16_run) else None
 
         
         for train_steps_per_epoch, batch in tqdm(enumerate(self.train_dataloader, 1)):
@@ -159,12 +159,23 @@ class Trainer(object):
             self.timer.cnt("rd")           
             #print(f'shapes {shapes}', flush = True)        
             
+
             self.optimizer.zero_grad()
-            loss, losses = compute_loss(self.model, _batch, self.objective)        
-            self.timer.cnt('fw')
-            loss.backward()
-            self.optimizer.step()
-            self.timer.cnt('bw')
+            
+            if scaler is not None:
+                with torch.cuda.amp.autocast():
+                    loss, losses = compute_loss(self.model, _batch, self.objective)        
+                self.timer.cnt('fw')    
+                scaler.scale(loss).backward()
+                scaler.step(self.optimizer)
+                scaler.update()
+                self.timer.cnt('bw')    
+            else:
+                loss, losses = compute_loss(self.model, _batch, self.objective)        
+                self.timer.cnt('fw')
+                loss.backward()
+                self.optimizer.step()
+                self.timer.cnt('bw')
             
             loss_string = f"epoch: {self.epochs}| iters: {self.iters}| timer: {self.timer.show()}|" 
             for key in losses:

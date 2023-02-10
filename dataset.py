@@ -149,10 +149,18 @@ class Dataset(data.Dataset):
         pros_rep = np.expand_dims(np.load(pros_rep_path), axis = 1)
         pros_duration = pros_rep.shape[0]
         
+        # up_sample ling_rep to 10hz, in case some ling_rep are 50hz or 25hz.
+        factor = int(round(mel_duration / ling_duration))
+        repeated_ling_rep = np.repeat(ling_rep, factor, axis=1)
+        ling_rep = np.reshape(repeated_ling_rep, [ling_duration * factor, ling_rep.shape[1]])
+        ling_duration = ling_rep.shape[0]
+
+
         # match length between mel and ling_rep
-        if mel_duration > ling_duration:
+        if mel_duration > ling_duration :
             pad_vec = np.expand_dims(ling_rep[-1,:], axis = 0)
             ling_rep = np.concatenate((ling_rep, np.repeat(pad_vec, mel_duration - ling_duration, 0)),0)
+                
         elif mel_duration < ling_duration:
             ling_rep = ling_rep[:mel_duration,:]
         

@@ -2,11 +2,12 @@
 
 #conda
 conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
-conda_env=torch_1.7
+conda_env=torch_1.9
 
 #exp setup
 #ling=vqw2v
-ling=conformerppg
+#ling=conformerppg
+ling=hubertsoft
 spk=uttdvec
 pros=none
 #dec=fastspeech2
@@ -22,7 +23,8 @@ njobs=24
 ngpus=2
 slots=8
 #gputypes="GeForceRTX3060|GeForceRTX3090"
-gputypes="GeForceRTX3090"
+#gputypes="GeForceRTX3090"
+gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp
@@ -42,7 +44,10 @@ for ((n=0;n<${njobs};n++)); do
     job=$job_dir/train${n}.sh
     cat <<EOF > $job
 #!/bin/bash
+    
 source $conda/bin/activate $conda_env
+export CUDA_HOME=/share/mini1/sw/std/cuda/cuda11.3/x86_64/
+export LD_LIBRARY_PATH="\${CUDA_HOME}/lib64:\${LD_LIBRARY_PATH}"
 exp=$exp
 ckpt_dir=$exp/ckpt/
 if [ ! -e \${ckpt_dir} ] ; then

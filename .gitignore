@@ -10,6 +10,7 @@ submit_gpu.sh
 downloads/
 ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt
 exp/
+vocoder/libritts_hifigan/checkpoint-600000steps.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

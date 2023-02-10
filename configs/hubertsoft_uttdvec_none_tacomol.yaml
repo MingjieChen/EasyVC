@@ -7,14 +7,14 @@ dev_set: dev_clean
 
 
 # encoder-decoder
-ling_enc: conformer_ppg
+ling_enc: hubert_soft
 spk_enc: utt_dvec
 pros_enc: f0
 decoder: TacoMOL
 
 
 # training 
-fp16_run: !!bool False
+fp16_run: !!bool True
 epochs: 200
 save_freq: 2 # save ckpt frequency
 show_freq: 10
@@ -27,7 +27,7 @@ ngpu: 2
 sort: !!bool True
 dump_dir: dump
 num_workers: !!int 8
-batch_size: 64
+batch_size: 32
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
@@ -37,7 +37,7 @@ frames_per_step: !!int 4
 # decoder params
 decoder_params: 
   spk_embed_dim: 256
-  bottle_neck_feature_dim: 144
+  bottle_neck_feature_dim: 256
 
 #optimizer & scheduler
 optimizer:
