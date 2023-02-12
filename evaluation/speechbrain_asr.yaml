@@ -1,0 +1,421 @@
+# Generated 2022-02-18 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-17 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-17 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-17 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-17 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-17 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-17 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-17 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-16 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-11 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-10 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-09 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-07 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-07 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-06 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-06 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-06 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-05 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-03 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-03 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-03 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-02 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-02 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-02 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-02 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-02 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-02-01 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-31 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-31 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-31 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-30 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-30 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-30 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-27 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-27 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-27 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-27 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-25 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-23 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-23 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-21 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-21 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-21 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-18 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# Generated 2022-01-18 from:
+# /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/hyperparams.yaml
+# yamllint disable
+# ############################################################################
+# Model: E2E ASR with Transformer
+# Encoder: Transformer Encoder
+# Decoder: Transformer Decoder + (CTC/ATT joint) beamsearch + TransformerLM
+# Tokens: unigram
+# losses: CTC + KLdiv (Label Smoothing loss)
+# Training: Librispeech 960h
+# Authors:  Jianyuan Zhong, Titouan Parcollet
+# ############################################################################
+# Seed needs to be set at top of yaml, before objects with parameters are made
+seed: 1234
+__set_seed: !apply:torch.manual_seed [1234]
+output_folder: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer
+wer_file: /share/mini1/res/t/vc/studio/timap-en/vctk/exp/transformer_adversarial/0217_ta_0/wer.txt
+save_folder: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/save
+train_log: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/train_log.txt
+
+# Language model (LM) pretraining
+# NB: To avoid mismatch, the speech recognizer must be trained with the same
+# tokenizer used for LM training. Here, we download everything from the
+# speechbrain HuggingFace repository. However, a local path pointing to a
+# directory containing the lm.ckpt and tokenizer.ckpt may also be specified
+# instead. E.g if you want to use your own LM / tokenizer.
+pretrained_lm_tokenizer_path: speechbrain/asr-transformer-transformerlm-librispeech
+
+# Data files
+data_folder: /share/mini1/data/audvis/pub/asr/ab/en/librispeech/v1/
+                          # e.g., /path/to/LibriSpeech
+# If RIRS_NOISES dir exists in /localscratch/xxx_corpus/RIRS_NOISES
+# then data_folder_rirs should be /localscratch/xxx_corpus
+# otherwise the dataset will automatically be downloaded
+data_folder_rirs: /share/mini1/data/audvis/pub/asr/ab/en/librispeech/v1/
+train_splits: [train-clean-100]
+dev_splits: [dev-clean]
+test_splits: [test-clean]
+skip_prep: false
+train_csv: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/save/train-clean-100.csv
+valid_csv: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/save/dev-clean.csv
+test_csv: [/share/mini1/res/t/vc/studio/timap-en/vctk/exp/transformer_adversarial/0217_ta_0/eval_list.csv]
+number_of_epochs: 110
+batch_size: 16 # This works for 2x GPUs with 32GB
+ctc_weight: 0.3
+gradient_accumulation: 4
+gradient_clipping: 5.0
+loss_reduction: batchmean
+sorting: random
+
+# stages related parameters
+stage_one_epochs: 90
+lr_adam: 1.0
+lr_sgd: 0.000025
+
+# Feature parameters
+sample_rate: 16000
+n_fft: 400
+n_mels: 80
+
+# Dataloader options
+train_dataloader_opts:
+  batch_size: 16
+  shuffle: true
+
+valid_dataloader_opts:
+  batch_size: 1
+
+test_dataloader_opts:
+  batch_size: 1
+
+####################### Model parameters ###########################
+# Transformer
+d_model: 768
+nhead: 8
+num_encoder_layers: 12
+num_decoder_layers: 6
+d_ffn: 3072
+transformer_dropout: 0.0
+activation: &id001 !name:torch.nn.GELU
+output_neurons: 5000
+vocab_size: 5000
+
+# Outputs
+blank_index: 0
+label_smoothing: 0.1
+pad_index: 0
+bos_index: 1
+eos_index: 2
+unk_index: 0
+
+# Decoding parameters
+min_decode_ratio: 0.0
+max_decode_ratio: 1.0
+valid_search_interval: 10
+valid_beam_size: 10
+test_beam_size: 66
+lm_weight: 0.60
+ctc_weight_decode: 0.40
+
+############################## models ################################
+
+CNN: &id002 !new:speechbrain.lobes.models.convolution.ConvolutionFrontEnd
+  input_shape: (8, 10, 80)
+  num_blocks: 3
+  num_layers_per_block: 1
+  out_channels: (128, 256, 512)
+  kernel_sizes: (3, 3, 1)
+  strides: (2, 2, 1)
+  residuals: (False, False, False)
+
+Transformer: &id003 !new:speechbrain.lobes.models.transformer.TransformerASR.TransformerASR
+                                                                                     # yamllint disable-line rule:line-length
+  input_size: 10240
+  tgt_vocab: 5000
+  d_model: 768
+  nhead: 8
+  num_encoder_layers: 12
+  num_decoder_layers: 6
+  d_ffn: 3072
+  dropout: 0.0
+  activation: *id001
+  normalize_before: false
+
+# This is the TransformerLM that is used according to the Huggingface repository
+# Visit the HuggingFace model corresponding to the pretrained_lm_tokenizer_path
+# For more details about the model!
+# NB: It has to match the pre-trained TransformerLM!!
+lm_model: &id006 !new:speechbrain.lobes.models.transformer.TransformerLM.TransformerLM
+                                                                                # yamllint disable-line rule:line-length
+  vocab: 5000
+  d_model: 768
+  nhead: 12
+  num_encoder_layers: 12
+  num_decoder_layers: 0
+  d_ffn: 3072
+  dropout: 0.0
+  activation: !name:torch.nn.GELU
+  normalize_before: false
+
+tokenizer: &id011 !new:sentencepiece.SentencePieceProcessor
+
+ctc_lin: &id005 !new:speechbrain.nnet.linear.Linear
+
+  input_size: 768
+  n_neurons: 5000
+
+seq_lin: &id004 !new:speechbrain.nnet.linear.Linear
+  input_size: 768
+  n_neurons: 5000
+
+modules:
+  CNN: *id002
+  Transformer: *id003
+  seq_lin: *id004
+  ctc_lin: *id005
+model: &id007 !new:torch.nn.ModuleList
+- [*id002, *id003, *id004, *id005]
+Adam: !name:torch.optim.Adam
+  lr: 0
+  betas: (0.9, 0.98)
+  eps: 0.000000001
+
+SGD: !name:torch.optim.SGD
+  lr: 0.000025
+  momentum: 0.99
+  nesterov: true
+
+valid_search: !new:speechbrain.decoders.S2STransformerBeamSearch
+  modules: [*id003, *id004, *id005]
+  bos_index: 1
+  eos_index: 2
+  blank_index: 0
+  min_decode_ratio: 0.0
+  max_decode_ratio: 1.0
+  beam_size: 10
+  ctc_weight: 0.40
+  using_eos_threshold: false
+  length_normalization: false
+
+
+test_search: !new:speechbrain.decoders.S2STransformerBeamSearch
+  modules: [*id003, *id004, *id005]
+  bos_index: 1
+  eos_index: 2
+  blank_index: 0
+  min_decode_ratio: 0.0
+  max_decode_ratio: 1.0
+  beam_size: 66
+  ctc_weight: 0.40
+  lm_weight: 0.60
+  lm_modules: *id006
+  temperature: 1.15
+  temperature_lm: 1.15
+  using_eos_threshold: false
+  length_normalization: true
+
+log_softmax: !new:torch.nn.LogSoftmax
+  dim: -1
+
+ctc_cost: !name:speechbrain.nnet.losses.ctc_loss
+  blank_index: 0
+  reduction: batchmean
+
+seq_cost: !name:speechbrain.nnet.losses.kldiv_loss
+  label_smoothing: 0.1
+  reduction: batchmean
+
+noam_annealing: &id008 !new:speechbrain.nnet.schedulers.NoamScheduler
+  lr_initial: 1.0
+  n_warmup_steps: 25000
+  model_size: 768
+
+checkpointer: !new:speechbrain.utils.checkpoints.Checkpointer
+  checkpoints_dir: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/save
+  recoverables:
+    model: *id007
+    noam_scheduler: *id008
+    normalizer: &id010 !new:speechbrain.processing.features.InputNormalization
+      norm_type: global
+      update_until_epoch: 4
+
+    counter: &id009 !new:speechbrain.utils.epoch_loop.EpochCounter
+
+      limit: 110
+
+epoch_counter: *id009
+normalize: *id010
+augmentation: !new:speechbrain.lobes.augment.SpecAugment
+  time_warp: true
+  time_warp_window: 5
+  time_warp_mode: bicubic
+  freq_mask: true
+  n_freq_mask: 2
+  time_mask: true
+  n_time_mask: 2
+  replace_with_zero: false
+  freq_mask_width: 30
+  time_mask_width: 40
+
+speed_perturb: !new:speechbrain.processing.speech_augmentation.SpeedPerturb
+  orig_freq: 16000
+  speeds: [95, 100, 105]
+
+compute_features: !new:speechbrain.lobes.features.Fbank
+  sample_rate: 16000
+  n_fft: 400
+  n_mels: 80
+
+train_logger: !new:speechbrain.utils.train_logger.FileTrainLogger
+  save_file: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/train_log.txt
+
+error_rate_computer: !name:speechbrain.utils.metric_stats.ErrorRateStats
+acc_computer: !name:speechbrain.utils.Accuracy.AccuracyStats
+
+# The pretrainer allows a mapping between pretrained files and instances that
+# are declared in the yaml. E.g here, we will download the file lm.ckpt
+# and it will be loaded into "lm" which is pointing to the <lm_model> defined
+# before.
+pretrainer: !new:speechbrain.utils.parameter_transfer.Pretrainer
+  collect_in: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/save
+  loadables:
+    lm: *id006
+    tokenizer: *id011
+  paths:
+        # lm: !ref <pretrained_lm_tokenizer_path>/lm.ckpt
+    lm: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/save/lm_model.ckpt
+    tokenizer: /share/mini1/res/t/vc/studio/timap-en/vctk/speechbrain/recipes/LibriSpeech/ASR/transformer/transformer/save/5000_unigram.model

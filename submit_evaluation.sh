@@ -1,6 +1,9 @@
 #!/bin/bash
 
 
+# eval step
+step=asr # utmos|asr|asv
+
 # model setup
 ling_enc=vqw2v
 spk_enc=uttdvec
@@ -20,15 +23,15 @@ eval_wav_dir=$exp_dir/inference/$task/$epochs
 
 [ ! -e $exp_dir/evaluation ] && mkdir -p $exp_dir/evaluation
 
+if [[ "$step" == "utmos" ]] || [[ "$step" == "all" ]]; then
 
+    # utmos
+    utmos_job=$exp_dir/scripts/utmos_${task}_${epochs}.sh
+    utmos_log=$exp_dir/logs/utmos_${task}_${epochs}.log
+    touch $utmos_job
+    chmod +x $utmos_job
 
-# utmos
-utmos_job=$exp_dir/scripts/utmos_${task}_${epochs}.sh
-utmos_log=$exp_dir/logs/utmos_${task}_${epochs}.log
-touch $utmos_job
-chmod +x $utmos_job
-
-cat <<EOF > $utmos_job
+    cat <<EOF > $utmos_job
 #!/bin/bash
 wav_dir=$root/$eval_wav_dir
 out_csv=$root/$exp_dir/evaluation/utmos_${task}_${epochs}.csv
@@ -42,7 +45,19 @@ python predict.py --mode predict_dir --inp_dir \$wav_dir --bs 1 --out_path \$out
 
 EOF
 
-submitjob -m 20000 -M2 $utmos_log $utmos_job
-echo "job submited, see ${utmos_log}"
+    submitjob -m 20000 -M2 $utmos_log $utmos_job
+    echo "job submited, see ${utmos_log}"
+fi
+
+# speechbrain asr
+
+if [[ "$step" == "asr"]] || [[ "$step" == "all" ]]; then
+    # generate test_csv for speechbrain_asr.py from eval_wav_dir
+    python evaluation/test_csv_speechbrain_asr.py \
+        --eval_list $eval_list \
+        --eval_wav_dir $root/$eval_wav_dir \
+        --test_csv_path $root/$exp_dir/evaluation/speechbrain_asr_test_csv_${task}_${epochs}.csv
+    
+fi        
 
 

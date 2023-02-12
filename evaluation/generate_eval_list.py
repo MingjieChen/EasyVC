@@ -101,10 +101,10 @@ if __name__ == '__main__':
                         trg_wavs = [_trg_meta['wav_path'] for _trg_meta in trg_metas]
                         
                         ID = _meta['ID']
-                        src_wav = meta['wav_path']
-                        duration = meta['duration']
-                        text = meta['wrd']
-                        src_spk = meta['spk']
+                        src_wav = _meta['wav_path']
+                        duration = _meta['duration']
+                        text = _meta['wrd']
+                        src_spk = _meta['spk']
 
                         element = {
                                     'ID': ID + '_' + trg_spk,
