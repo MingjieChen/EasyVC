@@ -39,8 +39,8 @@ for spk in ${spks}; do
     eval_data_dirs+=" data/vctk/eval_${spk}"
 done
 # shellcheck disable=SC2086
-dataset/libritts/combine_data.sh "data/${train_set}" ${train_data_dirs}
+dataset/libritts/combine_data.sh "data/vctk/${train_set}" ${train_data_dirs}
 # shellcheck disable=SC2086
-dataset/libritts/combine_data.sh "data/${dev_set}" ${dev_data_dirs}
+dataset/libritts/combine_data.sh "data/vctk/${dev_set}" ${dev_data_dirs}
 # shellcheck disable=SC2086
-dataset/libritts/combine_data.sh "data/${eval_set}" ${eval_data_dirs}
+dataset/libritts/combine_data.sh "data/vctk/${eval_set}" ${eval_data_dirs}

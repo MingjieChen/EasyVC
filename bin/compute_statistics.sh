@@ -5,6 +5,6 @@ conda_env=torch_1.7
 source $conda/bin/activate $conda_env
 
 python preprocess/compute_statistics.py \
-    --dump_dir dump/libritts/ \
-    --split train_nodev_clean \
-    --metadata data/libritts/train_nodev_clean/metadata.csv
+    --dump_dir dump/vctk/ \
+    --split train_nodev_all \
+    --metadata data/vctk/train_nodev_all/metadata.csv

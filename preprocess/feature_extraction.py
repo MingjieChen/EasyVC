@@ -75,7 +75,7 @@ def logmelfilterbank(
 
 def process_speaker(spk_meta, spk, config, args):
     
-    for row in spk_meta:
+    for row in tqdm(spk_meta):
         # load wav
         ID = row['ID']
         wav_path = row['wav_path'].strip()
