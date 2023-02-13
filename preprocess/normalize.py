@@ -32,8 +32,8 @@ if __name__ == '__main__':
         
     # load stats
     scaler = StandardScaler()
-    scaler.mean_ = np.load(args.stats)[0]
-    scaler.scale_ = np.load(args.stats)[1]        
+    scaler.mean_ = np.load(args.stats_path)[0]
+    scaler.scale_ = np.load(args.stats_path)[1]        
     scaler.n_features_in_ = scaler.mean_.shape[0]
 
 
@@ -43,13 +43,13 @@ if __name__ == '__main__':
         spk = _meta['spk']
         mel_path = os.path.join(args.dump_dir, args.split, 'mel', spk, ID + '.npy')
         norm_path = os.path.join(args.dump_dir, args.split, 'norm_mel', spk, ID + '.npy')
-        os.makedirs(os.path.basename(norm_path), exists_ok = True)
+        os.makedirs(os.path.dirname(norm_path), exist_ok = True)
 
         mel = np.load(mel_path)
         norm_mel = scaler.transform(mel)
         np.save(
                 norm_path,
-                mel.astype(np.float32),
+                norm_mel.astype(np.float32),
                 allow_pickle=False,
                )
 

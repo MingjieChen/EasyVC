@@ -70,7 +70,7 @@ if __name__ == '__main__':
     
     print(f'generating {len(eval_list)} samples')
     # split eval_list by sge_job_idx
-    n_per_task = round(len(eval_list) / args.sge_n_tasks, 0)    
+    n_per_task = np.ceil(len(eval_list) / args.sge_n_tasks)    
     start = int(( args.sge_task_id -1 ) * n_per_task)
     if int( args.sge_task_id * n_per_task) >= len(eval_list):
         end = len(eval_list) -1

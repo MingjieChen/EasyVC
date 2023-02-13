@@ -96,16 +96,16 @@ class Dataset(data.Dataset):
                 # remove utterances that are too long for training.
                 if config['rm_long_utt']:
                     _duration = row['duration']
-                    if float(_duration) <= config['max_utt_duration']:
+                    if float(_duration) < config['max_utt_duration']:
                         self.metadata.append(row)
             f.close()    
         
-
+        print(f'{split} data samples {len(self.metadata)}')
         self.batch_size = config['batch_size']
         self.drop_last = config['drop_last']
         self.sort = config['sort']
         # feature dirs
-        self.mel_dir = os.path.join(config['dump_dir'], config['dataset'], split, 'mel')
+        self.mel_dir = os.path.join(config['dump_dir'], config['dataset'], split, 'norm_mel')
 
         self.ling_enc = config['ling_enc']
         self.ling_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.ling_enc)
