@@ -5,6 +5,7 @@ conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
 conda_env=torch_1.9
 
 #exp setup
+dataset=vctk
 ling=vqw2v
 #ling=conformerppg
 #ling=hubertsoft
@@ -14,8 +15,8 @@ dec=fastspeech2
 #dec=tacoar
 #dec=tacomol
 
-exp_name=libritts_24khz_10ms
-config=configs/${ling}_${spk}_${pros}_${dec}.yaml
+exp_name=vctk_24khz_10ms
+config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}.yaml
 exp_dir=exp
 model_name=${ling}_${spk}_${pros}_${dec}
 exp=$exp_dir/$model_name/$exp_name

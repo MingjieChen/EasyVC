@@ -14,6 +14,29 @@ from functools import partial
 import subprocess
 import torch
 
+
+def ppgvc_hifigan_logmelspectrogram(audio, config):
+    
+    # extract mel   
+    norm_audio = normalize(audio) * 0.95
+    norm_audio = torch.FloatTensor(norm_audio).unsqueeze(0)
+    mel = mel_spectrogram(
+           norm_audio,
+           sampling_rate = config['sampling_rate'],
+           n_fft = config['fft_size'],
+           hop_size = config['hop_size'],
+           win_size = config['win_length'],
+           num_mels = config['num_mels'],
+           fmin = config['fmin'],
+           fmax = config['fmax'],
+    )
+    mel = mel.squeeze(0).T.numpy()
+    # min-max normalization
+    mel = (mel - config['mel_min']) / (config['mel_max'] - config['mel_min']) * 8.0 - 4.0 
+    mel = np.clip(mel, -4. , 4.)
+    return mel
+    
+       
 def logmelfilterbank(
     audio,
     sampling_rate,
@@ -87,32 +110,38 @@ def process_speaker(spk_meta, spk, config, args):
                         int(end * config['sampling_rate'])
             ]
         
-        mel = logmelfilterbank(
-            audio,
-            sampling_rate=config['sampling_rate'],
-            hop_size=config['hop_size'],
-            fft_size=config["fft_size"],
-            win_length=config["win_length"],
-            window=config["window"],
-            num_mels=config["num_mels"],
-            fmin=config["fmin"],
-            fmax=config["fmax"]
-        )
-        mel_path = os.path.join(args.dump_dir, args.split, 'mel', spk, ID+'.npy')
+        if args.mel_type == 'mel':
+            mel = logmelfilterbank(
+                audio,
+                sampling_rate=config['sampling_rate'],
+                hop_size=config['hop_size'],
+                fft_size=config["fft_size"],
+                win_length=config["win_length"],
+                window=config["window"],
+                num_mels=config["num_mels"],
+                fmin=config["fmin"],
+                fmax=config["fmax"]
+            )
+        elif args.mel_type == 'ppgvc_mel':
+            mel = ppgvc_hifigan_logmelspectrogram(audio, config)     
+        else:
+            raise Exception    
+        mel_path = os.path.join(args.dump_dir, args.split, args.mel_type, spk, ID+'.npy')
         os.makedirs(os.path.dirname(mel_path), exist_ok = True)
         np.save(mel_path, mel)
         # extract pitch
-        pitch, t = pw.harvest(
-            audio.astype(np.float64),
-            config['sampling_rate'],
-            frame_period=config['hop_size'] / config['sampling_rate'] * 1000,
-            f0_floor = config['f0_floor'],
-            f0_ceil = config['f0_ceil']
-        )
-        pitch = pitch.astype(np.float32)
-        pitch_path = os.path.join(args.dump_dir, args.split, 'f0', spk, ID+'.npy')
-        os.makedirs(os.path.dirname(pitch_path), exist_ok = True)
-        np.save(pitch_path, pitch )
+        if args.pitch:
+            pitch, t = pw.harvest(
+                audio.astype(np.float64),
+                config['sampling_rate'],
+                frame_period=config['hop_size'] / config['sampling_rate'] * 1000,
+                f0_floor = config['f0_floor'],
+                f0_ceil = config['f0_ceil']
+            )
+            pitch = pitch.astype(np.float32)
+            pitch_path = os.path.join(args.dump_dir, args.split, 'f0', spk, ID+'.npy')
+            os.makedirs(os.path.dirname(pitch_path), exist_ok = True)
+            np.save(pitch_path, pitch )
     return 0    
     
     
@@ -126,6 +155,8 @@ if __name__ == '__main__':
     parser.add_argument('--split', type = str)
     parser.add_argument('--max_workers', type = int, default = 20)
     parser.add_argument('--speaker', type = str, default = None)
+    parser.add_argument('--mel_type', type = str, default = 'mel', choices = ['mel', 'ppgvc_mel'])
+    parser.add_argument('--pitch', default = False, action = 'store_true')
     args = parser.parse_args()
     
     # load in config
