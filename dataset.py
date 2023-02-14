@@ -105,7 +105,7 @@ class Dataset(data.Dataset):
         self.drop_last = config['drop_last']
         self.sort = config['sort']
         # feature dirs
-        self.mel_dir = os.path.join(config['dump_dir'], config['dataset'], split, 'norm_mel')
+        self.mel_dir = os.path.join(config['dump_dir'], config['dataset'], split, config['mel_type'])
 
         self.ling_enc = config['ling_enc']
         self.ling_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.ling_enc)

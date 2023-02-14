@@ -1,0 +1,10 @@
+sampling_rate: !!int 24000
+fft_size: !!int 2048
+hop_size: !!int 240
+win_length: !!int 1200
+window: hann
+num_mels: !!int 80
+fmin: !!int 80
+fmax: !!int 7600
+f0_floor: !!float 20.0
+f0_ceil: !!float 600.0

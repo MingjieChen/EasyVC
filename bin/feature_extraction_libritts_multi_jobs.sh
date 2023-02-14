@@ -12,7 +12,7 @@ for split in $splits ; do
     echo "[feature extraction]: $split for libritts"
     speakers=$(cat data/libritts/$split/speakers.txt)
     for spk in $speakers ; do 
-        b=$script_dir/feature_extraction_${spk}.sh
+        b=$script_dir/feature_extraction_${split}_${spk}.sh
         l=logs/enc_dec_feature_extraction.${spk}.log
         cat <<EOF > $b
 #!/bin/bash
