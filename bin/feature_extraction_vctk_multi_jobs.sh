@@ -7,7 +7,7 @@ conda_env=torch_1.7
 
 dataset=vctk
 config=configs/preprocess_vctk_ppgvc_mel.yaml
-mel_type=ppgvc_mel
+feature_type=ppgvc_mel
 splits="train_nodev_all dev_all"
 
 script_dir=scripts/$dataset/preprocess
@@ -30,7 +30,7 @@ python3 preprocess/feature_extraction.py \
     --config_path  $config \
     --split $split \
     --max_workers 20 \
-    --mel_type $mel_type \
+    --feature_type $feature_type \
     --speaker $spk
 EOF
     chmod +x $b

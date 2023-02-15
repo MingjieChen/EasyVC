@@ -4,6 +4,7 @@ import json
 import os
 import glob
 from audio_utils import mel_spectrogram, normalize
+from prosodic_encoder.ppgvc_f0.ppgvc_lf0 import compute_f0 as compute_ppgvc_f0
 import pyworld as pw
 import librosa
 import numpy  as np
@@ -110,8 +111,8 @@ def process_speaker(spk_meta, spk, config, args):
                         int(end * config['sampling_rate'])
             ]
         
-        if args.mel_type == 'mel':
-            mel = logmelfilterbank(
+        if args.feature_type == 'mel':
+            feature = logmelfilterbank(
                 audio,
                 sampling_rate=config['sampling_rate'],
                 hop_size=config['hop_size'],
@@ -122,26 +123,13 @@ def process_speaker(spk_meta, spk, config, args):
                 fmin=config["fmin"],
                 fmax=config["fmax"]
             )
-        elif args.mel_type == 'ppgvc_mel':
-            mel = ppgvc_hifigan_logmelspectrogram(audio, config)     
-        else:
-            raise Exception    
-        mel_path = os.path.join(args.dump_dir, args.split, args.mel_type, spk, ID+'.npy')
-        os.makedirs(os.path.dirname(mel_path), exist_ok = True)
-        np.save(mel_path, mel)
-        # extract pitch
-        if args.pitch:
-            pitch, t = pw.harvest(
-                audio.astype(np.float64),
-                config['sampling_rate'],
-                frame_period=config['hop_size'] / config['sampling_rate'] * 1000,
-                f0_floor = config['f0_floor'],
-                f0_ceil = config['f0_ceil']
-            )
-            pitch = pitch.astype(np.float32)
-            pitch_path = os.path.join(args.dump_dir, args.split, 'f0', spk, ID+'.npy')
-            os.makedirs(os.path.dirname(pitch_path), exist_ok = True)
-            np.save(pitch_path, pitch )
+        elif args.feature_type == 'ppgvc_mel':
+            feature = ppgvc_hifigan_logmelspectrogram(audio, config)     
+        elif args.feature_type == 'ppgvc_f0':
+            feature = compute_ppgvc_f0(audio, sr = config['sampling_rate'], frame_period = 10.0)    
+        feature_path = os.path.join(args.dump_dir, args.split, args.feature_type, spk, ID+'.npy')
+        os.makedirs(os.path.dirname(feature_path), exist_ok = True)
+        np.save(feature_path, feature)
     return 0    
     
     
@@ -155,7 +143,7 @@ if __name__ == '__main__':
     parser.add_argument('--split', type = str)
     parser.add_argument('--max_workers', type = int, default = 20)
     parser.add_argument('--speaker', type = str, default = None)
-    parser.add_argument('--mel_type', type = str, default = 'mel', choices = ['mel', 'ppgvc_mel'])
+    parser.add_argument('--feature_type', type = str, default = 'mel', choices = ['mel', 'ppgvc_mel', 'ppgvc_f0', 'fastspeech2_f0'])
     parser.add_argument('--pitch', default = False, action = 'store_true')
     args = parser.parse_args()
     
