@@ -3,7 +3,7 @@ import yaml
 import json
 import os
 import glob
-from audio_utils import mel_spectrogram, normalize
+from preprocess.audio_utils import mel_spectrogram, normalize
 from prosodic_encoder.ppgvc_f0.ppgvc_lf0 import compute_f0 as compute_ppgvc_f0
 import pyworld as pw
 import librosa

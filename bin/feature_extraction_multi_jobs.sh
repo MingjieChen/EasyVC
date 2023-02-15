@@ -7,7 +7,7 @@ conda_env=torch_1.7
 
 dataset=vctk
 config=configs/preprocess_vctk_ppgvc_mel.yaml
-feature_type=ppgvc_mel
+feature_type=ppgvc_f0
 splits="train_nodev_all dev_all"
 
 script_dir=scripts/$dataset/preprocess
@@ -16,15 +16,15 @@ script_dir=scripts/$dataset/preprocess
 
 for split in $splits ; do
     
-    echo "[feature extraction]: $split for $dataset"
+    echo "[feature extraction]: $split $dataset $feature_type"
     speakers=$(cat data/$dataset/$split/speakers.txt)
     for spk in $speakers ; do 
-        b=$script_dir/feature_extraction_${split}_${spk}.sh
-        l=logs/feature_extraction_${split}.${spk}.log
+        b=$script_dir/feature_extraction_${feature_type}_${split}_${spk}.sh
+        l=logs/feature_extraction_${feature_type}_${split}_${spk}.log
         cat <<EOF > $b
 #!/bin/bash
 source $conda/bin/activate $conda_env
-python3 preprocess/feature_extraction.py \
+python3 feature_extraction.py \
     --metadata data/$dataset/$split/metadata.csv \
     --dump_dir dump/$dataset \
     --config_path  $config \
@@ -35,6 +35,6 @@ python3 preprocess/feature_extraction.py \
 EOF
     chmod +x $b
     submitjob -m 10000 $l $b
-    echo "submitjob for $dataset $split  $spk"
+    echo "submitjob for $dataset $split  $spk $feature_type"
     done
 done        

@@ -9,6 +9,7 @@ import csv
 import random
 from torch.utils.data import DataLoader
 from collections import defaultdict
+from prosodic_encoder.ppgvc_f0.ppgvc_lf0 import get_cont_lf0 as process_ppgvc_f0
 def get_dataloader(config):
     train_dataset = Dataset(config, config['train_meta'], config['train_set'])
     dev_dataset = Dataset(config, config['dev_meta'], config['dev_set'])
@@ -111,9 +112,9 @@ class Dataset(data.Dataset):
         self.ling_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.ling_enc)
         self.spk_enc = config['spk_enc']
         self.spk_emb_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.spk_enc)
-        self.pros_enc = config['pros_enc']
+        self.pros_enc = config['pros_enc'] #e.g. ppgvc_f0
         self.pros_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.pros_enc)
-        
+        self.pros_rep_process_func = f'process_{self.pros_enc}'
         # frames per step (only work for TacoMOL)
         self.frames_per_step = config['frames_per_step'] if 'frames_per_step' in config else 1
 
@@ -146,7 +147,8 @@ class Dataset(data.Dataset):
         ling_rep = np.load(ling_rep_path)
         ling_duration = ling_rep.shape[0]
         spk_emb = np.load(spk_emb_path)
-        pros_rep = np.expand_dims(np.load(pros_rep_path), axis = 1)
+        pros_rep = np.load(pros_rep_path)
+        pros_rep = eval(self.pros_rep_process_func)(pros_rep)
         pros_duration = pros_rep.shape[0]
         
         # up_sample ling_rep to 10hz, in case some ling_rep are 50hz or 25hz.

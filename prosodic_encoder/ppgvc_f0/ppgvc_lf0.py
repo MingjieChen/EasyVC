@@ -114,4 +114,5 @@ def get_cont_lf0(f0, frame_period=10.0, lpf=False):
         nonzero_indices = np.nonzero(cont_f0)
         cont_lf0 = cont_f0.copy()
         cont_lf0[cont_f0>0] = np.log(cont_f0[cont_f0>0])
-        return uv, cont_lf0
+        lf0_uv = np.concatenate([cont_lf0[:, np.newaxis], uv[:, np.newaxis]], axis=1)
+        return lf0_uv
