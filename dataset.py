@@ -10,6 +10,7 @@ import random
 from torch.utils.data import DataLoader
 from collections import defaultdict
 from prosodic_encoder.ppgvc_f0.ppgvc_lf0 import get_cont_lf0 as process_ppgvc_f0
+from prosodic_encoder.fastspeech2_pitch_energy.pitch_energy import process_fastspeech2_pitch_energy
 def get_dataloader(config):
     train_dataset = Dataset(config, config['train_meta'], config['train_set'])
     dev_dataset = Dataset(config, config['dev_meta'], config['dev_set'])

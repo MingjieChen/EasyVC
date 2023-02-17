@@ -6,8 +6,8 @@ conda_env=torch_1.7
 # setup
 
 dataset=vctk
-config=configs/preprocess_vctk_ppgvc_mel.yaml
-feature_type=ppgvc_f0
+config=configs/preprocess_vctk.yaml
+feature_type=fastspeech2_pitch_energy
 splits="train_nodev_all dev_all"
 
 script_dir=scripts/$dataset/preprocess
@@ -35,6 +35,6 @@ python3 feature_extraction.py \
 EOF
     chmod +x $b
     submitjob -m 10000 $l $b
-    echo "submitjob for $dataset $split  $spk $feature_type"
+    echo "submitjob for $dataset $split  $spk $feature_type see log $l"
     done
 done        

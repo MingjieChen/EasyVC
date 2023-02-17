@@ -10,6 +10,54 @@ from .blocks import (
     Conv1DBlock,
     TransformerBlock,
 )
+
+class DiscreteProsodicNet(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+
+        bins = config['prosodic_bins']
+        quantize = config['quantize']
+        prosodic_stats_path = config['prosodic_stats_path']
+
+    def forward(self, x):
+        return x    
+class ContinuousProsodicNet(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+
+        hidden_dim = config['hidden_dim']
+        self.pitch_convs = torch.nn.Sequential(
+            torch.nn.Conv1d(2, hidden_dim, kernel_size=1, bias=False),
+            torch.nn.LeakyReLU(0.1),
+
+            torch.nn.InstanceNorm1d(hidden_dim, affine=False),
+            torch.nn.Conv1d(
+                hidden_dim, hidden_dim, 
+                kernel_size= 3, 
+                stride=1, 
+                padding=1,
+            ),
+            torch.nn.LeakyReLU(0.1),
+            
+            torch.nn.InstanceNorm1d(encoder_dim, affine=False),
+            torch.nn.Conv1d(
+                hidden_dim, hidden_dim, 
+                kernel_size= 3, 
+                stride=1, 
+                padding=1,
+            ),
+            torch.nn.LeakyReLU(0.1),
+
+            torch.nn.InstanceNorm1d(hidden_dim, affine=False),
+        )
+    def forward(self, x):
+        
+        out = x.transpose(1,2)
+        out = self.pitch_convs(out)
+        out = out.transpose(1,2)
+        return out    
+
+
 class VarianceAdaptor(nn.Module):
     """ Variance Adaptor """
 
@@ -17,12 +65,23 @@ class VarianceAdaptor(nn.Module):
         super(VarianceAdaptor, self).__init__()
 
         self.d_model = model_config["transformer"]["encoder_hidden"]
-        self.projection = nn.Linear(model_config['spk_emb_dim'],model_config['transformer']['encoder_hidden'])
+        self.reduce_projection = nn.Linear(model_config['transformer']['encoder_hidden'] + model_config['spk_emb_dim'], model_config['transformer']['encoder_hidden'])
+        if model_config['prosodic_rep_type'] == 'continues':
+            self.pros_net = ContinuousProsodicNet(model_config['pitch_net'])
+        elif model_config['prosodic_rep_type'] == 'discrete':
+            self.pros_net = DiscreteProsodicNet(model_config['pitch_net'])    
 
-    def forward(self, x, spk_emb, f0, mask, max_len):
+    def forward(self, x, spk_emb, pros_rep, mask, max_len):
         batch_size = x.size(0)
-        spk_emb = self.projection(spk_emb.squeeze(1)).unsqueeze(1)
-        x = x + spk_emb.expand(batch_size, max_len, self.d_model )
+        # integrate speaker embedding
+        spk_emb = F.normalize(spk_emb.squeeze(1)).unsqueeze(1)
+        x = torch.cat([x,spk_emb.expand(batch_size, max_len, self.d_model )], dim = -1)
+        x = self.reduce_projection(x)
+
+        # integrate prosodic_rep
+        processed_pros_rep = self.pitch_net(pros_rep)
+        x = x + processed_pros_rep
+
         if mask is not None:
             x = x.masked_fill(mask.unsqueeze(-1), 0)
 

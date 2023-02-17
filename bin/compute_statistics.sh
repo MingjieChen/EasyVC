@@ -7,4 +7,5 @@ source $conda/bin/activate $conda_env
 python preprocess/compute_statistics.py \
     --dump_dir dump/vctk/ \
     --split train_nodev_all \
-    --metadata data/vctk/train_nodev_all/metadata.csv
+    --metadata data/vctk/train_nodev_all/metadata.csv \
+    --feature_type fastspeech2_pitch_energy
