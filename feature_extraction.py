@@ -6,6 +6,7 @@ import glob
 from preprocess.audio_utils import mel_spectrogram, normalize
 from prosodic_encoder.ppgvc_f0.ppgvc_lf0 import compute_f0 as compute_ppgvc_f0
 from prosodic_encoder.fastspeech2_pitch_energy.pitch_energy import extract_pitch_energy as compute_fastspeech2_pitch_energy
+from decoder.vits.mel_processing import spectrogram_torch 
 import pyworld as pw
 import librosa
 import numpy  as np
@@ -130,6 +131,14 @@ def process_speaker(spk_meta, spk, config, args):
             feature = compute_ppgvc_f0(audio, sr = config['sampling_rate'], frame_period = 10.0)    
         elif args.feature_type == 'fastspeech2_pitch_energy':
             feature = compute_fastspeech2_pitch_energy(audio, config)     
+        elif args.feature_type == "vits_spec":
+            audio = torch.FloatTensor([audio.astype(np.float32)])
+            feature = spectrogram_torch(audio, config['n_fft'], 
+                config['sampling_rate'],
+                config['hop_size'],
+                config['win_size']
+                )
+            feature = feature[0].data.numpy().T     
         feature_path = os.path.join(args.dump_dir, args.split, args.feature_type, spk, ID+'.npy')
         os.makedirs(os.path.dirname(feature_path), exist_ok = True)
         np.save(feature_path, feature)
@@ -146,7 +155,7 @@ if __name__ == '__main__':
     parser.add_argument('--split', type = str)
     parser.add_argument('--max_workers', type = int, default = 20)
     parser.add_argument('--speaker', type = str, default = None)
-    parser.add_argument('--feature_type', type = str, default = 'mel', choices = ['mel', 'ppgvc_mel', 'ppgvc_f0', 'fastspeech2_pitch_energy'])
+    parser.add_argument('--feature_type', type = str, default = 'mel', choices = ['mel', 'ppgvc_mel', 'ppgvc_f0', 'fastspeech2_pitch_energy', 'vits_spec'])
     parser.add_argument('--pitch', default = False, action = 'store_true')
     args = parser.parse_args()
     

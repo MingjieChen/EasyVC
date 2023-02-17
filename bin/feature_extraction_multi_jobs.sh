@@ -6,8 +6,8 @@ conda_env=torch_1.7
 # setup
 
 dataset=vctk
-config=configs/preprocess_vctk.yaml
-feature_type=fastspeech2_pitch_energy
+config=configs/vits_preprocessing.yaml
+feature_type=vits_spec
 splits="train_nodev_all dev_all"
 
 script_dir=scripts/$dataset/preprocess

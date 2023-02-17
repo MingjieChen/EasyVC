@@ -1,0 +1,4 @@
+sampling_rate: !!int 24000
+hop_size: !!int 240
+n_fft: !!int 1024
+win_size: !!int 1024

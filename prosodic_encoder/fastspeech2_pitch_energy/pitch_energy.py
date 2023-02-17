@@ -1,13 +1,13 @@
 import os
 import random
 import json
-
+from scipy.interpolate import interp1d
 import librosa
 import numpy as np
 import pyworld as pw
 
-def process_fastspeech2_pitch_energy(pitch_energy):
-    return pitch_energy
+def process_norm_fastspeech2_pitch_energy(pitch_energy):
+    return pitch_energy.T
 def extract_energy(
     audio,
     sampling_rate,
@@ -41,6 +41,14 @@ def extract_pitch_energy(audio, config):
             frame_period=config['hop_size'] / config['sampling_rate'] * 1000,
             )
     pitch = pw.stonemask(audio.astype(np.float64), pitch, t, config['sampling_rate'])
+    #nonzero_ids = np.where(pitch != 0)[0]
+    #interp_fn = interp1d(
+    #        nonzero_ids,
+    #        pitch[nonzero_ids],
+    #        fill_value=(pitch[nonzero_ids[0]], pitch[nonzero_ids[-1]]),
+    #        bounds_error=False,
+    #        )
+    #pitch = interp_fn(np.arange(0, len(pitch)))
     energy = extract_energy(
         audio,
         sampling_rate=config['sampling_rate'],

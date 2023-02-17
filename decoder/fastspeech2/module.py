@@ -15,12 +15,35 @@ class DiscreteProsodicNet(nn.Module):
     def __init__(self, config):
         super().__init__()
 
-        bins = config['prosodic_bins']
-        quantize = config['quantize']
+        n_bins = config['prosodic_bins']
         prosodic_stats_path = config['prosodic_stats_path']
-
+        # load pitch energy min max
+        stats = np.load(prosodic_stats_path)
+        pitch_max = stats[0][0]
+        pitch_min = stats[1][0]
+        energy_max = stats[2][0]
+        energy_min = stats[3][0]
+        self.pitch_bins = nn.Parameter(
+                torch.linspace(pitch_min, pitch_max, n_bins - 1),
+                requires_grad=False,
+                )
+        self.energy_bins = nn.Parameter(
+                torch.linspace(energy_min, energy_max, n_bins - 1),
+                requires_grad=False,
+                )        
+        self.pitch_embedding = nn.Embedding(
+                n_bins, config["hidden_dim"]
+                )
+        self.energy_embedding = nn.Embedding(
+                n_bins, config["hidden_dim"]
+                )
     def forward(self, x):
-        return x    
+        pitch = x[:,:,0]
+        energy = x[:,:,1]
+        pitch_reps = self.pitch_embedding(torch.bucketize(pitch, self.pitch_bins))
+        energy_reps = self.energy_embedding(torch.bucketize(energy, self.energy_bins))
+        prosodic_reps = pitch_reps + energy_reps
+        return prosodic_reps     
 class ContinuousProsodicNet(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -39,7 +62,7 @@ class ContinuousProsodicNet(nn.Module):
             ),
             torch.nn.LeakyReLU(0.1),
             
-            torch.nn.InstanceNorm1d(encoder_dim, affine=False),
+            torch.nn.InstanceNorm1d(hidden_dim, affine=False),
             torch.nn.Conv1d(
                 hidden_dim, hidden_dim, 
                 kernel_size= 3, 
@@ -66,10 +89,12 @@ class VarianceAdaptor(nn.Module):
 
         self.d_model = model_config["transformer"]["encoder_hidden"]
         self.reduce_projection = nn.Linear(model_config['transformer']['encoder_hidden'] + model_config['spk_emb_dim'], model_config['transformer']['encoder_hidden'])
-        if model_config['prosodic_rep_type'] == 'continues':
-            self.pros_net = ContinuousProsodicNet(model_config['pitch_net'])
+        if model_config['prosodic_rep_type'] == 'continuous':
+            self.pros_net = ContinuousProsodicNet(model_config['prosodic_net'])
         elif model_config['prosodic_rep_type'] == 'discrete':
-            self.pros_net = DiscreteProsodicNet(model_config['pitch_net'])    
+            self.pros_net = DiscreteProsodicNet(model_config['prosodic_net'])            
+        else:    
+            self.pros_net = None  
 
     def forward(self, x, spk_emb, pros_rep, mask, max_len):
         batch_size = x.size(0)
@@ -77,10 +102,10 @@ class VarianceAdaptor(nn.Module):
         spk_emb = F.normalize(spk_emb.squeeze(1)).unsqueeze(1)
         x = torch.cat([x,spk_emb.expand(batch_size, max_len, self.d_model )], dim = -1)
         x = self.reduce_projection(x)
-
-        # integrate prosodic_rep
-        processed_pros_rep = self.pitch_net(pros_rep)
-        x = x + processed_pros_rep
+        if self.pros_net is not None:
+            # integrate prosodic_rep
+            processed_pros_rep = self.pros_net(pros_rep)
+            x = x + processed_pros_rep
 
         if mask is not None:
             x = x.masked_fill(mask.unsqueeze(-1), 0)

@@ -8,7 +8,15 @@ import yaml
 
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
+def remove_outlier( values):
+    #values = np.array(values)
+    p25 = np.percentile(values, 25)
+    p75 = np.percentile(values, 75)
+    lower = p25 - 1.5 * (p75 - p25)
+    upper = p75 + 1.5 * (p75 - p25)
+    normal_indices = np.logical_and(values > lower, values < upper)
 
+    return values[normal_indices]
 
 
 if __name__ == '__main__':
@@ -40,10 +48,13 @@ if __name__ == '__main__':
         assert os.path.exists(feature_path), f'{feature_path}'
         feature = np.load(feature_path)
         if args.feature_type == 'fastspeech2_pitch_energy':
-            pitch = feature[0, :]
-            energy = feature[1, :]
-            scaler_pitch.partial_fit(pitch.reshape(-1, 1))
-            scaler_energy.partial_fit(energy.reshape(-1, 1))
+            pitch = remove_outlier(feature[0, :])
+            energy = remove_outlier(feature[1, :])
+            if pitch.shape[0] != 0:
+            
+                scaler_pitch.partial_fit(pitch.reshape(-1, 1))
+            if energy.shape[0] != 0:    
+                scaler_energy.partial_fit(energy.reshape(-1, 1))
         else:    
             scaler.partial_fit(feature)
 
