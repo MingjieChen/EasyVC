@@ -8,6 +8,10 @@ This repo covers all the pipelines from dataset downloading to evaluation.
 
 # Working progress
 
+- **Dataset**
+ - [x] VCTK
+ - [x] LibriTTS
+
 - **Linguistic Encoder**
  - [x] conformer_ppg from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
  - [x] vq-wav2vec from [fairseq](https://github.com/facebookresearch/fairseq)
@@ -35,4 +39,15 @@ This repo covers all the pipelines from dataset downloading to evaluation.
 
 # How to run
 
-more to come ...
+## Dataset download 
+This part of codes are mostly from [parallel_wavegan](https://github.com/kan-bayashi/ParallelWaveGAN)
+
+```
+./download_vctk_dataset.sh
+```
+
+Or
+
+```
+./download_libritts_dataset.sh
+```
