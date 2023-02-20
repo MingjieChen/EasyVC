@@ -2,9 +2,31 @@
 
 **Work in progress.**
 
-A voice conversion framework for different types of encoders and decoders. The encoder-decoder framework is demonstrated in the following figure ![figure](enc_dec_voice_conversion.drawio.png)
+A voice conversion framework for different types of encoders, decoders and vocoders. 
 
-This repo covers all the pipelines from dataset downloading to evaluation.
+The encoder-decoder framework is demonstrated in the following figure. ![figure](enc_dec_voice_conversion.drawio.png)
+
+More specifically, three encoders are used to extract representations from speech, including a linguistic encoder, a prosodic encoder and a speaker encoder.
+Then a decoder is used to reconstruct speech mel-spectrograms. 
+Finally, a vocoder converts mel-spectrograms to waveforms. 
+Note that this repo also supports decoders that directly reconstruct waveforms (e.g. VITS), in these case, vocoders are not needed. 
+
+
+This repo covers all the steps of a voice conversion pipeline from dataset downloading to evaluation.
+
+I am currently working on my own to maintain this repo. I am planning to integrate more encoders and decoders.
+
+Pleas be aware that this repo is currently very unstable and under very fast developement.
+
+
+# Conda env
+
+create a conda env
+```
+conda create --name torch_1.9 --file requirements.txt
+```
+
+
 
 # Working progress
 
