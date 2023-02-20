@@ -1,5 +1,5 @@
 # project related files
-
+.DS_Store
 data/
 dump/
 logs/
