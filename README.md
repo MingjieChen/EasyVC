@@ -54,5 +54,9 @@ Or
 ## Step2: Preprocessing (generate metadata.csv)
 
 ```
-./bin/preprocess.sh
+./bin/preprocess_vctk.sh
+```
+Or
+```
+./bin/preprocess_libritts.sh
 ```
