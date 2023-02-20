@@ -56,7 +56,7 @@ Or
 ```
 ./bin/download_libritts_dataset.sh
 ```
-## Step2: Preprocessing (generate metadata.csv)
+## Step2: Generate metadata.csv
 
 ```
 ./bin/preprocess_vctk.sh
@@ -65,3 +65,21 @@ Or
 ```
 ./bin/preprocess_libritts.sh
 ```
+
+## Step3: Extract features
+
+A ESPNET style bash script has been provided for extracting features, including spectrograms, linguistic, speaker, and prosodic representations.
+e.g.
+```
+./extract_features.sh --stage 1 \
+                      --stop_stage 4 \
+                      --dataset vctk \
+                      --mel_type ppgvc_mel \
+                      --linguistic_encoder vqwav2vec \
+                      --speaker_encoder utt_dvec \
+                      --prosodic_encoder ppgvc_f0
+```
+
+## Step4: Training
+
+more to come
