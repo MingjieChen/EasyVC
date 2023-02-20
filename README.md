@@ -2,7 +2,7 @@
 
 **Work in progress.**
 
-A voice conversion framework for different types of encoder and decoders. The encoder-decoder framework is demonstrated in the following ![figure](enc_dec_voice_conversion.drawio.png)
+A voice conversion framework for different types of encoders and decoders. The encoder-decoder framework is demonstrated in the following figure ![figure](enc_dec_voice_conversion.drawio.png)
 
 This repo covers all the pipelines from dataset downloading to evaluation.
 
