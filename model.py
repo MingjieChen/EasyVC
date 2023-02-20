@@ -3,6 +3,7 @@ import copy
 from decoder.fastspeech2.fastspeech2 import FastSpeech2
 from decoder.taco_ar.model import Model as TacoAR 
 from decoder.taco_mol.model import MelDecoderMOLv2 as TacoMOL
+from decoder.vits.models import VITS
 
 
 def print_network(model, name):
@@ -15,7 +16,8 @@ def print_network(model, name):
     print("The number of parameters: {}".format(num_params), flush=True)
 
 def build_model(config):
-    model = eval(config['decoder'])(config['decoder_params'])
+    decoder_params = config['decoder_params']
+    model = eval(config['decoder'])(config = decoder_params)
     print_network(model, config['decoder'])
 
     return model

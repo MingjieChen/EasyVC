@@ -11,8 +11,8 @@ from torch import nn
 from tqdm import tqdm
 from munch import Munch
 import torch.nn.functional as F
-
-
+from .losses import compute_g_loss, compute_d_loss
+from .commons import  clip_grad_value_
 
 class Trainer(object):
     def __init__(self,
@@ -44,6 +44,18 @@ class Trainer(object):
         self.timer = timer
         print(f'trainer device {self.device}')
         self.iters = 0
+        self.optim_g = torch.optim.AdamW(
+          self.model.generator.parameters(), 
+          config['optimizer']['generator']['lr'], 
+          config['optimizer']['generator']['betas'], 
+          eps=config['optimizer']['generator']['eps'])
+        self.optim_d = torch.optim.AdamW(
+          self.model.discriminator.parameters(),
+          config['optimizer']['discriminator']['lr'], 
+          config['optimizer']['discriminator']['betas'], 
+          eps=config['optimizer']['discriminator']['eps'])
+        self.scheduler_g = torch.optim.lr_scheduler.ExponentialLR(self.optim_g, gamma=config['scheduler']['generator']['lr_decay'], last_epoch=self.epochs - 1)
+        self.scheduler_d = torch.optim.lr_scheduler.ExponentialLR(self.optim_d, gamma=config['scheduler']['discriminator']['lr_decay'], last_epoch=self.epochs - 1)
 
     def save_checkpoint(self, checkpoint_path):
         """Save checkpoint.
@@ -117,7 +129,7 @@ class Trainer(object):
         total_norm = np.sqrt(total_norm)
         return total_norm
     def _get_lr(self):
-        for param_group in self.optimizer.param_groups:
+        for param_group in self.optim_g.param_groups:
             lr = param_group['lr']
             break
         return lr
@@ -144,32 +156,47 @@ class Trainer(object):
                 else:
                     _batch.append(b)    
             self.timer.cnt("rd")        
-            self.optimizer.zero_grad()
+            self.optim_g.zero_grad()
+            self.optim_d.zero_grad()
             if scaler is not None:
-                with torch.cuda.amp.autocast():
-                    loss, losses = compute_loss(self.model, _batch)
+                d_loss, d_losses = compute_d_loss(self.model, _batch, self.config)
+                g_loss, g_losses = compute_g_loss(self.model, _batch, self.config)
                 self.timer.cnt('fw')    
-                scaler.scale(loss).backward()
-                scaler.step(self.optimizer)
+                scaler.scale(d_loss).backward()
+                scaler.scale(g_loss).backward()
+                scaler.unscale_(self.optim_d)
+                scaler.unscale_(self.optim_g)
+                grad_norm_d = clip_grad_value_(self.model.discriminator.parameters(), None)
+                grad_norm_g = clip_grad_value_(self.model.generator.parameters(), None)
+                scaler.step(self.optim_g)
+                scaler.step(self.optim_d)
+
                 scaler.update()
                 self.timer.cnt('bw')    
             else:
-                loss, losses = compute_loss(self.model, _batch)        
+                d_loss, d_losses = compute_d_loss(self.model, _batch, self.config)
+                g_loss, g_losses = compute_g_loss(self.model, _batch, self.config)
                 self.timer.cnt('fw')    
-                loss.backward()
-                self.optimizer.step()
+                d_loss.backward()
+                self.optim_d.step()
+                self.optim_g.step()
                 self.timer.cnt('bw')    
             
             loss_string = f"epoch: {self.epochs}| iters: {self.iters}| timer: {self.timer.show()}|" 
-            for key in losses:
-                train_losses["train/%s" % key].append(losses[key])
-                loss_string += f" {key}:{losses[key]:.3f} "
-                self.step_writer.add_scalar('step/'+key, losses[key], self.iters)
+            for key in d_losses:
+                train_losses["train/%s" % key].append(d_losses[key])
+                loss_string += f" {key}:{d_losses[key]:.3f} "
+                self.step_writer.add_scalar('step/'+key, d_losses[key], self.iters)
+            for key in g_losses:
+                train_losses["train/%s" % key].append(g_losses[key])
+                loss_string += f" {key}:{g_losses[key]:.3f} "
+                self.step_writer.add_scalar('step/'+key, g_losses[key], self.iters)
             self.step_writer.add_scalar('step/lr', self._get_lr(), self.iters)    
             self.iters+=1
             if self.iters % self.config['show_freq'] == 0:
                 print(loss_string, flush = True)
-            self.scheduler.step()
+            self.scheduler_g.step()
+            self.scheduler_d.step()
         train_losses = {key: np.mean(value) for key, value in train_losses.items()}
         return train_losses
     
@@ -186,9 +213,12 @@ class Trainer(object):
                     _batch.append(b.to(self.device))
                 else:
                     _batch.append(b)    
-            loss, losses = compute_loss(self.model, _batch)        
-            for key in losses:
-                eval_losses["eval/%s" % key].append(losses[key])
+            d_loss, d_losses = compute_d_loss(self.model, _batch, self.config)        
+            g_loss, g_losses = compute_g_loss(self.model, _batch, self.config)        
+            for key in d_losses:
+                eval_losses["eval/%s" % key].append(d_losses[key])
+            for key in g_losses:
+                eval_losses["eval/%s" % key].append(g_losses[key])
         
         eval_losses = {key: np.mean(value) for key, value in eval_losses.items()}
         eval_string = f"epoch {self.epochs}, eval: "

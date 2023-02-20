@@ -13,6 +13,7 @@ from model  import build_model
 from decoder.fastspeech2.trainer import Trainer as FS2Trainer
 from decoder.taco_ar.trainer import Trainer as TacoARTrainer
 from decoder.taco_mol.trainer import Trainer as TacoMOLTrainer
+from decoder.vits.trainer import Trainer as VITSTrainer
 import random
 import numpy as np
 import os.path as osp
@@ -43,8 +44,8 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
     else:
         dist.init_process_group(backend = 'nccl', world_size = replica_count, rank = replica_id)
         device = torch.device("cuda", replica_id )
-
-    torch.cuda.set_device(device)
+    
+        torch.cuda.set_device(device)
 
     # create exp dir
     log_dir = args.log_dir
@@ -73,7 +74,7 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
     timer.set()
     trainer_class = config['trainer']
     trainer = eval(trainer_class)(  
-                        args = Munch(config['loss']),
+                        args = Munch(config['losses']),
                         config = config,
                         model = model,
                         model_ema = None,
@@ -91,9 +92,9 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
 
     # start training
     
-    epochs = config['epochs']
+    max_epochs = config['epochs']
     start_epoch = trainer.epochs
-    for _ in range(start_epoch+1, epochs+1):
+    for _ in range(start_epoch+1, max_epochs+1):
         epoch = trainer.epochs+1
         print(f'start epoch {epoch}')
         train_results = trainer._train_epoch()
