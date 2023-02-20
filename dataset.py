@@ -93,6 +93,7 @@ class VITSDataset(data.Dataset):
         self.hop_size = config['vits_hop_size']
         self.sampling_rate = config['sampling_rate']
         self.segment_size = config['decoder_params']['segment_size'] # random slice segment size of the HIfIGAN in the VITS model.
+        self.spec_max_len = config['spec_max_len']
         # read metadata
         with open(metadata_csv) as f:
             reader = csv.DictReader(f, delimiter = ',')
@@ -102,6 +103,8 @@ class VITSDataset(data.Dataset):
                     _duration = row['duration']
                     if float(_duration) < config['max_utt_duration']:
                         self.metadata.append(row)
+                else:
+                    self.metadata.append(row)       
             f.close()    
         
         print(f'{split} data samples {len(self.metadata)}')
@@ -200,6 +203,17 @@ class VITSDataset(data.Dataset):
         elif audio_duration > int(spec_duration * self.hop_size):
             audio = audio[:int(spec_duration * self.hop_size)]    
         
+        # slice by spec_max_len
+        if spec_duration > self.spec_max_len:
+            start = random.randint(0, spec_duration - self.spec_max_len)
+            end = start + self.spec_max_len
+            spec_duration = self.spec_max_len
+            spec = spec[start:end, :]
+            ling_rep = ling_rep[start:end, :]
+            pros_rep = pros_rep[start:end, :]
+            audio = audio[start * self.hop_size: end *self.hop_size]
+
+
         
             
         return (audio, spec, ling_rep, pros_rep,  spk_emb, spec_duration)

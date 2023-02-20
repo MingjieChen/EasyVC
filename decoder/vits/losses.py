@@ -6,7 +6,6 @@ from torch.cuda.amp import autocast
 from .commons import slice_segments
 def compute_g_loss(model, batch, config):
     y, spec, ling, pros, spk_emb, spec_lengths, audio_length = batch 
-
     with autocast(enabled=config['fp16_run']):
         y_hat, ids_slice, spec_mask, (z, z_p, m_p, logs_p, m_q, logs_q) = model.generator(spec, spec_lengths, ling, spk_emb, pros)
 

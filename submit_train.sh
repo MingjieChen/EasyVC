@@ -22,11 +22,12 @@ exp_dir=exp
 model_name=${ling}_${spk}_${pros}_${dec}
 exp=$exp_dir/$model_name/$exp_name
 njobs=1
-ngpus=1
+ngpus=2
 slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
-gputypes="GeForceRTX3090"
+#gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
+gputypes="GeForceGTX1080Ti"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp

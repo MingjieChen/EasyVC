@@ -32,7 +32,6 @@ class Trainer(object):
         
         self.args = args
         self.epochs = initial_epochs
-        self.model = model
         self.model_ema = model_ema
         self.train_dataloader = train_dataloader
         self.dev_dataloader = dev_dataloader
@@ -42,6 +41,10 @@ class Trainer(object):
         self.fp16_run = fp16_run
         self.step_writer = step_writer
         self.timer = timer
+        if self.config['ngpu'] > 1:
+            self.model = model.module
+        else:    
+            self.model = model
         print(f'trainer device {self.device}')
         self.iters = 0
         self.optim_g = torch.optim.AdamW(
@@ -54,6 +57,7 @@ class Trainer(object):
           config['optimizer']['discriminator']['lr'], 
           config['optimizer']['discriminator']['betas'], 
           eps=config['optimizer']['discriminator']['eps'])
+            
         self.scheduler_g = torch.optim.lr_scheduler.ExponentialLR(self.optim_g, gamma=config['scheduler']['generator']['lr_decay'], last_epoch=self.epochs - 1)
         self.scheduler_d = torch.optim.lr_scheduler.ExponentialLR(self.optim_d, gamma=config['scheduler']['discriminator']['lr_decay'], last_epoch=self.epochs - 1)
 
@@ -63,7 +67,10 @@ class Trainer(object):
             checkpoint_path (str): Checkpoint path to be saved.
         """
         state_dict = {
-            "optimizer": self.optimizer.state_dict(),
+            "optim_g": self.optim_g.state_dict(),
+            "optim_d": self.optim_d.state_dict(),
+            "sched_g": self.scheduler_g.state_dict(),
+            "sched_d": self.scheduler_d.state_dict(),
             "epochs": self.epochs,
             "model": self.model.state_dict(),
             "iters": self.iters
@@ -92,8 +99,10 @@ class Trainer(object):
         if not load_only_params:
             self.epochs = state_dict["epochs"]
             self.iters = state_dict['iters']
-            self.optimizer.load_state_dict(state_dict["optimizer"])
-            self.scheduler.current_step = self.iters
+            self.optim_g.load_state_dict(state_dict["optim_g"])
+            self.optim_d.load_state_dict(state_dict["optim_d"])
+            self.scheduler_g.load_state_dict(state_dict['sched_g'])
+            self.scheduler_d.load_state_dict(state_dict['sched_d'])
 
 
     def _load(self, states, model, force_load=True):
@@ -148,7 +157,7 @@ class Trainer(object):
         scaler = torch.cuda.amp.GradScaler() if (('cuda' in str(self.device)) and self.fp16_run) else None
 
         
-        for train_steps_per_epoch, batch in tqdm(enumerate(self.train_dataloader, 1)):
+        for train_steps_per_epoch, batch in tqdm(enumerate(self.train_dataloader, 1), total = len(self.train_dataloader)):
             _batch = []
             for b in batch:
                 if isinstance(b, torch.Tensor):

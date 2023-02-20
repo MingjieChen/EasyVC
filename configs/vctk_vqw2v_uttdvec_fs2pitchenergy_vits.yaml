@@ -21,18 +21,19 @@ show_freq: 100 # show training information frequency
 load_only_params: !!bool False
 seed: !!int 1234
 trainer: VITSTrainer
-ngpu: 1
+ngpu: 2
 
 #dataloader
 dataset_class: VITSDataset
 sampling_rate: !!int 24000
 vits_hop_size: !!int 240
-sort: !!bool False
+spec_max_len: !!int 360
+sort: !!bool True
 dump_dir: dump
-num_workers: !!int 8
-batch_size: !!int 16
+num_workers: !!int 4
+batch_size: !!int 12
 drop_last: !!bool True
-rm_long_utt: !!bool True # remove too long utterances from metadata
+rm_long_utt: !!bool False # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 
