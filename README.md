@@ -35,10 +35,10 @@ This repo covers all the pipelines from dataset downloading to evaluation.
  
  
 - **Vocoder**
- - [x] vctk_hifigan from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
+ - [x] hifigan (vctk) from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
 
 - **Evaluation**
- - [x] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
+ - [ ] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
  - [ ] ASR WER
  - [ ] ASV EER
  - [ ] MCD, F0-RMSE, F0-CORR
