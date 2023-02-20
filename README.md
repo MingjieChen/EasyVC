@@ -1,4 +1,4 @@
-# enc_dec_voice_conversion
+# enc_dec_voice_conversion (**EDVC**)
 
 **Work in progress.**
 
