@@ -39,15 +39,20 @@ This repo covers all the pipelines from dataset downloading to evaluation.
 
 # How to run
 
-## Dataset download 
+## Step1: Dataset download 
 This part of codes are mostly from [parallel_wavegan](https://github.com/kan-bayashi/ParallelWaveGAN)
 
 ```
-./download_vctk_dataset.sh
+./bin/download_vctk_dataset.sh
 ```
 
 Or
 
 ```
-./download_libritts_dataset.sh
+./bin/download_libritts_dataset.sh
+```
+## Step2: Preprocessing (generate metadata.csv)
+
+```
+./bin/preprocess.sh
 ```
