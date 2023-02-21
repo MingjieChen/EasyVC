@@ -19,6 +19,7 @@ from scipy.io import wavfile
 import resampy
 from ling_encoder.interface import *
 from speaker_encoder.interface import *
+from prosodic_encoder.inteface import *
 from decoder.interface import *
 from vocoder.interface import *
 from sklearn.preprocessing import StandardScaler
@@ -135,6 +136,12 @@ if __name__ == '__main__':
     else:
         mean_tensor = None
         std_tensor = None    
+    
+    # norm pros reps
+    if 'pros_stats' in exp_config:
+        pros_stats = exp_config['pros_stats']
+    else:
+        pros_stats = None    
 
     total_rtf = 0.0
     cnt = 0
@@ -151,11 +158,25 @@ if __name__ == '__main__':
         start_time = time.time()
         # extract ling representations
         ling_rep = eval(ling_encoder_func)(ling_enc_model, src_wav_tensor)
+        ling_duration = ling_rep.size(1)
+        # extract prosodic representations
+        if prosodic_encoder != 'none':
+            prosodic_func = f'infer_{prosodic_encoder}'
+            pros_rep = eval(prosodic_func)(src_wav_path, trg_wav_path, stats = pros_stats)
+            pros_duration = pros_rep.size(1)
+            min_duration = min(pros_duration, ling_duration)
+            ling_rep = ling_rep[:, : min_duration, :]
+            pros_rep = pros_rep[:, : min_duration, :]
+            pros_rep = pros_rep.to(args.device)
+        else:
+            pros_rep = None    
+
         # trg spk emb
         spk_emb = speaker_encoder_func(speaker_enc_model, trg_wav_path)
         spk_emb_tensor = torch.FloatTensor(spk_emb).unsqueeze(0).unsqueeze(0).to(args.device)
+
         # generate mel
-        mel = eval(decoder_func)(decoder_model, ling_rep, None, spk_emb_tensor)
+        mel = eval(decoder_func)(decoder_model, ling_rep, pros_rep, spk_emb_tensor)
         mel = denorm_mel(mean_tensor, std_tensor, mel)
         # vocoder
         wav = eval(vocoder_func)(vocoder_model, mel)

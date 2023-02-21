@@ -12,6 +12,7 @@ spk_enc: utt_dvec
 pros_enc: norm_fastspeech2_pitch_energy
 decoder: VITS
 mel_type: vits_spec
+pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
 
 # training 
 fp16_run: !!bool True

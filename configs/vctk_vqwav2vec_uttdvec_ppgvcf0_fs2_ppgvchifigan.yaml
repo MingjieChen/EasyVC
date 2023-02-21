@@ -11,9 +11,8 @@ ling_enc: vqwav2vec
 spk_enc: utt_dvec
 pros_enc: ppgvc_f0
 decoder: FastSpeech2
-mel_type: norm_mel
-vocoder: vctk_hifigan
-mel_stats: dump/vctk/train_nodev_all/mel/train_nodev_all.npy
+mel_type: ppgvc_mel
+vocoder: ppgvc_hifigan
 
 # training 
 fp16_run: !!bool True
@@ -29,7 +28,7 @@ ngpu: 2
 sort: !!bool False
 dump_dir: dump
 num_workers: !!int 8
-batch_size: 64
+batch_size: 32
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)

@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
-
+from .prosodic_nets import DiscreteProsodicNet, ContinuousProsodicNet
 ################################################################################
 
 # The follow section is related to Tacotron2
@@ -299,6 +299,17 @@ class Model(nn.Module):
         output_dim = config['output_dim']
         spk_emb_integration_type = config['spk_emb_integration_type']
         spk_emb_dim = config['spk_emb_dim']
+        
+        if 'prosodic_rep_type' not in config:
+            self.prosodic_net = None
+        elif config['prosodic_rep_type'] == 'discrete':
+            self.prosodic_net = DiscreteProsodicNet(config['prosodic_net'])
+        elif config['prosodic_rep_type'] == 'continuous':    
+            self.prosodic_net = ContinuousProsodicNet(config['prosodic_net'])
+        else:
+            raise Exception    
+               
+            
 
         lstmp_layers = config['lstmp_layers']
         lstmp_dropout_rate = config['lstmp_dropout_rate']
@@ -403,7 +414,7 @@ class Model(nn.Module):
 
         return hs
 
-    def forward(self, features, lens, ref_spk_embs, targets = None):
+    def forward(self, features, lens, ref_spk_embs, targets = None, pros_rep = None):
         """Calculate forward propagation.
             Args:
             features: Batch of the sequences of input features (B, Lmax, idim).
@@ -427,7 +438,9 @@ class Model(nn.Module):
 
         # inject speaker embeddings
         encoder_states = self._integrate_with_spk_emb(encoder_states, ref_spk_embs)
-        
+        # inject prosodic representations
+        if self.prosodic_net is not None and pros_rep is not None:
+            encoder_states = encoder_states + self.prosodic_net(pros_rep)
         # decoder: LSTMP layers & projection
         if self.ar:
             if targets is not None:

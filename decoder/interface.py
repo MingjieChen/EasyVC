@@ -53,7 +53,7 @@ def load_TacoAR(ckpt = None, config = None, device = 'cpu'):
 
 def infer_TacoAR(model, ling, pros, spk):
      
-     mel, _ = model(ling, torch.LongTensor([ling.size(1)]).to(ling.device), spk)
+     mel, _ = model(ling, torch.LongTensor([ling.size(1)]).to(ling.device), spk, pros_rep = pros)
      return mel      
 
 def load_TacoMOL(ckpt = None, config = None, device = 'cpu'):

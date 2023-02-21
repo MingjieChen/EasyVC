@@ -13,6 +13,7 @@ pros_enc: norm_fastspeech2_pitch_energy
 decoder: FastSpeech2
 vocoder: ppgvc_hifigan
 mel_type: ppgvc_mel
+pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
 
 # training 
 fp16_run: !!bool True

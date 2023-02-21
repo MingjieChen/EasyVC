@@ -14,6 +14,7 @@ decoder: FastSpeech2
 vocoder: vctk_hifigan
 mel_type: norm_mel
 mel_stats: dump/vctk/train_nodev_all/mel/train_nodev_all.npy # used for vctkhifigan vocoder
+pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
 
 # training 
 fp16_run: !!bool True

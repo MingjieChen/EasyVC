@@ -1,0 +1,77 @@
+# experiment
+dataset: vctk
+train_meta: data/vctk/train_nodev_all/metadata.csv
+dev_meta: data/vctk/dev_all/metadata.csv
+train_set: train_nodev_all
+dev_set: dev_all
+
+
+# encoder-decoder
+ling_enc: vqwav2vec
+spk_enc: utt_dvec
+pros_enc: ppgvc_f0
+decoder: TacoAR
+mel_type: ppgvc_mel
+vocoder: ppgvc_hifigan
+
+
+# training 
+fp16_run: !!bool False
+epochs: 200
+save_freq: 2 # save ckpt frequency
+show_freq: 10
+load_only_params: !!bool False
+seed: !!int 1234
+trainer: TacoARTrainer
+ngpu: 2
+
+#dataloader
+sort: !!bool True
+dump_dir: dump
+num_workers: !!int 8
+batch_size: 64
+drop_last: !!bool True
+rm_long_utt: !!bool True # remove too long utterances from metadata
+max_utt_duration: !!float 10.0 # max utterance duration (seconds)
+
+
+# decoder params
+decoder_params: 
+    prosodic_rep_type: continuous
+    prosodic_net:
+        hidden_dim: 256
+    input_dim: 512
+    output_dim: 80
+    resample_ratio: 1
+    spk_emb_integration_type: concat # add or concat
+    spk_emb_dim: 256
+    ar: True
+    encoder_type: "taco2"
+    hidden_dim: 1024
+    prenet_layers: 2  # if set 0, no prenet is used
+    prenet_dim: 256
+    prenet_dropout_rate: 0.5
+    lstmp_layers: 2
+    lstmp_dropout_rate: 0.2
+    lstmp_proj_dim: 256
+    lstmp_layernorm: False
+
+#optimizer & scheduler
+optimizer:
+    weight_decay: 0.0
+    betas: [0.9,0.99]  
+    lr: !!float 1e-4
+scheduler:    
+    num_training_steps: 500000
+    num_warmup_steps: 4000
+
+# loss hyper-parameters
+loss:
+   alpha: 1. 
+    
+
+
+
+
+
+
