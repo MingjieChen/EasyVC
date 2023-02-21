@@ -11,12 +11,20 @@ stop_stage=
 
 # set up
 dataset=vctk # vctk or libritts
-mel_type=ppgvc_mel # mel, vits_spec, ppgvc_mel
 linguistic_encoder=vqwav2vec 
 speaker_encoder=utt_dvec
 prosodic_encoder=ppgvc_f0
 decoder=fastspeech2
 vocoder=ppgvc_hifigan
+
+# decide feature_type based on choices of vocoder and decoder
+if [ "$vocoder" == "ppgvc_hifigan" ]; then
+    feature_type=ppgvc_mel # mel, vits_spec, ppgvc_mel
+elif [ "$decoder" == "vits"]; then
+    feature_type=vits_spec
+else
+    feature_type=mel    
+fi        
 
 if [ "$dataset" == "vctk" ]; then
     train_split=train_nodev_all
@@ -60,11 +68,11 @@ fi
 # step 3: prosodic representation extraction
 if [ "${stage}" -le 3 ] && [ "${stop_stage}" -ge 3 ]; then
     ./bin/feature_extraction.sh $dataset $prosodic_encoder
-    if [ "$feature_type" == "fastspeech2_pitch_energy"  ]; then
+    if [ "$prosodic_encoder" == "fastspeech2_pitch_energy"  ]; then
         # normalize pitch & energy 
-        stats_path=dump/$dataset/$train_split/$feature_type/${train_split}.npy
-        ./bin/compute_statistics.sh $dataset $train_split $feature_type
-        ./bin/normalize.sh $dataset $splits $feature_type $stats_path
+        stats_path=dump/$dataset/$train_split/$prosodic_encoder/${train_split}.npy
+        ./bin/compute_statistics.sh $dataset $train_split $prosodic_encoder  
+        ./bin/normalize.sh $dataset $splits $prosodic_encoder $stats_path
 fi    
 
 # step 4: speaker representation extraction
