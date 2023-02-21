@@ -91,24 +91,25 @@ Or
 ## Step3: Extract features
 
 A ESPNET style bash script has been provided for extracting features, including spectrograms, linguistic, speaker, and prosodic representations.
+Before start extracting features, you need to decide the setups of your encoders, decoder and vocoder.
+
 e.g.
 ```
 ./extract_features.sh --stage 1 \
                       --stop_stage 4 \
                       --dataset vctk \
-                      --mel_type ppgvc_mel \
                       --linguistic_encoder vqwav2vec \
                       --speaker_encoder utt_dvec \
-                      --prosodic_encoder ppgvc_f0
+                      --prosodic_encoder ppgvc_f0 \
+                      --decoder fastspeech2 \
+                      --vocoder ppgvc_hifigan
 ```
 Options:
 - dataset: 
     - vctk 
     - libritts
-- feature_type: 
-    - ppgvc_mel, mel-spectrograms of ppgvc_hifigan vocoder
-    - vits_spec, linear spectrograms of vits
-    - mel, mel-spectrograms of parallel_wavegan
+- speaker_encoder: 
+    - utt_dvec
 - linguistic_encoder: 
     - vqwav2vec
     - conformer_ppg 
@@ -116,7 +117,16 @@ Options:
 - prosodic_encoder: 
     - ppgvc_f0 
     - fastspeech2_pitch_energy
-
+- decoder:
+    - fastspeech2
+    - taco_ar
+    - taco_mol
+    - vits
+- vocoder:
+    - ppgvc_hifigan
+    - vctk_hifigan
+    - libritts_hifigan
+    
 
 ## Step4: Training
 
