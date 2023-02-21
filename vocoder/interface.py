@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import torch
 
-def load_ppg_vc_hifigan(ckpt = None, config = None, device = 'cpu'):
+def load_ppgvc_hifigan(ckpt = None, config = None, device = 'cpu'):
     model = load_hifigan_generator(device)
     return model
 
@@ -48,7 +48,7 @@ def vctk_hifigan(model, mel ):
     wav = hifigan_model.inference(mel.squeeze(0)).view(-1)        
 
     return wav
-def ppg_vc_hifigan(model, mel):
+def ppgvc_hifigan(model, mel):
     
     wav = model(mel.transpose(1,2)).view(-1)
     return wav     

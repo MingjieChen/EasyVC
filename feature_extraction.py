@@ -155,7 +155,8 @@ if __name__ == '__main__':
     parser.add_argument('--split', type = str)
     parser.add_argument('--max_workers', type = int, default = 20)
     parser.add_argument('--speaker', type = str, default = None)
-    parser.add_argument('--feature_type', type = str, default = 'mel', choices = ['mel', 'ppgvc_mel', 'ppgvc_f0', 'fastspeech2_pitch_energy', 'vits_spec'])
+    parser.add_argument('--feature_type', type = str, default = 'mel', 
+        choices = ['mel','ppgvc_mel', 'ppgvc_f0', 'fastspeech2_pitch_energy', 'vits_spec'])
     parser.add_argument('--pitch', default = False, action = 'store_true')
     args = parser.parse_args()
     
