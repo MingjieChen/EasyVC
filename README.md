@@ -130,4 +130,8 @@ Options:
 
 ## Step4: Training
 
-more to come
+To run training, a config file need to be chosed. A config file can be specified by its dataset, encoder, decoder and vocoder.
+E.g.
+```
+./bin/train.sh configs/vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan.yaml
+```
