@@ -101,6 +101,22 @@ e.g.
                       --speaker_encoder utt_dvec \
                       --prosodic_encoder ppgvc_f0
 ```
+Options:
+- dataset: 
+    - vctk 
+    - libritts
+- feature_type: 
+    - ppgvc_mel, mel-spectrograms of ppgvc_hifigan vocoder
+    - vits_spec, linear spectrograms of vits
+    - mel, mel-spectrograms of parallel_wavegan
+- linguistic_encoder: 
+    - vqwav2vec
+    - conformer_ppg 
+    - hubert_soft
+- prosodic_encoder: 
+    - ppgvc_f0 
+    - fastspeech2_pitch_energy
+
 
 ## Step4: Training
 
