@@ -6,20 +6,21 @@ conda_env=torch_1.9
 
 #choose config
 dataset=vctk
-ling=vqw2v
+ling=vqwav2vec
 #ling=conformerppg
 #ling=hubertsoft
 spk=uttdvec
 pros=fs2pitchenergy
-#dec=fastspeech2
+#dec=fs2
 dec=vits
 #dec=tacoar
 #dec=tacomol
+vocoder=vctkhifigan
 
 exp_name=vctk_24khz_10ms
-config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}.yaml
+config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 exp_dir=exp
-model_name=${ling}_${spk}_${pros}_${dec}
+model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name
 njobs=1
 ngpus=2

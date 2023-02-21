@@ -1,15 +1,12 @@
 #!/bin/bash
 
-conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
-conda_env=torch_1.7
-source $conda/bin/activate $conda_env
 
-dataset=vctk
-splits="train_nodev_all dev_all"
-feature_type=fastspeech2_pitch_energy
-stats_path=dump/$dataset/train_nodev_all/$feature_type/train_nodev_all.npy
+dataset=$1
+splits=$2
+feature_type=$3
+stats_path=$4
 
-for split in train_nodev_all dev_all ;do
+for split in $splits ;do
     python preprocess/normalize.py \
             --stats_path $stats_path \
             --dump_dir dump/$dataset \

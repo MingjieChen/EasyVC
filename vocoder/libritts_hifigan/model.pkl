@@ -1,0 +1,1 @@
+/share/mini1/res/t/vc/studio/tiresyn-en/libritts/ParallelWaveGAN/egs/libritts/voc1/exp/train_nodev_clean_libritts_24khz_10ms/checkpoint-400000steps.pkl

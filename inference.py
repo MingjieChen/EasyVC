@@ -21,6 +21,19 @@ from ling_encoder.interface import *
 from speaker_encoder.interface import *
 from decoder.interface import *
 from vocoder.interface import *
+from sklearn.preprocessing import StandardScaler
+
+
+
+def denorm_mel(mean_tensor, std_tensor, mel):
+    
+    if mean_tensor is not None and std_tensor is not None:
+        mean_tensor = torch.FloatTensor(scaler.mean_)
+        std_tensor = torch.FloatTensor(scaler.scale_)
+        
+        mel = mel * std_tensor + mean_tensor
+    
+    return mel
 
 def load_wav(path, sample_rate = 16000):
     sr, x = wavfile.read(path)
@@ -31,6 +44,9 @@ def load_wav(path, sample_rate = 16000):
         x = resampy.resample(x, sr, sample_rate)
     x = np.clip(x, -1.0, 1.0)
     return x
+
+
+
 
 
 if __name__ == '__main__':
@@ -107,6 +123,18 @@ if __name__ == '__main__':
     vocoder_func = f'{vocoder}'
     print(f'load vocoder {vocoder} done')
     # conduct inference
+    
+    # denorm mel scaler
+    if 'mel_stats' in exp_config:
+        scaler = StandardScaler()
+        scaler.mean_ = np.load(exp_config['mel_stats'])[0]
+        scaler.scale_ = np.load(exp_config['mel_stats'])[1]
+        scaler.n_features_in = scaler.mean_.shape[0]
+        mean_tensor = torch.FloatTensor(scaler.mean_).to(args.device)
+        std_tensor = torch.FloatTensor(scaler.scale_).to(args.device)
+    else:
+        mean_tensor = None
+        std_tensor = None    
 
     total_rtf = 0.0
     cnt = 0
@@ -128,6 +156,7 @@ if __name__ == '__main__':
         spk_emb_tensor = torch.FloatTensor(spk_emb).unsqueeze(0).unsqueeze(0).to(args.device)
         # generate mel
         mel = eval(decoder_func)(decoder_model, ling_rep, None, spk_emb_tensor)
+        mel = denorm_mel(mean_tensor, std_tensor, mel)
         # vocoder
         wav = eval(vocoder_func)(vocoder_model, mel)
         end_time = time.time()

@@ -282,9 +282,15 @@ class Dataset(data.Dataset):
         self.ling_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.ling_enc)
         self.spk_enc = config['spk_enc']
         self.spk_emb_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.spk_enc)
-        self.pros_enc = config['pros_enc'] #e.g. ppgvc_f0
-        self.pros_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.pros_enc)
-        self.pros_rep_process_func = f'process_{self.pros_enc}'
+        
+        if config['pros_enc'] == 'none':
+            self.pros_enc = None
+            self.pros_rep_dir = None
+            self.pros_rep_process_func = None
+        else:    
+            self.pros_enc = config['pros_enc'] #e.g. ppgvc_f0
+            self.pros_rep_dir = os.path.join(config['dump_dir'], config['dataset'], split, self.pros_enc)
+            self.pros_rep_process_func = f'process_{self.pros_enc}'
         # frames per step (only work for TacoMOL)
         self.frames_per_step = config['frames_per_step'] if 'frames_per_step' in config else 1
 
@@ -304,12 +310,14 @@ class Dataset(data.Dataset):
         
         ling_rep_path = os.path.join(self.ling_rep_dir, spk, ID+'.npy')
         spk_emb_path = os.path.join(self.spk_emb_dir, spk, ID+'.npy')
-        pros_rep_path = os.path.join(self.pros_rep_dir, spk, ID + '.npy')
 
         assert os.path.exists(mel_path), f"{mel_path}"
         assert os.path.exists(ling_rep_path), f'{ling_rep_path}'
         assert os.path.exists(spk_emb_path), f'{spk_emb_path}'
-        assert os.path.exists(pros_rep_path), f'{pros_rep_path}'
+        
+        if self.pros_enc is not None:
+            pros_rep_path = os.path.join(self.pros_rep_dir, spk, ID + '.npy')
+            assert os.path.exists(pros_rep_path), f'{pros_rep_path}'
         
         # load feature
         mel = np.load(mel_path)    
@@ -317,9 +325,13 @@ class Dataset(data.Dataset):
         ling_rep = np.load(ling_rep_path)
         ling_duration = ling_rep.shape[0]
         spk_emb = np.load(spk_emb_path)
-        pros_rep = np.load(pros_rep_path)
-        pros_rep = eval(self.pros_rep_process_func)(pros_rep)
-        pros_duration = pros_rep.shape[0]
+        if self.pros_enc is not None:
+            pros_rep = np.load(pros_rep_path)
+            pros_rep = eval(self.pros_rep_process_func)(pros_rep)
+            pros_duration = pros_rep.shape[0]
+        else:
+            pros_rep = np.zeros(mel.shape)    
+            pros_duration = pros_rep.shape[0]
         
         # up_sample ling_rep to 10hz, in case some ling_rep are 50hz or 25hz.
         factor = int(round(mel_duration / ling_duration))
