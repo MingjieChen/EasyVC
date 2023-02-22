@@ -1,4 +1,4 @@
-# enc_dec_voice_conversion (**EDVC**)
+# **EasyVC**
 
 **Work in progress.**
 
@@ -16,7 +16,7 @@ This repo covers all the steps of a voice conversion pipeline from dataset downl
 
 I am currently working on my own to maintain this repo. I am planning to integrate more encoders and decoders.
 
-Pleas be aware that this repo is currently very unstable and under very fast developement.
+Please be aware that this repo is currently very unstable and under very fast developement.
 
 
 # Conda env
@@ -37,7 +37,10 @@ conda create --name torch_1.9 --file requirements.txt
 - **Linguistic Encoder**
     - [x] conformer_ppg from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
     - [x] vq-wav2vec from [fairseq](https://github.com/facebookresearch/fairseq)
-    - [x] hubert_soft and hubert_discrete from [soft-vc](https://github.com/bshall/soft-vc)
+    - [x] hubert_soft from [soft-vc](https://github.com/bshall/soft-vc)
+    - [ ] contentvec_100 from [contentvec](https://github.com/auspicious3000/contentvec)
+    - [ ] contentvec_500 from [contentvec](https://github.com/auspicious3000/contentvec)
+    - [ ] whisper_ppg from [whisper_ppg](https://github.com/PlayVoice/whisper_ppg)
  
  
 - **Prosodic Encoder**
@@ -47,6 +50,7 @@ conda create --name torch_1.9 --file requirements.txt
  
 - **Speaker Encoder**
     - [x] d-vector from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
+    - [ ] ECAPA-TDNN from [speechbrain](https://github.com/speechbrain/speechbrain/tree/develop/recipes/VoxCeleb)
  
  
 - **Decoder**
@@ -54,6 +58,7 @@ conda create --name torch_1.9 --file requirements.txt
     - [x] taco_ar from [s3prl-vc](https://github.com/s3prl/s3prl/tree/main/s3prl/downstream/a2a-vc-vctk)
     - [x] taco_mol from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
     - [x] vits from [vits](https://github.com/jaywalnut310/vits)
+    - [ ] grad_tts from [Grad_TTS](https://github.com/huawei-noah/Speech-Backbones)
  
  
 - **Vocoder**
@@ -130,7 +135,8 @@ Options:
 
 ## Step4: Training
 
-To run training, a config file need to be chosed. A config file can be specified by its dataset, encoder, decoder and vocoder.
+To run training, you need to select a config file from configs/. 
+The config files are named following the format ${dataset}_${linguistic_encoder}_${speaker_encoder}_${prosodic_encoder}_${decoder}_${vocoder}
 E.g.
 ```
 ./bin/train.sh configs/vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan.yaml

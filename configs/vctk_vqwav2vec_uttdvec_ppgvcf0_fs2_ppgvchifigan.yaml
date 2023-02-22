@@ -50,7 +50,7 @@ decoder_params:
     postnet:
         idim: 80
         odim: 80
-        n_layers: 5
+        n_layers: 0
         n_filts: 5
         n_chans: 256
         dropout_rate: 0.5

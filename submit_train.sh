@@ -15,9 +15,9 @@ dec=fs2
 #dec=vits
 #dec=tacoar
 #dec=tacomol
-vocoder=vctkhifigan
+vocoder=ppgvchifigan
 
-exp_name=vctk_24khz_10ms
+exp_name=vctk_24khz_10ms_no_postnet
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
@@ -28,7 +28,7 @@ slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 #gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
-gputypes="GeForceGTX1080Ti"
+gputypes="GeForceGTX1080Ti|GeforceRTX3090"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp
