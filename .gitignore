@@ -11,16 +11,13 @@ downloads/
 ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt
 ling_encoder/contentvec_100/contentvec_100_model.pt
 ling_encoder/contentvec_500/contentvec_500_model.pt
+ling_encoder/whisper_ppg/ckpt
 exp/
 vocoder/libritts_hifigan/*.pkl
+decoder/grad_tts
 
 # parts that are not public yet
-evaluation/UTMOS-demo
-ling_encoder/contentvec_100
-ling_encoder/contentvec_500
-ling_encoder/whisper_ppg
-bin/contentvec_*
-bin/whisper_ppg*
+evaluation/UTMOS-demo/
 
 
 

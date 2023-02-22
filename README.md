@@ -38,9 +38,9 @@ conda create --name torch_1.9 --file requirements.txt
     - [x] conformer_ppg from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
     - [x] vq-wav2vec from [fairseq](https://github.com/facebookresearch/fairseq)
     - [x] hubert_soft from [soft-vc](https://github.com/bshall/soft-vc)
-    - [ ] contentvec_100 from [contentvec](https://github.com/auspicious3000/contentvec)
-    - [ ] contentvec_500 from [contentvec](https://github.com/auspicious3000/contentvec)
-    - [ ] whisper_ppg from [whisper_ppg](https://github.com/PlayVoice/whisper_ppg)
+    - [x] contentvec_100 from [contentvec](https://github.com/auspicious3000/contentvec)
+    - [x] contentvec_500 from [contentvec](https://github.com/auspicious3000/contentvec)
+    - [x] whisper_ppg from [whisper_ppg](https://github.com/PlayVoice/whisper_ppg)
  
  
 - **Prosodic Encoder**
@@ -119,6 +119,9 @@ Options:
     - vqwav2vec
     - conformer_ppg 
     - hubert_soft
+    - contentvec_100
+    - contentvec_500
+    - whisper_ppg
 - prosodic_encoder: 
     - ppgvc_f0 
     - fastspeech2_pitch_energy
