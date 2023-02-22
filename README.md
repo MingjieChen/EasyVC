@@ -135,7 +135,7 @@ Options:
 
 ## Step4: Training
 
-To run training, you need to select a config file from configs/. 
+To run training, you need to select a config file from `configs/`. 
 The config files are named following the format `${dataset}_${linguistic_encoder}_${speaker_encoder}_${prosodic_encoder}_${decoder}_${vocoder}`
 E.g.
 ```
