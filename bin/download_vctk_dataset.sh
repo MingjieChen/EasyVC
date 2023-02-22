@@ -15,7 +15,7 @@ eval_set="eval_$(echo "${spks}" | tr " " "_")"         # name of evaluation data
 
 
 echo "Stage -1: Data download"
-#dataset/vctk/data_download.sh "${download_dir}"
+dataset/vctk/data_download.sh "${download_dir}"
 
 echo "Stage 0: Data preparation"
 train_data_dirs=""

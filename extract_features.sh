@@ -52,6 +52,7 @@ if [ "${stage}" -le 1 ] && [ "${stop_stage}" -ge 1 ]; then
         stats_path=dump/$dataset/$train_split/$feature_type/${train_split}.npy
         ./bin/compute_statistics.sh $dataset $train_split $feature_type
         ./bin/normalize.sh $dataset $splits $feature_type $stats_path   
+    fi    
 fi   
 
 # step 2: linguistic representation extraction
@@ -73,19 +74,10 @@ if [ "${stage}" -le 3 ] && [ "${stop_stage}" -ge 3 ]; then
         stats_path=dump/$dataset/$train_split/$prosodic_encoder/${train_split}.npy
         ./bin/compute_statistics.sh $dataset $train_split $prosodic_encoder  
         ./bin/normalize.sh $dataset $splits $prosodic_encoder $stats_path
+    fi    
 fi    
 
 # step 4: speaker representation extraction
 if [ "${stage}" -le 4 ] && [ "${stop_stage}" -ge 4 ]; then
     ./bin/d_vector_extract_utterance_embedding.sh $split   $dataset
 fi    
-
-
-
-
-   
-
-
- 
-
-
