@@ -10,7 +10,7 @@ dev_set: dev_all
 ling_enc: vqwav2vec
 spk_enc: utt_dvec
 pros_enc: ppgvc_f0
-decoder: TacoAR
+decoder: TacoMOL
 mel_type: ppgvc_mel
 vocoder: ppgvc_hifigan
 
@@ -22,7 +22,7 @@ save_freq: 2 # save ckpt frequency
 show_freq: 10
 load_only_params: !!bool False
 seed: !!int 1234
-trainer: TacoARTrainer
+trainer: TacoMOLTrainer
 ngpu: 2
 
 #dataloader
@@ -34,6 +34,7 @@ batch_size: 32
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
+frames_per_step: !!int 4
 
 
 # decoder params
@@ -41,25 +42,12 @@ decoder_params:
     prosodic_rep_type: continuous
     prosodic_net:
         hidden_dim: 256
-    input_dim: 512
-    output_dim: 80
-    resample_ratio: 1
-    spk_emb_integration_type: concat # add or concat
-    spk_emb_dim: 256
-    ar: True
-    encoder_type: "taco2"
-    hidden_dim: 1024
-    prenet_layers: 2  # if set 0, no prenet is used
-    prenet_dim: 256
-    prenet_dropout_rate: 0.5
-    lstmp_layers: 2
-    lstmp_dropout_rate: 0.2
-    lstmp_proj_dim: 256
-    lstmp_layernorm: False
+    spk_embed_dim: 256
+    bottle_neck_feature_dim: 512
 
 #optimizer & scheduler
 optimizer:
-    weight_decay: 0.0
+    weight_decay: !!float 1e-6
     betas: [0.9,0.99]  
     lr: !!float 1e-4
 scheduler:    

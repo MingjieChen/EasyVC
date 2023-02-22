@@ -34,7 +34,7 @@ def compute_loss(model, batch, objective, *args, **kwargs ) :
     
     mel, ling_rep, pros_rep, spk_emb, length, max_len = batch
     device = mel.device
-    predicted_features, predicted_feature_lengths = model(ling_rep, length, spk_emb, mel)
+    predicted_features, predicted_feature_lengths = model(ling_rep, length, spk_emb, mel, pros_rep = pros_rep)
     # loss calculation (masking and normalization are done inside)
     loss = objective(predicted_features,
                         mel,

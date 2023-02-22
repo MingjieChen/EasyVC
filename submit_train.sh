@@ -11,13 +11,13 @@ ling=vqwav2vec
 #ling=hubertsoft
 spk=uttdvec
 pros=ppgvcf0
-dec=fs2
+#dec=fs2
 #dec=vits
 #dec=tacoar
-#dec=tacomol
+dec=tacomol
 vocoder=ppgvchifigan
 
-exp_name=vctk_24khz_10ms_no_postnet
+exp_name=vctk_first_train
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
@@ -43,6 +43,7 @@ cp $config $exp_config
 #submit first job
 #jid=$(submitjob -m 10000 -g${ngpus} -M${slots} -o -l gputype=$gputypes  -eo  $log_dir/train.log  ./bin/train.sh | grep -E [0-9]+)
 jid=""
+jobs_to_kill="qdel"
 # create following jobs
 for ((n=0;n<${njobs};n++)); do
     job=$job_dir/train${n}.sh
@@ -82,7 +83,10 @@ EOF
         jid=$(submitjob -m 10000  -g${ngpus} -M${slots} -o -l gputype=$gputypes  -eo  $log  $job | grep -E [0-9]+)
     else    
         jid=$(submitjob -m 10000 -w $jid  -g${ngpus} -M${slots} -o -l gputype=$gputypes  -eo  $log  $job | grep -E [0-9]+)
-    fi    
+    fi
+    jobs_to_kill+=" $jid"    
     echo "submit $jid job $job log $log"
 done    
+[ -e $job_dir/kill_all.sh ] && rm $job_dir/kill_all.sh
+touch $job_dir/kill_all.sh; echo "$jobs_to_kill" >> $job_dir/kill_all.sh; chmod +x $job_dir/kill_all.sh
 

@@ -13,6 +13,41 @@ from torch.nn.utils import weight_norm, remove_weight_norm, spectral_norm
 from .commons import init_weights, get_padding, rand_slice_segments, sequence_mask
 
 
+class ContinuousProsodicNet(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+
+        hidden_dim = config['hidden_dim']
+        self.pitch_convs = torch.nn.Sequential(
+            torch.nn.Conv1d(2, hidden_dim, kernel_size=1, bias=False),
+            torch.nn.LeakyReLU(0.1),
+
+            torch.nn.InstanceNorm1d(hidden_dim, affine=False),
+            torch.nn.Conv1d(
+                hidden_dim, hidden_dim, 
+                kernel_size= 3, 
+                stride=1, 
+                padding=1,
+            ),
+            torch.nn.LeakyReLU(0.1),
+            
+            torch.nn.InstanceNorm1d(hidden_dim, affine=False),
+            torch.nn.Conv1d(
+                hidden_dim, hidden_dim, 
+                kernel_size= 3, 
+                stride=1, 
+                padding=1,
+            ),
+            torch.nn.LeakyReLU(0.1),
+
+            torch.nn.InstanceNorm1d(hidden_dim, affine=False),
+        )
+    def forward(self, x):
+        
+        out = x.transpose(1,2)
+        out = self.pitch_convs(out)
+        out = out.transpose(1,2)
+        return out    
 
 class DiscreteProsodicNet(nn.Module):
     def __init__(self, config):
@@ -347,7 +382,13 @@ class SynthesizerTrn(nn.Module):
         self.gin_channels = config['spk_emb_dim']
         self.hop_size = config['hop_length']
         
-        self.prosodic_net = DiscreteProsodicNet(config['prosodic_net'])
+        if 'prosodic_rep_type' not in config:
+            self.prosodic_net = None
+        else:
+            if config['prosodic_rep_type'] == 'discrete':     
+                self.prosodic_net = DiscreteProsodicNet(config['prosodic_net'])
+            elif config['prosodic_rep_type'] == 'continuous':
+                self.prosodic_net = ContinuousProsodicNet(config['prosodic_net'])    
         self.enc_p = TextEncoder(self.input_dim, 
                         self.inter_channels, 
                         self.hidden_channels, 
@@ -374,7 +415,8 @@ class SynthesizerTrn(nn.Module):
 
 
     def forward(self, spec, spec_lengths, ling, spk, pros):
-        pros = self.prosodic_net(pros)
+        if self.prosodic_net is not None and pros is not None:
+            pros = self.prosodic_net(pros)
         z_ptemp, m_p, logs_p, _ = self.enc_p(ling, spec_lengths, pros)
 
         z, m_q, logs_q, spec_mask = self.enc_q(spec, spec_lengths, g=spk)

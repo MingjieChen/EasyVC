@@ -178,6 +178,7 @@ if __name__ == '__main__':
         # generate mel
         mel = eval(decoder_func)(decoder_model, ling_rep, pros_rep, spk_emb_tensor)
         mel = denorm_mel(mean_tensor, std_tensor, mel)
+
         # vocoder
         wav = eval(vocoder_func)(vocoder_model, mel)
         end_time = time.time()

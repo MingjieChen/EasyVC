@@ -28,7 +28,7 @@ python3 ling_encoder/whisper_ppg/whisper_ppg_feature_extract.py \
     --speaker $spk
 EOF
     chmod +x $b
-    submitjob -m 10000 $l $b
+    submitjob -m 10000  $l $b
     echo "submitjob for $spk see log $l"
     done
 done        
