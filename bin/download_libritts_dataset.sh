@@ -10,8 +10,8 @@ part="clean" # "clean" or "all"
              # if set to "all", use clean + other data
 
 # directory path setting
-download_dir=downloads # directory to save database
-dumpdir=dump/libritts_clean           # directory to dump features
+download_dir=downloads/libritts # directory to save database
+dumpdir=dump/libritts           # directory to dump features
 datadir=data/libritts   # directory to store meta data (wav.scp, segments)
 
 train_set="train_nodev_${part}" # name of training data directory
