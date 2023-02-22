@@ -4,6 +4,9 @@ import sys
 import json
 import os
 import numpy as np
+from concurrent.futures import ProcessPoolExecutor
+from functools import partial
+import subprocess
 from d_vector_model.audio import preprocess_wav
 from d_vector_model.voice_encoder import SpeakerEncoder
 D_VECTOR_SAMPLING_RATE=16000

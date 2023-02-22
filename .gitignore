@@ -1,13 +1,12 @@
 # project related files
 .DS_Store
-data/
-dump/
-logs/
+data
+dump
 logs
-scripts/
+scripts
 submit_cpu.sh
 submit_gpu.sh
-downloads/
+downloads
 ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt
 ling_encoder/contentvec_100/contentvec_100_model.pt
 ling_encoder/contentvec_500/contentvec_500_model.pt
