@@ -6,8 +6,8 @@ conda_env=torch_1.9
 source $conda/bin/activate $conda_env
 
 # stage
-stage=
-stop_stage=
+stage=1
+stop_stage=4
 
 # set up
 dataset=vctk # vctk or libritts
@@ -16,6 +16,7 @@ speaker_encoder=utt_dvec
 prosodic_encoder=ppgvc_f0
 decoder=fastspeech2
 vocoder=ppgvc_hifigan
+. bin/parse_options.sh || exit 1;
 
 # decide feature_type based on choices of vocoder and decoder
 if [ "$vocoder" == "ppgvc_hifigan" ]; then
@@ -41,12 +42,11 @@ else
 fi    
 
 
-. bin/parse_options.sh || exit 1;
 
 
 # step 1: spectrogram extraction
 if [ "${stage}" -le 1 ] && [ "${stop_stage}" -ge 1 ]; then
-    ./bin/feature_extraction.sh $dataset $feature_type
+    ./bin/feature_extraction.sh $dataset $feature_type $splits
     if [ "$feature_type" == "mel" ]; then
         # normalize as parallel_wavegan
         stats_path=dump/$dataset/$train_split/$feature_type/${train_split}.npy
@@ -56,7 +56,7 @@ fi
 
 # step 2: linguistic representation extraction
 if [ "${stage}" -le 2 ] && [ "${stop_stage}" -ge 2 ]; then
-    if [ "$linguistic_encoder" == "vqwav2vec" ]; then 
+    if [ "$linguistic_encoder" == "vqwav2vec" ] && [ ! -e ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt ]; then 
         mkdir -p ling_encoder/vqwav2vec 
         cd ling_encoder/vqwav2vec
         wget https://dl.fbaipublicfiles.com/fairseq/wav2vec/vq-wav2vec_kmeans.pt
@@ -67,7 +67,7 @@ fi
 
 # step 3: prosodic representation extraction
 if [ "${stage}" -le 3 ] && [ "${stop_stage}" -ge 3 ]; then
-    ./bin/feature_extraction.sh $dataset $prosodic_encoder
+    ./bin/feature_extraction.sh $dataset $prosodic_encoder $splits
     if [ "$prosodic_encoder" == "fastspeech2_pitch_energy"  ]; then
         # normalize pitch & energy 
         stats_path=dump/$dataset/$train_split/$prosodic_encoder/${train_split}.npy

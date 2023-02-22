@@ -2,8 +2,8 @@
 
 dataset=$1
 feature_type=$2
+splits=$3
 config=configs/preprocess_${feature_type}.yaml
-splits="train_nodev_all dev_all"
 
 
 for split in $splits ; do
