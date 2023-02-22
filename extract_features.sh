@@ -6,7 +6,7 @@ conda_env=torch_1.9
 source $conda/bin/activate $conda_env
 
 # stage
-stage=4
+stage=1
 stop_stage=4
 
 # set up
