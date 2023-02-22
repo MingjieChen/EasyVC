@@ -4,13 +4,20 @@ import pyworld
 from scipy.interpolate import interp1d
 from scipy.signal import firwin, get_window, lfilter
 
+def f02lf0(f0):
+    lf0 = f0.copy()
+    nonzero_indices = np.nonzero(f0)
+    lf0[nonzero_indices] = np.log(f0[nonzero_indices])
+    return lf0
+
 def get_converted_lf0uv(
     wav, 
     lf0_mean_trg, 
     lf0_std_trg,
+    sr,
     convert=True,
 ):
-    f0_src = compute_f0(wav)
+    f0_src = compute_f0(wav, sr = sr)
     if not convert:
         uv, cont_lf0 = get_cont_lf0(f0_src)
         lf0_uv = np.concatenate([cont_lf0[:, np.newaxis], uv[:, np.newaxis]], axis=1)
@@ -24,8 +31,7 @@ def get_converted_lf0uv(
     f0_vc = lf0_vc.copy()
     f0_vc[lf0_src > 0.0] = np.exp(lf0_vc[lf0_src > 0.0])
     
-    uv, cont_lf0_vc = get_cont_lf0(f0_vc)
-    lf0_uv = np.concatenate([cont_lf0_vc[:, np.newaxis], uv[:, np.newaxis]], axis=1)
+    lf0_uv = get_cont_lf0(f0_vc)
     return lf0_uv
 
 def compute_mean_std(lf0):

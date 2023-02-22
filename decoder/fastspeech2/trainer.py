@@ -139,7 +139,7 @@ class Trainer(object):
         scaler = torch.cuda.amp.GradScaler() if (('cuda' in str(self.device)) and self.fp16_run) else None
 
         
-        for train_steps_per_epoch, batch in tqdm(enumerate(self.train_dataloader, 1)):
+        for train_steps_per_epoch, batch in tqdm(enumerate(self.train_dataloader, 1), total = len(self.train_dataloader)):
             _batch = []
             for b in batch:
                 if isinstance(b, torch.Tensor):

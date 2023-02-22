@@ -1,4 +1,4 @@
-from .ppg_vc_hifigan.hifigan_model import load_hifigan_generator
+from .ppgvc_hifigan.hifigan_model import load_hifigan_generator
 from .libritts_hifigan.vocoder import libritts_hifigan_model
 from .vctk_hifigan.vocoder import vctk_hifigan_model
 from sklearn.preprocessing import StandardScaler

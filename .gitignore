@@ -9,9 +9,20 @@ submit_cpu.sh
 submit_gpu.sh
 downloads/
 ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt
+ling_encoder/contentvec_100/contentvec_100_model.pt
+ling_encoder/contentvec_500/contentvec_500_model.pt
 exp/
-vocoder/libritts_hifigan/checkpoint-600000steps.pkl
+vocoder/libritts_hifigan/*.pkl
+
+# parts that are not public yet
 evaluation/UTMOS-demo
+ling_encoder/contentvec_100
+ling_encoder/contentvec_500
+ling_encoder/whisper_ppg
+bin/contentvec_*
+bin/whisper_ppg*
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

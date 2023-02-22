@@ -26,10 +26,11 @@ trainer: TacoARTrainer
 ngpu: 2
 
 #dataloader
+dataset_class: Dataset
 sort: !!bool True
 dump_dir: dump
 num_workers: !!int 8
-batch_size: 64
+batch_size: 32
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
@@ -66,7 +67,7 @@ scheduler:
     num_warmup_steps: 4000
 
 # loss hyper-parameters
-loss:
+losses:
    alpha: 1. 
     
 

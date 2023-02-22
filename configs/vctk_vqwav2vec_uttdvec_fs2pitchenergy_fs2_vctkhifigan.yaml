@@ -27,10 +27,11 @@ trainer: FS2Trainer
 ngpu: 2
 
 #dataloader
+dataset_class: Dataset
 sort: !!bool False
 dump_dir: dump
 num_workers: !!int 8
-batch_size: 64
+batch_size: 32
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
@@ -80,7 +81,7 @@ scheduler:
     anneal_rate: 0.3
 
 # loss hyper-parameters
-loss:
+losses:
    alpha: 1. 
     
 

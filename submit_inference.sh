@@ -3,18 +3,20 @@
 dataset=vctk
 split=eval_all
 # model setup
-ling_enc=vqw2v
+ling_enc=vqwav2vec
 spk_enc=uttdvec
-pros_enc=none
-dec=fastspeech2
-vocoder=vctk_hifigan
+pros_enc=ppgvcf0
+dec=fs2
+vocoder=ppgvchifigan
 
 # exp setup
 exp_name=vctk_24khz_10ms
-exp_dir=exp/${ling_enc}_${spk_enc}_${pros_enc}_${dec}/${exp_name}
+exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
+
 
 # eval setup
-task=oneshot_vc
+#task=oneshot_vc
+task=m2m_vc
 epochs=$( ls -t $exp_dir/ckpt | head -n 1 | sed 's/[^0-9]*//g')
 eval_list=eval_list_m2m_vc_small.json
 eval_list_path=data/$dataset/$split/$eval_list
@@ -39,7 +41,6 @@ python inference.py \
         --eval_list $eval_list_path \
         --epochs ${epochs} \
         --task ${task} \
-        --vocoder ${vocoder}  \
         --device ${device} \
         --sge_task_id \$SGE_TASK_ID \
         --sge_n_tasks ${n_parallel_jobs}

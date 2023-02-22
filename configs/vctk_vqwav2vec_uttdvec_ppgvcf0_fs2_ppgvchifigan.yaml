@@ -25,6 +25,7 @@ trainer: FS2Trainer
 ngpu: 2
 
 #dataloader
+dataset_class: Dataset
 sort: !!bool False
 dump_dir: dump
 num_workers: !!int 8
@@ -76,7 +77,7 @@ scheduler:
     anneal_rate: 0.3
 
 # loss hyper-parameters
-loss:
+losses:
    alpha: 1. 
     
 

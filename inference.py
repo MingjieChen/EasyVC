@@ -19,7 +19,7 @@ from scipy.io import wavfile
 import resampy
 from ling_encoder.interface import *
 from speaker_encoder.interface import *
-from prosodic_encoder.inteface import *
+from prosodic_encoder.interface import *
 from decoder.interface import *
 from vocoder.interface import *
 from sklearn.preprocessing import StandardScaler
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     decoder_model = eval(decoder_load_func)(decoder_model_path, exp_config_path, device = args.device)
     print(f'load decoder {decoder} done')
     # load vocoder
-    vocoder = args.vocoder
+    vocoder = exp_config['vocoder']
     vocoder_load_func = f'load_{vocoder}'
     vocoder_model = eval(vocoder_load_func)(device = args.device)
     vocoder_func = f'{vocoder}'
