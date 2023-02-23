@@ -95,5 +95,5 @@ fi
 
 # step 4: speaker representation extraction
 if [ "${stage}" -le 4 ] && [ "${stop_stage}" -ge 4 ]; then
-    ./bin/d_vector_extract_utterance_embedding.sh "$splits"   $dataset
+    ./bin/${speaker_encoder}_feature_extraction.sh "$splits"   $dataset
 fi    
