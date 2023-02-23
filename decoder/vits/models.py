@@ -44,9 +44,7 @@ class ContinuousProsodicNet(nn.Module):
         )
     def forward(self, x):
         
-        out = x.transpose(1,2)
-        out = self.pitch_convs(out)
-        out = out.transpose(1,2)
+        out = self.pitch_convs(x)
         return out    
 
 class DiscreteProsodicNet(nn.Module):

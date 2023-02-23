@@ -12,10 +12,11 @@ ling=vqwav2vec
 spk=uttdvec
 pros=ppgvcf0
 #dec=fs2
-#dec=vits
+dec=vits
 #dec=tacoar
-dec=tacomol
-vocoder=ppgvchifigan
+#dec=tacomol
+#vocoder=ppgvchifigan
+vocoder=none
 
 exp_name=vctk_first_train
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
@@ -28,7 +29,7 @@ slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 #gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
-gputypes="GeForceGTX1080Ti|GeforceRTX3090"
+gputypes="GeForceGTX1080Ti|GeforceRTX3090|GeForceRTX3060"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp
