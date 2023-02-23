@@ -40,7 +40,7 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 decoder_params: 
     prosodic_rep_type: continuous
     prosodic_net:
-        hidden_dim: 256
+        hidden_dim: 1024
     input_dim: 512
     output_dim: 80
     resample_ratio: 1

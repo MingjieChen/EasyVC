@@ -31,8 +31,12 @@ def load_FastSpeech2(ckpt = None, config = None, device = 'cpu'):
 
 def infer_FastSpeech2(model, ling, pros, spk):
     
-    _, mel, _ = model(ling, pros, spk, torch.LongTensor([ling.size(1)]).to(ling.device), ling.size(1))
-    return mel
+    mel, postnet_mel, _ = model(ling, pros, spk, torch.LongTensor([ling.size(1)]).to(ling.device), ling.size(1))
+
+    if postnet_mel is not None:
+        return postnet_mel
+    else:    
+        return mel
 
 
 def load_TacoAR(ckpt = None, config = None, device = 'cpu'):

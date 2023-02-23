@@ -9,6 +9,7 @@ class DiscreteProsodicNet(nn.Module):
 
         n_bins = config['prosodic_bins']
         prosodic_stats_path = config['prosodic_stats_path']
+        hidden_dim = config['hidden_dim']
         # load pitch energy min max
         stats = np.load(prosodic_stats_path)
         pitch_max = stats[0][0]
@@ -29,12 +30,36 @@ class DiscreteProsodicNet(nn.Module):
         self.energy_embedding = nn.Embedding(
                 n_bins, config["hidden_dim"]
                 )
+        self.pitch_convs = torch.nn.Sequential(
+            torch.nn.Conv1d(hidden_dim, hidden_dim, kernel_size=1, bias=False),
+            torch.nn.LeakyReLU(0.1),
+
+            torch.nn.Conv1d(
+                hidden_dim, hidden_dim, 
+                kernel_size= 3, 
+                stride=2, 
+                padding=1,
+            ),
+            torch.nn.LeakyReLU(0.1),
+            
+            torch.nn.Conv1d(
+                hidden_dim, hidden_dim, 
+                kernel_size= 3, 
+                stride=2, 
+                padding=1,
+            ),
+            torch.nn.LeakyReLU(0.1),
+
+        )
     def forward(self, x):
         pitch = x[:,:,0]
         energy = x[:,:,1]
         pitch_reps = self.pitch_embedding(torch.bucketize(pitch, self.pitch_bins))
         energy_reps = self.energy_embedding(torch.bucketize(energy, self.energy_bins))
         prosodic_reps = pitch_reps + energy_reps
+        out = prosodic_reps.transpose(1,2)
+        out = self.pitch_convs(out)
+        out = out.transpose(1,2)
         return prosodic_reps     
 class ContinuousProsodicNet(nn.Module):
     def __init__(self, config):
@@ -49,7 +74,7 @@ class ContinuousProsodicNet(nn.Module):
             torch.nn.Conv1d(
                 hidden_dim, hidden_dim, 
                 kernel_size= 3, 
-                stride=1, 
+                stride=2, 
                 padding=1,
             ),
             torch.nn.LeakyReLU(0.1),
@@ -58,7 +83,7 @@ class ContinuousProsodicNet(nn.Module):
             torch.nn.Conv1d(
                 hidden_dim, hidden_dim, 
                 kernel_size= 3, 
-                stride=1, 
+                stride=2, 
                 padding=1,
             ),
             torch.nn.LeakyReLU(0.1),

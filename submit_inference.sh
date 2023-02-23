@@ -10,7 +10,7 @@ dec=fs2
 vocoder=ppgvchifigan
 
 # exp setup
-exp_name=vctk_24khz_10ms
+exp_name=vctk_24khz_10ms_no_postnet
 exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
 
 
