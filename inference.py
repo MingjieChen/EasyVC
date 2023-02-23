@@ -117,12 +117,19 @@ if __name__ == '__main__':
     decoder_model_path = os.path.join(args.exp_dir, 'ckpt', f'epoch_{args.epochs}.pth')
     decoder_model = eval(decoder_load_func)(decoder_model_path, exp_config_path, device = args.device)
     print(f'load decoder {decoder} done')
+
     # load vocoder
-    vocoder = exp_config['vocoder']
-    vocoder_load_func = f'load_{vocoder}'
-    vocoder_model = eval(vocoder_load_func)(device = args.device)
-    vocoder_func = f'{vocoder}'
-    print(f'load vocoder {vocoder} done')
+    if 'vocoder' in exp_config:
+        vocoder = exp_config['vocoder']
+        vocoder_load_func = f'load_{vocoder}'
+        vocoder_model = eval(vocoder_load_func)(device = args.device)
+        vocoder_func = f'{vocoder}'
+        print(f'load vocoder {vocoder} done')
+    else:
+        vocoder = None
+        vocoder_load_func = None
+        vocoder_model = None
+        vocoder_func = None    
     # conduct inference
     
     # denorm mel scaler
@@ -176,11 +183,14 @@ if __name__ == '__main__':
         spk_emb_tensor = torch.FloatTensor(spk_emb).unsqueeze(0).unsqueeze(0).to(args.device)
 
         # generate mel
-        mel = eval(decoder_func)(decoder_model, ling_rep, pros_rep, spk_emb_tensor)
-        mel = denorm_mel(mean_tensor, std_tensor, mel)
-
-        # vocoder
-        wav = eval(vocoder_func)(vocoder_model, mel)
+        decoder_out = eval(decoder_func)(decoder_model, ling_rep, pros_rep, spk_emb_tensor)
+        decoder_out = denorm_mel(mean_tensor, std_tensor, decoder_out)
+        
+        if vocoder is not None:
+            # vocoder
+            wav = eval(vocoder_func)(vocoder_model, mel)
+        else:
+            wav = decoder_out.view(-1)    
         end_time = time.time()
         rtf = (end_time - start_time) / (0.01 * ling_rep.size(1))
         total_rtf += rtf

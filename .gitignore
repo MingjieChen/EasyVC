@@ -16,7 +16,7 @@ vocoder/libritts_hifigan/*.pkl
 decoder/grad_tts
 
 # parts that are not public yet
-evaluation/UTMOS-demo/
+evaluation/UTMOS-demo
 
 
 

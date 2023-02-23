@@ -1,6 +1,8 @@
 from .fastspeech2.fastspeech2 import FastSpeech2
 from .taco_ar.model import Model as TacoAR
 from .taco_mol.model import MelDecoderMOLv2 as TacoMOL
+from .vits.models import VITS
+from .vits.utils import load_checkpoint as load_vits_checkpoint
 import torch
 import yaml
 
@@ -11,6 +13,22 @@ def remove_module_from_state_dict(state_dict):
         name = k[7:] # remove `module.`
         new_state_dict[name] = v
     return new_state_dict        
+
+
+def load_VITS(ckpt = None, config = None, device = 'cpu'):
+    with open(config) as f:
+        model_config = yaml.safe_load(f)
+        f.close()
+    model = VITS(model_config)    
+    model = load_vits_checkpoint(ckpt, model, None)
+    generator = model.generator
+    generator.dec.remove_weight_norm()
+    generator.to(device)
+    generator.eval()
+    return generator
+    
+    
+
 
 def load_FastSpeech2(ckpt = None, config = None, device = 'cpu'):
     with open(config) as f:
@@ -54,6 +72,15 @@ def load_TacoAR(ckpt = None, config = None, device = 'cpu'):
     model.eval()
 
     return model
+
+
+def infer_VITS(model, ling, pros, spk):
+    ling_lengths = torch.LongTensor([ling.size(1)]).to(ling.device)
+    ling = ling.transpose(1,2)
+    pros = pros.transpose(1,2)
+    spk = spk.transpose(1,2)
+    out = model.infer(ling, ling_lengths, pros, spk)
+    return out
 
 def infer_TacoAR(model, ling, pros, spk):
      
