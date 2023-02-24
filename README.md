@@ -50,7 +50,7 @@ conda create --name torch_1.9 --file requirements.txt
  
 - **Speaker Encoder**
     - [x] d-vector from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
-    - [ ] ECAPA-TDNN from [speechbrain](https://github.com/speechbrain/speechbrain/tree/develop/recipes/VoxCeleb)
+    - [x] ECAPA-TDNN from [speechbrain](https://github.com/speechbrain/speechbrain/tree/develop/recipes/VoxCeleb)
  
  
 - **Decoder**
@@ -115,6 +115,7 @@ Options:
     - libritts
 - speaker_encoder: 
     - utt_dvec
+    - utt_ecapa_tdnn
 - linguistic_encoder: 
     - vqwav2vec
     - conformer_ppg 
