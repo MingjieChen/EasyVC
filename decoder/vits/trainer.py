@@ -204,8 +204,8 @@ class Trainer(object):
             self.iters+=1
             if self.iters % self.config['show_freq'] == 0:
                 print(loss_string, flush = True)
-            self.scheduler_g.step()
-            self.scheduler_d.step()
+        self.scheduler_g.step()
+        self.scheduler_d.step()
         train_losses = {key: np.mean(value) for key, value in train_losses.items()}
         return train_losses
     
