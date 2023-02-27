@@ -13,6 +13,7 @@ spk=uttdvec
 pros=ppgvcf0
 #dec=fs2
 dec=vits
+#dec=gradtts
 #dec=tacoar
 #dec=tacomol
 #vocoder=ppgvchifigan
@@ -20,6 +21,10 @@ vocoder=none
 
 exp_name=vctk_first_train
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
+if [ ! -e $config ] ; then
+    echo "can't find config file $config" 
+    exit 1;
+fi    
 exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name

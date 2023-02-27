@@ -269,12 +269,19 @@ class Dataset(data.Dataset):
                     _duration = row['duration']
                     if float(_duration) < config['max_utt_duration']:
                         self.metadata.append(row)
+                else:
+                    self.metadata.append(row)        
             f.close()    
         
         print(f'{split} data samples {len(self.metadata)}')
         self.batch_size = config['batch_size']
         self.drop_last = config['drop_last']
         self.sort = config['sort']
+        if 'mel_segment_length' in config:
+            self.mel_segment_length = config['mel_segment_length']
+        else:
+            self.mel_segment_length = None    
+
         # feature dirs
         self.mel_dir = os.path.join(config['dump_dir'], config['dataset'], split, config['mel_type'])
 
@@ -356,6 +363,16 @@ class Dataset(data.Dataset):
             pros_rep = pros_rep[:mel_duration,:]
         
         
+        if self.mel_segment_length is not None:
+            if mel_duration > self.mel_segment_length:
+                start = random.randint(0, mel_duration - self.mel_segment_length)
+                end = start + self.mel_segment_length
+                mel_duration = self.mel_segment_length
+                mel = mel[start:end, :]
+                ling_rep = ling_rep[start:end, :]
+                pros_rep = pros_rep[start:end, :]
+
+
         return (mel, ling_rep, pros_rep,  spk_emb, mel_duration)
     
     def collate_fn(self, data):

@@ -4,6 +4,7 @@ from decoder.fastspeech2.fastspeech2 import FastSpeech2
 from decoder.taco_ar.model import Model as TacoAR 
 from decoder.taco_mol.model import MelDecoderMOLv2 as TacoMOL
 from decoder.vits.models import VITS
+from decoder.grad_tts.grad_tts_model import GradTTS
 
 
 def print_network(model, name):

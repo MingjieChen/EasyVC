@@ -14,6 +14,7 @@ from decoder.fastspeech2.trainer import Trainer as FS2Trainer
 from decoder.taco_ar.trainer import Trainer as TacoARTrainer
 from decoder.taco_mol.trainer import Trainer as TacoMOLTrainer
 from decoder.vits.trainer import Trainer as VITSTrainer
+from decoder.grad_tts.trainer import Trainer as GradTTSTrainer
 import random
 import numpy as np
 import os.path as osp
@@ -21,6 +22,17 @@ import shutil
 import torch.multiprocessing as mp
 import torch.distributed as dist
 from util import Timer
+def clean_checkpoints(path_to_models='ckpt', n_ckpts_to_keep=10, sort_by_time=True, prefix = 'epoch'):
+    ckpts_files = [f for f in os.listdir(path_to_models) if os.path.isfile(os.path.join(path_to_models, f))]
+    name_key = (lambda _f: int(re.compile('._(\d+)\.pth').match(_f).group(1)))
+    time_key = (lambda _f: os.path.getmtime(os.path.join(path_to_models, _f)))
+    sort_key = time_key if sort_by_time else name_key
+    x_sorted = lambda _x: sorted([f for f in ckpts_files if f.startswith(_x) and not f.endswith('_0.pth')], key=sort_key)
+    to_del = [os.path.join(path_to_models, fn) for fn in
+             x_sorted(prefix)[:-n_ckpts_to_keep]]
+    del_info = lambda fn: print(f".. Free up space by deleting ckpt {fn}")
+    del_routine = lambda x: [os.remove(x), del_info(x)]
+    rs = [del_routine(fn) for fn in to_del]
 def _get_free_port():
     import socketserver
     with socketserver.TCPServer(('localhost',0),None) as s:
@@ -109,8 +121,13 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
             else:
                 for v in value:
                     writer.add_figure('eval_spec', v, epoch)
-        if replica_id == 0 and (epoch % config['save_freq']) == 0:
-            trainer.save_checkpoint(osp.join(exp_dir, 'ckpt',f'epoch_{epoch}.pth'))
+        
+        
+        # save            
+        if epoch % config['save_freq'] == 0:
+            if replica_id == 0 or replica_id == None:
+                trainer.save_checkpoint(osp.join(exp_dir, 'ckpt',f'epoch_{epoch}.pth'))
+                clean_checkpoints(osp.join(exp_dir, 'ckpt'), prefix = 'epoch' )
 
 
 

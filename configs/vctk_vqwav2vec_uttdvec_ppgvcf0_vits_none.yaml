@@ -74,11 +74,11 @@ decoder_params:
 #optimizer & scheduler
 optimizer:
     generator:
-        lr: !!float 2e-4
+        lr: !!float 1e-4
         betas: [0.8,0.99]
         eps: !!float 1e-9
     discriminator:
-        lr: !!float 2e-4
+        lr: !!float 1e-4
         betas: [0.8,0.99]
         eps: !!float 1e-9
 scheduler:    

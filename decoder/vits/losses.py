@@ -25,11 +25,7 @@ def compute_g_loss(model, batch, config):
           config['decoder_params']['hop_length'], 
           config['decoder_params']['win_length'], 
       )
-    y = slice_segments(y, ids_slice * config['decoder_params']['hop_length'], config['decoder_params']['segment_size']) # slice 
-    assert y.size(2) == y_hat.size(2), f'y {y.size()} y_hat {y_hat.size()}'
 
-    with autocast(enabled=config['fp16_run']):
-        y_d_hat_r, y_d_hat_g, fmap_r, fmap_g = model.discriminator(y, y_hat)
     with autocast(enabled=False):
         loss_mel = F.l1_loss(y_mel, y_hat_mel) * config['losses']['mel']
         loss_kl = kl_loss(z_p, logs_q, m_p, logs_p, spec_mask) * config['losses']['kl']
@@ -46,9 +42,13 @@ def compute_g_loss(model, batch, config):
 def compute_d_loss(model, batch, config):
     y, spec, ling, pros, spk_emb, spec_lengths, audio_length = batch 
 
+    
     with autocast(enabled=config['fp16_run']):
         y_hat, ids_slice, spec_mask, (z, z_p, m_p, logs_p, m_q, logs_q) = model.generator(spec, spec_lengths, ling, spk_emb, pros)
+        y = slice_segments(y, ids_slice * config['decoder_params']['hop_length'], config['decoder_params']['segment_size']) # slice 
+        assert y.size(2) == y_hat.size(2), f'y {y.size()} y_hat {y_hat.size()}'
         y_d_hat_r, y_d_hat_g, _, _ = model.discriminator(y, y_hat.detach())
+        
     with autocast(enabled=False):
         loss_disc, losses_disc_r, losses_disc_g = discriminator_loss(y_d_hat_r, y_d_hat_g)
         loss_disc_all = loss_disc
