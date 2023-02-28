@@ -60,6 +60,7 @@ if __name__ == '__main__':
     #exp 
     parser.add_argument('--epochs', type = str)
     parser.add_argument('--task', type = str) 
+    parser.add_argument('--src_resyn', default = False, action = 'store_true')
     # vocoder
     parser.add_argument('--vocoder', type = str, default = 'ppg_vc_hifigan')
     # sge task 
@@ -157,6 +158,23 @@ if __name__ == '__main__':
         ID = meta['ID']
         src_wav_path = meta['src_wav']
         trg_wav_path = meta['trg_wav']
+        
+        if args.src_resyn and vocoder == 'ppgvc_hifigan':
+            from feature_extraction import ppgvc_hifigan_logmelspectrogram
+            src_audio = load_wav(src_wav_path, 24000)
+            ppgvc_mel_config = {'sampling_rate':24000, 
+                                'fft_size': 1024, 
+                                'hop_size': 240,
+                                'win_length': 1024,
+                                'window': 'hann',
+                                'num_mels': 80,
+                                'fmin': 0,
+                                'fmax': 8000,
+                                'mel_min': -12.0,
+                                'mel_max': 2.5
+                                }
+            src_mel_resyn = ppgvc_hifigan_logmelspectrogram(src_audio,ppgvc_mel_config)
+        
         # load src wav & trg wav
         src_wav = load_wav(src_wav_path, 16000)
         
@@ -188,7 +206,10 @@ if __name__ == '__main__':
         
         if vocoder is not None:
             # vocoder
-            wav = eval(vocoder_func)(vocoder_model, mel)
+            wav = eval(vocoder_func)(vocoder_model, decoder_out)
+            if args.src_resyn:
+                src_mel_tensor = torch.FloatTensor([src_mel_resyn])
+                src_resyn_wav = eval(vocoder_func)(vocoder_model, src_mel_tensor)
         else:
             wav = decoder_out.view(-1)    
         end_time = time.time()
@@ -197,6 +218,10 @@ if __name__ == '__main__':
         cnt += 1
         converted_wav_basename = f'{ID}_gen.wav'
         sf.write(os.path.join(out_wav_dir, converted_wav_basename), wav.data.cpu().numpy(), 24000, "PCM_16")
+        if args.src_resyn:
+            resyn_wav_basename = f'{ID}_resyn.wav'
+            sf.write(os.path.join(out_wav_dir, resyn_wav_basename), src_resyn_wav.data.cpu().numpy(), 24000, "PCM_16")
+
     print(f"RTF: {total_rtf/cnt :.2f}")    
 
 

@@ -8,6 +8,9 @@ def compute_g_loss(model, batch, config):
     y, spec, ling, pros, spk_emb, spec_lengths, audio_length = batch 
     with autocast(enabled=config['fp16_run']):
         y_hat, ids_slice, spec_mask, (z, z_p, m_p, logs_p, m_q, logs_q) = model.generator(spec, spec_lengths, ling, spk_emb, pros)
+        y = slice_segments(y, ids_slice * config['decoder_params']['hop_length'], config['decoder_params']['segment_size']) # slice 
+        assert y.size(2) == y_hat.size(2), f'y {y.size()} y_hat {y_hat.size()}'
+        y_d_hat_r, y_d_hat_g, fmap_r, fmap_g = model.discriminator(y, y_hat)
 
         mel = spec_to_mel_torch(
            spec,

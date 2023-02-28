@@ -6,11 +6,11 @@ split=eval_all
 ling_enc=vqwav2vec
 spk_enc=uttdvec
 pros_enc=ppgvcf0
-dec=fs2
+dec=tacoar
 vocoder=ppgvchifigan
 
 # exp setup
-exp_name=vctk_24khz_10ms_no_postnet
+exp_name=vctk_first_train
 exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
 
 
@@ -43,7 +43,7 @@ python inference.py \
         --task ${task} \
         --device ${device} \
         --sge_task_id \$SGE_TASK_ID \
-        --sge_n_tasks ${n_parallel_jobs}
+        --sge_n_tasks ${n_parallel_jobs} \
 
 EOF
 
