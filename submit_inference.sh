@@ -6,7 +6,7 @@ split=eval_all
 ling_enc=vqwav2vec
 spk_enc=uttdvec
 pros_enc=ppgvcf0
-dec=tacoar
+dec=gradtts
 vocoder=ppgvchifigan
 
 # exp setup

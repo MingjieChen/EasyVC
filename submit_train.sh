@@ -19,7 +19,7 @@ dec=vits
 #vocoder=ppgvchifigan
 vocoder=none
 
-exp_name=vctk_first_train
+exp_name=vctk_no16fp
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 if [ ! -e $config ] ; then
     echo "can't find config file $config" 
@@ -34,7 +34,7 @@ slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 #gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
-gputypes="GeForceGTX1080Ti|GeforceRTX3090|GeForceRTX3060"
+gputypes="GeForceGTX1080Ti|GeforceRTX3090"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp

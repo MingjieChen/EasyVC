@@ -17,6 +17,10 @@ import csv
 from tqdm import tqdm
 from scipy.io import wavfile
 import resampy
+import logging
+import logging
+logger = logging.getLogger('log')
+logger.setLevel(logging.WARNING)
 from ling_encoder.interface import *
 from speaker_encoder.interface import *
 from prosodic_encoder.interface import *

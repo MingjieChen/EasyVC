@@ -15,7 +15,7 @@ mel_type: vits_spec
 
 
 # training 
-fp16_run: !!bool True
+fp16_run: !!bool False
 epochs: 200
 save_freq: 2 # save ckpt frequency
 show_freq: 100 # show training information frequency
@@ -28,7 +28,7 @@ ngpu: 2
 dataset_class: VITSDataset
 sampling_rate: !!int 24000
 vits_hop_size: !!int 240
-spec_max_len: !!int 360
+spec_max_len: !!int 240
 sort: !!bool True
 dump_dir: dump
 num_workers: !!int 4
