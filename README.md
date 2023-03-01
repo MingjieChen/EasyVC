@@ -33,6 +33,9 @@ conda create --name torch_1.9 --file requirements.txt
 - **Dataset**
     - [x] VCTK
     - [x] LibriTTS
+    - [ ] M4Singer
+    - [ ] NUS-48E
+    - [ ] NHSS
 
 - **Linguistic Encoder**
     - [x] conformer_ppg from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
@@ -58,11 +61,13 @@ conda create --name torch_1.9 --file requirements.txt
     - [x] taco_ar from [s3prl-vc](https://github.com/s3prl/s3prl/tree/main/s3prl/downstream/a2a-vc-vctk)
     - [x] taco_mol from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
     - [x] vits from [vits](https://github.com/jaywalnut310/vits)
-    - [ ] grad_tts from [Grad_TTS](https://github.com/huawei-noah/Speech-Backbones)
+    - [x] grad_tts from [Grad_TTS](https://github.com/huawei-noah/Speech-Backbones)
  
  
 - **Vocoder**
     - [x] hifigan (vctk) from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
+    - [ ] CARGAN from [cargan](https://github.com/descriptinc/cargan)
+    - [ ] BigVGAN from [bigvgan](https://github.com/NVIDIA/BigVGAN)
 
 - **Evaluation**
     - [ ] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
