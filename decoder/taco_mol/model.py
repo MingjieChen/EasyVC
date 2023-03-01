@@ -41,9 +41,11 @@ class MelDecoderMOLv2(AbsMelDecoder):
         postnet_hidden_dim = 512
         mask_padding = True
         use_spk_dvec = True
+        use_postnet = config['use_postnet']
         assert check_argument_types()
         super().__init__()
         
+        self.use_postnet = use_postnet
         self.mask_padding = mask_padding
         self.bottle_neck_feature_dim = bottle_neck_feature_dim
         self.num_mels = 80
@@ -106,7 +108,10 @@ class MelDecoderMOLv2(AbsMelDecoder):
         )
 
         # Mel-Spec Postnet: some residual CNN layers
-        self.postnet = Postnet()
+        if self.use_postnet:
+            self.postnet = Postnet(num_layers = postnet_num_layers, hidden_dim = postnet_hidden_dim)
+        else:
+            self.postnet = None    
     
     def parse_output(self, outputs, output_lengths=None):
         if self.mask_padding and output_lengths is not None:
@@ -153,8 +158,11 @@ class MelDecoderMOLv2(AbsMelDecoder):
         mel_outputs, predicted_stop, alignments = self.decoder(
             decoder_inputs, speech, feature_lengths//int(self.encoder_down_factor), max_len//int(self.encoder_down_factor))
         ## Post-processing
-        mel_outputs_postnet = self.postnet(mel_outputs.transpose(1, 2)).transpose(1, 2)
-        mel_outputs_postnet = mel_outputs + mel_outputs_postnet
+        if self.postnet is not None:
+            mel_outputs_postnet = self.postnet(mel_outputs.transpose(1, 2)).transpose(1, 2)
+            mel_outputs_postnet = mel_outputs + mel_outputs_postnet
+        else:
+            mel_outputs_postnet = None    
         if output_att_ws: 
             return self.parse_output(
                 [mel_outputs, mel_outputs_postnet, predicted_stop, alignments], speech_lengths)
@@ -197,9 +205,13 @@ class MelDecoderMOLv2(AbsMelDecoder):
             mel_outputs, alignments = self.decoder.inference_batched(bottle_neck_features)
         else:
             mel_outputs, alignments = self.decoder.inference(bottle_neck_features,)
-        ## Post-processing
-        mel_outputs_postnet = self.postnet(mel_outputs.transpose(1, 2)).transpose(1, 2)
-        mel_outputs_postnet = mel_outputs + mel_outputs_postnet
-        # outputs = mel_outputs_postnet[0]
         
-        return mel_outputs, mel_outputs_postnet, alignments
+        if self.postnet is not None:    
+            ## Post-processing
+            mel_outputs_postnet = self.postnet(mel_outputs.transpose(1, 2)).transpose(1, 2)
+            mel_outputs_postnet = mel_outputs + mel_outputs_postnet
+            return mel_outputs_postnet 
+            # outputs = mel_outputs_postnet[0]
+        else:
+            return mel_outputs   
+        

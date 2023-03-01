@@ -19,7 +19,7 @@ from scipy.io import wavfile
 import resampy
 import logging
 import logging
-logger = logging.getLogger('log')
+logger = logging.getLogger('numba')
 logger.setLevel(logging.WARNING)
 from ling_encoder.interface import *
 from speaker_encoder.interface import *

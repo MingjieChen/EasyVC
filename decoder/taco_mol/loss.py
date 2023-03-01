@@ -18,6 +18,7 @@ def compute_loss(model, batch, objective):
         stop_tokens[i, cur_ppg_len-objective.frames_per_step:] = 1
     
     mel_out, postnet_mel_out, stop_out = model(ling, length, mel, length, max_len, pros, spk)    
+    
     total_loss, mel_loss, postnet_mel_loss, stop_loss = objective(mel_out, postnet_mel_out, mel, length, stop_tokens, stop_out)
     return total_loss + stop_loss, {'total_loss': total_loss.item(), 'mel_loss':mel_loss.item(), 'post_loss': postnet_mel_loss.item(), 'stop_loss': stop_loss.item()} 
     
@@ -57,9 +58,13 @@ class MaskedMSELoss(nn.Module):
         # (B, T, D)
         mel_mask = mel_mask.expand_as(mel_trg)
         mel_loss_pre = (self.mel_loss_criterion(mel_pred, mel_trg) * mel_mask).sum() / mel_mask.sum()
-        mel_loss_post = (self.mel_loss_criterion(mel_pred_postnet, mel_trg) * mel_mask).sum() / mel_mask.sum()
+        if mel_pred_postnet is not None:
+            mel_loss_post = (self.mel_loss_criterion(mel_pred_postnet, mel_trg) * mel_mask).sum() / mel_mask.sum()
         
-        mel_loss = mel_loss_pre + mel_loss_post
+            mel_loss = mel_loss_pre + mel_loss_post
+        else:
+            mel_loss = mel_loss_pre    
+            mel_loss_post = torch.FloatTensor([0.]).to(mel_pred.device)
 
         # stop token loss
         stop_loss = torch.sum(self.stop_loss_criterion(stop_pred, stop_target) * stop_mask) / stop_mask.sum()

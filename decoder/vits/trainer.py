@@ -164,37 +164,35 @@ class Trainer(object):
                     _batch.append(b.to(self.device))
                 else:
                     _batch.append(b)    
-            self.timer.cnt("rd")        
             self.optim_g.zero_grad()
             self.optim_d.zero_grad()
             if scaler is not None:
                 d_loss, d_losses = compute_d_loss(self.model, _batch, self.config)
-                g_loss, g_losses = compute_g_loss(self.model, _batch, self.config)
-                self.timer.cnt('fw')    
                 scaler.scale(d_loss).backward()
-                scaler.scale(g_loss).backward()
                 scaler.unscale_(self.optim_d)
-                scaler.unscale_(self.optim_g)
                 grad_norm_d = clip_grad_value_(self.model.discriminator.parameters(), None)
+                scaler.step(self.optim_d)
+                
+                
+                g_loss, g_losses = compute_g_loss(self.model, _batch, self.config)
+                scaler.scale(g_loss).backward()
+                scaler.unscale_(self.optim_g)
                 grad_norm_g = clip_grad_value_(self.model.generator.parameters(), None)
                 scaler.step(self.optim_g)
-                scaler.step(self.optim_d)
 
                 scaler.update()
-                self.timer.cnt('bw')    
             else:
                 d_loss, d_losses = compute_d_loss(self.model, _batch, self.config)
-                g_loss, g_losses = compute_g_loss(self.model, _batch, self.config)
-                self.timer.cnt('fw')    
                 d_loss.backward()
-                g_loss.backward()
-                grad_norm_d = clip_grad_value_(self.model.discriminator.parameters(), None)
-                grad_norm_g = clip_grad_value_(self.model.generator.parameters(), None)
                 self.optim_d.step()
+                grad_norm_d = clip_grad_value_(self.model.discriminator.parameters(), None)
+                
+                g_loss, g_losses = compute_g_loss(self.model, _batch, self.config)
+                g_loss.backward()
+                grad_norm_g = clip_grad_value_(self.model.generator.parameters(), None)
                 self.optim_g.step()
-                self.timer.cnt('bw')    
             
-            loss_string = f"epoch: {self.epochs}| iters: {self.iters}| timer: {self.timer.show()}|" 
+            loss_string = f"epoch: {self.epochs}| iters: {self.iters}|" 
             for key in d_losses:
                 train_losses["train/%s" % key].append(d_losses[key])
                 loss_string += f" {key}:{d_losses[key]:.3f} "

@@ -19,7 +19,7 @@ dec=vits
 #vocoder=ppgvchifigan
 vocoder=none
 
-exp_name=vctk_no16fp
+exp_name=vctk_no16fp_split
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 if [ ! -e $config ] ; then
     echo "can't find config file $config" 

@@ -123,7 +123,7 @@ def load_TacoMOL(ckpt = None, config = None, device = 'cpu'):
 
 def infer_TacoMOL(model, ling, pros, spk):
     
-    _, mel, _ = model.inference(ling, pros, spk)    
+    mel = model.inference(ling, pros, spk)    
     return mel
 
 def infer_GradTTS(model, ling, pros, spk):
@@ -136,6 +136,6 @@ def infer_GradTTS(model, ling, pros, spk):
     
     
     ling_lengths = torch.LongTensor([ling.size(2)]).to(ling.device)
-    mel = model(ling, ling_lengths, spk, pros, 30)        
+    mel = model(ling, ling_lengths, spk, pros, 100)        
     mel = mel.transpose(1,2)
     return mel
