@@ -6,11 +6,11 @@ split=eval_all
 ling_enc=vqwav2vec
 spk_enc=uttdvec
 pros_enc=ppgvcf0
-dec=gradtts
-vocoder=ppgvchifigan
+dec=vits
+vocoder=none
 
 # exp setup
-exp_name=vctk_first_train
+exp_name=vctk_no16fp_split
 exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
 
 

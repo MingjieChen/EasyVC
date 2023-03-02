@@ -2,7 +2,6 @@ from .fastspeech2.fastspeech2 import FastSpeech2
 from .taco_ar.model import Model as TacoAR
 from .taco_mol.model import MelDecoderMOLv2 as TacoMOL
 from .vits.models import VITS
-from .vits.utils import load_checkpoint as load_vits_checkpoint
 from .grad_tts.grad_tts_model import GradTTS
 import torch
 import yaml
@@ -23,8 +22,12 @@ def load_VITS(ckpt = None, config = None, device = 'cpu'):
     with open(config) as f:
         model_config = yaml.safe_load(f)
         f.close()
-    model = VITS(model_config)    
-    model = load_vits_checkpoint(ckpt, model, None)
+    model = VITS(model_config['decoder_params'])    
+    params = torch.load(ckpt, map_location = torch.device(device))
+    params = params['model']
+    params = remove_module_from_state_dict(params)
+    model.load_state_dict(params)
+
     generator = model.generator
     generator.dec.remove_weight_norm()
     generator.to(device)

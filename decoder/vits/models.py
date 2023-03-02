@@ -427,9 +427,11 @@ class SynthesizerTrn(nn.Module):
         return o, ids_slice, spec_mask, (z, z_p, m_p, logs_p, m_q, logs_q)
 
     def infer(self, ling, lengths, pros, spk):
+        if self.prosodic_net is not None and pros is not None:
+            pros = self.prosodic_net(pros)
         z_p, m_p, logs_p, mask = self.enc_p(ling, lengths, pros)
         z = self.flow(z_p, mask, g=spk, reverse=True)
-        o = self.dec((z * mask), g=spk, pros = pros)
+        o = self.dec((z * mask), g=spk)
         return o 
 
 
