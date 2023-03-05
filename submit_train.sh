@@ -6,9 +6,9 @@ conda_env=torch_1.9
 
 #choose config
 dataset=vctk
-ling=vqwav2vec
+#ling=vqwav2vec
 #ling=conformerppg
-#ling=hubertsoft
+ling=hubertsoft
 spk=uttdvec
 pros=ppgvcf0
 #dec=fs2
@@ -19,7 +19,7 @@ dec=vits
 #vocoder=ppgvchifigan
 vocoder=none
 
-exp_name=vctk_no16fp_split
+exp_name=vctk_first_train
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 if [ ! -e $config ] ; then
     echo "can't find config file $config" 

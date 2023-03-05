@@ -14,7 +14,7 @@ for split in $splits ; do
     speakers=$(cat data/$dataset/$split/speakers.txt)
     for spk in $speakers ; do 
         b=$script_dir/conformer_ppg_feature_extraction_${split}_${spk}.sh
-        l=logs/enc_dec_conformer_ppg_feature_extraction${split}_${spk}.log
+        l=logs/enc_dec_conformer_ppg_feature_extraction_${split}_${spk}.log
         cat <<EOF > $b
 #!/bin/bash
 source $conda/bin/activate $conda_env
