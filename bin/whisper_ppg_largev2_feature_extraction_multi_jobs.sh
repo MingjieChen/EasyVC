@@ -14,8 +14,8 @@ for split in $splits ; do
     echo "[whisper_ppgfeature extraction]: $split for $dataset"
     speakers=$(cat data/$dataset/$split/speakers.txt)
     for spk in $speakers ; do 
-        b=$script_dir/whisper_ppg_feature_extraction_${split}_${spk}.sh
-        l=logs/whisper_ppg_feature_extraction_${split}_${spk}.log
+        b=$script_dir/whisper_ppg_largev2_feature_extraction_${split}_${spk}.sh
+        l=logs/whisper_ppg_largev2_feature_extraction_${split}_${spk}.log
         cat <<EOF > $b
 #!/bin/bash
 source $conda/bin/activate $conda_env
@@ -25,10 +25,11 @@ python3 ling_encoder/whisper_ppg/whisper_ppg_feature_extract.py \
     --dump_dir dump/$dataset \
     --split $split \
     --max_workers 20 \
-    --speaker $spk
+    --speaker $spk \
+    --ext largev2
 EOF
     chmod +x $b
-    submitjob -m 30000  $l $b
+    submitjob  -q LONG -m 30000  $l $b
     echo "submitjob for $spk see log $l"
     done
 done        

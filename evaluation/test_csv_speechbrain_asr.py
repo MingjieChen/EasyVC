@@ -25,7 +25,7 @@ if __name__ == '__main__':
     eval_wav_paths = sorted(glob.glob(os.path.join(args.eval_wav_dir, '*.wav')))
     
     # check 
-    assert len(eval_wav_paths) == len(eval_list)
+    assert len(eval_wav_paths) == len(eval_list), f'eval_wav_path {len(eval_wav_paths)} eval_list {len(eval_list)}'
     
     # write test_csv
     fieldnames = ["ID", "duration", "wav", "spk_id", "wrd"]
@@ -38,7 +38,7 @@ if __name__ == '__main__':
             wav_path = os.path.join(args.eval_wav_dir, ID + '_gen.wav')
             assert os.path.exists(wav_path)
             spk_id = ID.split('_')[-1]
-            wrd = meta['wrd']
+            wrd = meta['text']
             duration = meta['duration']
             
             csv_writer.writerow({'ID': ID, 'duration': duration, 'wav': wav_path, 'spk_id':spk_id, 'wrd': wrd})

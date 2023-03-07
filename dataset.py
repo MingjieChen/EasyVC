@@ -174,9 +174,10 @@ class VITSDataset(data.Dataset):
         
         # up_sample ling_rep to 10hz, in case some ling_rep are 50hz or 25hz.
         factor = int(round(spec_duration / ling_duration))
-        repeated_ling_rep = np.repeat(ling_rep, factor, axis=1)
-        ling_rep = np.reshape(repeated_ling_rep, [ling_duration * factor, ling_rep.shape[1]])
-        ling_duration = ling_rep.shape[0]
+        if factor > 1:
+            ling_rep = np.repeat(ling_rep, factor, axis=0)
+            #ling_rep = np.reshape(repeated_ling_rep, [ling_duration * factor, ling_rep.shape[1]])
+            ling_duration = ling_rep.shape[0]
 
 
         # match length between spec and ling_rep
@@ -342,9 +343,10 @@ class Dataset(data.Dataset):
         
         # up_sample ling_rep to 10hz, in case some ling_rep are 50hz or 25hz.
         factor = int(round(mel_duration / ling_duration))
-        repeated_ling_rep = np.repeat(ling_rep, factor, axis=1)
-        ling_rep = np.reshape(repeated_ling_rep, [ling_duration * factor, ling_rep.shape[1]])
-        ling_duration = ling_rep.shape[0]
+        if factor >1 :
+            ling_rep = np.repeat(ling_rep, factor, axis=0)
+            #ling_rep = np.reshape(repeated_ling_rep, [ling_duration * factor, ling_rep.shape[1]])
+            ling_duration = ling_rep.shape[0]
 
 
         # match length between mel and ling_rep

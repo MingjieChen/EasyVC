@@ -1,24 +1,30 @@
 #!/bin/bash
 
-
+dataset=vctk
+eval_split=eval_all
 # eval step
 step=asr # utmos|asr|asv
 
 # model setup
-ling_enc=vqw2v
+ling_enc=conformerppg
 spk_enc=uttdvec
-pros_enc=none
-dec=tacoar
-vocoder=libritts_hifigan
+pros_enc=ppgvcf0
+dec=vits
+vocoder=none
 
 # exp setup
-exp_name=first_train
-exp_dir=exp/${ling_enc}_${spk_enc}_${pros_enc}_${dec}/${exp_name}
+exp_name=vctk_first_train
+exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
+if [ ! -e $exp_dir ] ; then
+    echo "$exp_dir does not exist"
+    exit 1;
+fi
+    
 root=$PWD
 # eval setup
-task=oneshot_vc
-epochs=72
-eval_list=data/libritts/eval_clean/eval_list_oneshot_vc_small.json
+task=m2m_vc
+epochs=146
+eval_list=data/$dataset/eval_all/eval_list_m2m_vc_small_oneshot.json
 eval_wav_dir=$exp_dir/inference/$task/$epochs
 
 [ ! -e $exp_dir/evaluation ] && mkdir -p $exp_dir/evaluation
@@ -46,18 +52,43 @@ python predict.py --mode predict_dir --inp_dir \$wav_dir --bs 1 --out_path \$out
 EOF
 
     submitjob -m 20000 -M2 $utmos_log $utmos_job
-    echo "job submited, see ${utmos_log}"
+    echo "utmos job submited, see ${utmos_log}"
 fi
 
 # speechbrain asr
 
-if [[ "$step" == "asr"]] || [[ "$step" == "all" ]]; then
-    # generate test_csv for speechbrain_asr.py from eval_wav_dir
-    python evaluation/test_csv_speechbrain_asr.py \
-        --eval_list $eval_list \
-        --eval_wav_dir $root/$eval_wav_dir \
-        --test_csv_path $root/$exp_dir/evaluation/speechbrain_asr_test_csv_${task}_${epochs}.csv
-    
+if [[ "$step" == "asr" ]] || [[ "$step" == "all" ]]; then
+    if [ ! -e $root/$exp_dir/evaluation/speechbrain_asr_test_csv_${task}_${epochs}.csv ]; then
+        # generate test_csv for speechbrain_asr.py from eval_wav_dir
+        python evaluation/test_csv_speechbrain_asr.py \
+            --eval_list $eval_list \
+            --eval_wav_dir $root/$eval_wav_dir \
+            --test_csv_path $root/$exp_dir/evaluation/speechbrain_asr_test_csv_${task}_${epochs}.csv
+    fi        
+    asr_job=$exp_dir/scripts/asr_${task}_${epochs}.sh
+    asr_log=$exp_dir/logs/asr_${task}_${epochs}.log
+    touch $asr_job
+    chmod +x $asr_job
+    cat <<EOF > $asr_job
+#!/bin/bash
+conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
+conda_env=speechbrain
+source \$conda/bin/activate \$conda_env
+
+export PATH=/share/mini1/sw/std/cuda/cuda11.1/bin:\$PATH
+export CUDA_HOME=/share/mini1/sw/std/cuda/cuda11.1/
+export LD_LIBRARY_PATH=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7/envs/StyleSpeech/lib:/share/mini1/sw/std/cuda/cuda11.1/lib64:\$LD_LIBRARY_PATH
+
+python evaluation/speechbrain_asr.py  evaluation/speechbrain_asr.yaml  \
+        --test_csv=[$root/$exp_dir/evaluation/speechbrain_asr_test_csv_${task}_${epochs}.csv]  \
+        --wer_file=$root/$exp_dir/evaluation/wer_${task}_${epochs}.txt \
+        --output_folder=$root/$exp_dir/evaluation/asr_out_${task}_${epochs} \
+        --device=cpu
+EOF
+                            
+    submitjob -m 20000 -M2 $asr_log $asr_job
+    echo "asr job submited, see ${asr_log}"
+        
 fi        
 
 

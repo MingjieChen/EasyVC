@@ -95,7 +95,7 @@ if __name__ == '__main__':
     n_per_task = np.ceil(len(eval_list) / args.sge_n_tasks)    
     start = int(( args.sge_task_id -1 ) * n_per_task)
     if int( args.sge_task_id * n_per_task) >= len(eval_list):
-        end = len(eval_list) -1
+        end = len(eval_list) 
     else:
         end = int(args.sge_task_id  * n_per_task)    
     print(f'selected_eval_list from {start} to {end}')    
@@ -181,6 +181,7 @@ if __name__ == '__main__':
         
         # load src wav & trg wav
         src_wav = load_wav(src_wav_path, 16000)
+        mel_duration = len(src_wav) // 160 # estimate a mel duration for pad ling and pros reps
         
         # to tensor
         src_wav_tensor = torch.FloatTensor(src_wav).unsqueeze(0).to(args.device) 
@@ -188,18 +189,29 @@ if __name__ == '__main__':
         # extract ling representations
         ling_rep = eval(ling_encoder_func)(ling_enc_model, src_wav_tensor)
         ling_duration = ling_rep.size(1)
+        # check if need upsample ling rep
+        factor = int(round(mel_duration / ling_duration))
+        if factor > 1:
+            ling_rep = torch.repeat_interleave(ling_rep, repeats=factor, dim=1)
+            ling_duration = ling_rep.size(1)
+        if ling_duration > mel_duration:
+            ling_rep = ling_rep[:, :mel_duration, :]
+        elif mel_duration > ling_duration:
+            pad_vec = ling_rep[:, -1, :]
+            ling_rep = torch.cat([ling_rep, pad_vec.unsqueeze(1).expand(1, mel_duration - ling_duration, ling_rep.size(2))], dim = 1)
+            
         # extract prosodic representations
         if prosodic_encoder != 'none':
             prosodic_func = f'infer_{prosodic_encoder}'
             pros_rep = eval(prosodic_func)(src_wav_path, trg_wav_path, stats = pros_stats)
             pros_duration = pros_rep.size(1)
-            min_duration = min(pros_duration, ling_duration)
-            ling_rep = ling_rep[:, : min_duration, :]
-            pros_rep = pros_rep[:, : min_duration, :]
-            pros_rep = pros_rep.to(args.device)
+            if pros_duration > mel_duration:
+                pros_rep = pros_rep[:, : mel_duration, :]
+            elif mel_duration > pros_duration:
+                pad_vec = pros_rep[:, -1, :]
+                pros_rep = torch.cat([pros_rep, pad_vec.unsqueeze(1).expand(1, mel_duration - pros_duration, pros_rep.size(2))], dim = 1)
         else:
             pros_rep = None    
-
         # trg spk emb
         spk_emb = speaker_encoder_func(speaker_enc_model, trg_wav_path)
         spk_emb_tensor = torch.FloatTensor(spk_emb).unsqueeze(0).unsqueeze(0).to(args.device)

@@ -3,22 +3,25 @@
 dataset=vctk
 split=eval_all
 # model setup
-ling_enc=vqwav2vec
+ling_enc=conformerppg
 spk_enc=uttdvec
 pros_enc=ppgvcf0
 dec=vits
 vocoder=none
 
 # exp setup
-exp_name=vctk_no16fp_split
+exp_name=vctk_first_train
 exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
-
+if [ ! -e $exp_dir ]; then
+    echo "$exp_dir does not exist"
+    exit 1;
+fi    
 
 # eval setup
 #task=oneshot_vc
 task=m2m_vc
 epochs=$( ls -t $exp_dir/ckpt | head -n 1 | sed 's/[^0-9]*//g')
-eval_list=eval_list_m2m_vc_small.json
+eval_list=eval_list_m2m_vc_small_oneshot.json
 eval_list_path=data/$dataset/$split/$eval_list
 # sge submitjob setup
 n_parallel_jobs=50

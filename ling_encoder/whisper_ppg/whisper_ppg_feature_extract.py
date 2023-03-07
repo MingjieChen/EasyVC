@@ -48,7 +48,7 @@ def process_speaker(spk_meta, spk, args):
 
         #idxs = idxs[0].data.numpy()
         print(f" ppg {ppg.shape} ")
-        dump_path=os.path.join(args.dump_dir,args.split, 'whisper_ppg_largev2', spk, ID+'.npy')
+        dump_path=os.path.join(args.dump_dir,args.split, f'whisper_ppg_{args.ext}', spk, ID+'.npy')
         os.makedirs(os.path.dirname(dump_path), exist_ok = True)
         np.save(dump_path, ppg)
         #np.save(os.path.join(out_dir, split, speaker, file_id+'_idxs'), idxs)
@@ -65,6 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('--split', type = str)
     parser.add_argument('--max_workers', type = int, default = 20)
     parser.add_argument('--speaker', type = str, default = None)
+    parser.add_argument('--ext', type = str, default = 'largev2')
     args = parser.parse_args()
 
     # build a dict for spk2metadata

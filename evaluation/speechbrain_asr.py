@@ -389,7 +389,7 @@ if __name__ == "__main__":
     # Create experiment directory
     sb.create_experiment_directory(
         experiment_directory=hparams["output_folder"],
-        hyperparams_to_save=hparams_file,
+        hyperparams_to_save=None,
         overrides=overrides,
     )
 
