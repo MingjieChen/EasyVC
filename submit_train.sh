@@ -34,7 +34,7 @@ slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 #gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
-gputypes="GeForceGTX1080Ti|GeforceRTX3090"
+gputypes="GeForceGTX1080Ti|GeForceRTX3090"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp
