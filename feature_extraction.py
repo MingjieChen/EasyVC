@@ -18,6 +18,18 @@ import subprocess
 import torch
 
 
+
+
+def bigvgan_logmelspectrogram(audio, config):
+    audio = normalize(audio) * 0.95
+    audio = torch.FloatTensor(audio).unsqueeze(0)
+    mel = mel_spectrogram(audio, config['n_fft'], config['num_mels'],
+          config['sampling_rate'], config['hop_size'], config['win_size'], config['fmin'], config['fmax'],
+          center=False)
+    mel = mel.squeeze(0).T.numpy()
+    return mel
+    
+
 def ppgvc_hifigan_logmelspectrogram(audio, config):
     
     # extract mel   
@@ -127,6 +139,8 @@ def process_speaker(spk_meta, spk, config, args):
             )
         elif args.feature_type == 'ppgvc_mel':
             feature = ppgvc_hifigan_logmelspectrogram(audio, config)     
+        elif args.feature_type == 'bigvgan_mel':
+            feature = bigvgan_logmelspectrogram(audio, config)    
         elif args.feature_type == 'ppgvc_f0':
             feature = compute_ppgvc_f0(audio, sr = config['sampling_rate'], frame_period = 10.0)    
         elif args.feature_type == 'fastspeech2_pitch_energy':
@@ -156,7 +170,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_workers', type = int, default = 20)
     parser.add_argument('--speaker', type = str, default = None)
     parser.add_argument('--feature_type', type = str, default = 'mel', 
-        choices = ['mel','ppgvc_mel', 'ppgvc_f0', 'fastspeech2_pitch_energy', 'vits_spec'])
+        choices = ['mel','ppgvc_mel', 'bigvgan_mel', 'ppgvc_f0', 'fastspeech2_pitch_energy', 'vits_spec'])
     parser.add_argument('--pitch', default = False, action = 'store_true')
     args = parser.parse_args()
     

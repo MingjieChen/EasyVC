@@ -6,8 +6,8 @@ conda_env=torch_1.7
 # setup
 
 dataset=vctk
-config=configs/vits_preprocessing.yaml
-feature_type=vits_spec
+config=configs/preprocess_bigvgan_mel.yaml
+feature_type=bigvgan_mel
 splits="train_nodev_all dev_all"
 
 script_dir=scripts/$dataset/preprocess

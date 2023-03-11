@@ -1,0 +1,77 @@
+# experiment
+dataset: vctk
+train_meta: data/vctk/train_nodev_all/metadata.csv
+dev_meta: data/vctk/dev_all/metadata.csv
+train_set: train_nodev_all
+dev_set: dev_all
+
+
+# encoder-decoder
+ling_enc: whisper_ppg_small
+spk_enc: utt_ecapa_tdnn
+pros_enc: norm_fastspeech2_pitch_energy
+decoder: GradTTS
+mel_type: bigvgan_mel
+vocoder: bigvgan
+pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
+
+# training 
+fp16_run: !!bool False
+epochs: 2000
+save_freq: 1 # save ckpt frequency
+show_freq: 100 # show training information frequency
+load_only_params: !!bool False
+seed: !!int 1234
+trainer: GradTTSTrainer
+ngpu: 1
+
+#dataloader
+dataset_class: Dataset
+mel_segment_length: !!int 200
+sort: !!bool False
+dump_dir: dump
+num_workers: !!int 4
+batch_size: 16
+drop_last: !!bool True
+rm_long_utt: !!bool True # remove too long utterances from metadata
+max_utt_duration: !!float 10.0 # max utterance duration (seconds)
+
+
+# decoder params
+decoder_params: 
+    use_prior_loss: !!bool False
+    n_feats: !!int 100
+    input_dim: !!int 768
+    spk_emb_dim: !!int  192
+    prosodic_rep_type: discrete
+    prosodic_net:
+        hidden_dim: 100
+        prosodic_bins: !!int 256
+        prosodic_stats_path: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/pitch_energy_min_max.npy
+    n_enc_channels: !!int 192
+    filter_channels: !!int 768
+    filter_channels_dp: !!int 256
+    n_enc_layers: !!int 6
+    enc_kernel: !!int 3
+    enc_dropout: !!float 0.1
+    n_heads: !!int 2
+    window_size: !!int 4
+    dec_dim: !!int 64
+    beta_min: !!float 0.05
+    beta_max: !!float 20.0
+    pe_scale: !!int 1000  # 1 for `grad-tts-old.pt` checkpoint
+
+#optimizer & scheduler
+optimizer:
+    lr: !!float 1e-4
+
+# loss hyper-parameters
+losses:
+   alpha: 1. 
+    
+
+
+
+
+
+

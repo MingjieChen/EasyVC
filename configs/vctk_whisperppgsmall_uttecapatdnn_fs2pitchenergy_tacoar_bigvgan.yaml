@@ -1,0 +1,81 @@
+# experiment
+dataset: vctk
+train_meta: data/vctk/train_nodev_all/metadata.csv
+dev_meta: data/vctk/dev_all/metadata.csv
+train_set: train_nodev_all
+dev_set: dev_all
+
+
+# encoder-decoder
+ling_enc: whisper_ppg_small
+spk_enc: utt_ecapa_tdnn
+pros_enc: norm_fastspeech2_pitch_energy
+decoder: TacoAR
+mel_type: bigvgan_mel
+vocoder: bigvgan
+pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
+
+
+# training 
+fp16_run: !!bool True
+epochs: 200
+save_freq: 1 # save ckpt frequency
+show_freq: 10
+load_only_params: !!bool False
+seed: !!int 1234
+trainer: TacoARTrainer
+ngpu: 1
+
+#dataloader
+dataset_class: Dataset
+sort: !!bool True
+dump_dir: dump
+num_workers: !!int 8
+batch_size: 16
+drop_last: !!bool True
+rm_long_utt: !!bool True # remove too long utterances from metadata
+max_utt_duration: !!float 10.0 # max utterance duration (seconds)
+
+
+# decoder params
+decoder_params: 
+    prosodic_rep_type: discrete
+    prosodic_net:
+        hidden_dim: 1024
+        prosodic_bins: !!int 256
+        prosodic_stats_path: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/pitch_energy_min_max.npy
+    input_dim: 768
+    output_dim: 100
+    resample_ratio: 1
+    spk_emb_integration_type: concat # add or concat
+    spk_emb_dim: 192
+    ar: True
+    encoder_type: "taco2"
+    hidden_dim: 1024
+    prenet_layers: 2  # if set 0, no prenet is used
+    prenet_dim: 256
+    prenet_dropout_rate: 0.5
+    lstmp_layers: 2
+    lstmp_dropout_rate: 0.2
+    lstmp_proj_dim: 256
+    lstmp_layernorm: False
+
+#optimizer & scheduler
+optimizer:
+    weight_decay: 0.0
+    betas: [0.9,0.99]  
+    lr: !!float 1e-4
+scheduler:    
+    num_training_steps: 500000
+    num_warmup_steps: 4000
+
+# loss hyper-parameters
+losses:
+   alpha: 1. 
+    
+
+
+
+
+
+

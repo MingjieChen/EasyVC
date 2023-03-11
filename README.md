@@ -62,16 +62,16 @@ conda create --name torch_1.9 --file requirements.txt
     - [x] taco_mol from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
     - [x] vits from [vits](https://github.com/jaywalnut310/vits)
     - [x] grad_tts from [Grad_TTS](https://github.com/huawei-noah/Speech-Backbones)
+    - [x] diffwave from [DiffWave](https://github.com/lmnt-com/diffwave)
  
  
 - **Vocoder**
     - [x] hifigan (vctk) from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
-    - [ ] CARGAN from [cargan](https://github.com/descriptinc/cargan)
     - [ ] BigVGAN from [bigvgan](https://github.com/NVIDIA/BigVGAN)
 
 - **Evaluation**
-    - [ ] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
-    - [ ] ASR WER
+    - [x] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
+    - [x] ASR WER
     - [ ] ASV EER
     - [ ] MCD, F0-RMSE, F0-CORR
 # How to run

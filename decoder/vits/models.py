@@ -392,7 +392,7 @@ class SynthesizerTrn(nn.Module):
                         self.hidden_channels, 
                         5, 
                         1, 
-                        16,
+                        6,
                         0, 
                         self.filter_channels, 
                         self.n_heads, 

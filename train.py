@@ -15,6 +15,7 @@ from decoder.taco_ar.trainer import Trainer as TacoARTrainer
 from decoder.taco_mol.trainer import Trainer as TacoMOLTrainer
 from decoder.vits.trainer import Trainer as VITSTrainer
 from decoder.grad_tts.trainer import Trainer as GradTTSTrainer
+from decoder.diffwave.trainer import Trainer as DiffWaveTrainer
 import random
 import numpy as np
 import os.path as osp

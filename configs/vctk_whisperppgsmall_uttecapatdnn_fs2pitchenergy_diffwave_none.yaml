@@ -10,30 +10,30 @@ dev_set: dev_all
 ling_enc: whisper_ppg_small
 spk_enc: utt_ecapa_tdnn
 pros_enc: norm_fastspeech2_pitch_energy
-decoder: VITS
-mel_type: vits_spec
+decoder: DiffWave
+mel_type: vits_spec # will not use it 
+vocoder: none
 pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
-
 
 # training 
 fp16_run: !!bool False
-epochs: 1000
+epochs: 2000
 save_freq: 1 # save ckpt frequency
 show_freq: 100 # show training information frequency
 load_only_params: !!bool False
 seed: !!int 1234
-trainer: VITSTrainer
-ngpu: 1
+trainer: DiffWaveTrainer
+ngpu: 2
 
 #dataloader
 dataset_class: VITSDataset
 sampling_rate: !!int 24000
 vits_hop_size: !!int 240
-spec_max_len: !!int 480
-sort: !!bool True
+spec_max_len: !!int 80
+sort: !!bool False
 dump_dir: dump
-num_workers: !!int 4
-batch_size: !!int 16
+num_workers: !!int 8
+batch_size: 16
 drop_last: !!bool True
 rm_long_utt: !!bool False # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
@@ -41,59 +41,34 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
-    spk_emb_dim: 192
+    segment_size: 19200 
+    input_dim: !!int 768
+    spk_emb_dim: !!int  192
     prosodic_rep_type: discrete
     prosodic_net:
-        hidden_dim: 192
+        hidden_dim: 64
         prosodic_bins: !!int 256
         prosodic_stats_path: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/pitch_energy_min_max.npy
-    input_dim: !!int 768
-    spec_channels: !!int 513
-    inter_channels: !!int 192
-    hidden_channels: !!int 192
-    filter_channels: !!int 768
+    inter_channels: !!int 64
+    hidden_channels: !!int 64
+    filter_channels: !!int 128
     n_heads: !!int 2
     n_layers: !!int 6
     kernel_size: !!int 3
     p_dropout: !!float 0.1
-    resblock : 1
-    resblock_kernel_sizes: [3,7,11]
-    resblock_dilation_sizes: [[1,3,5], [1,3,5], [1,3,5]]
-    upsample_rates: [10,6,2,2]
-    upsample_initial_channel: !!int 512
-    upsample_kernel_sizes: [20, 12, 4, 4]
-    n_layers_q: !!int 3
-    use_spectral_norm: !!bool False
-    filter_length: !!int 1024
-    n_mels_channels: !!int 80
-    win_length: !!int 1024
-    hop_length: !!int 240
-    sampling_rate: !!int 24000
-    segment_size: !!int 9600
+    residual_channels: 64
+    residual_layers: 30
+    dilation_cycle_length: 10
+
     
-
-
 
 #optimizer & scheduler
 optimizer:
-    generator:
-        lr: !!float 1e-4
-        betas: [0.8,0.99]
-        eps: !!float 1e-9
-    discriminator:
-        lr: !!float 1e-4
-        betas: [0.8,0.99]
-        eps: !!float 1e-9
-scheduler:    
-    generator:
-        lr_decay: !!float 0.999875
-    discriminator:
-        lr_decay: !!float 0.999875    
+    lr: !!float 2e-4
 
 # loss hyper-parameters
 losses:
-   mel: !!int 45
-   kl: !!int 1
+   alpha: 1. 
     
 
 
