@@ -12,14 +12,14 @@ def infer_norm_fastspeech2_pitch_energy(source_wav, target_wav = None, config_pa
         config = yaml.safe_load(f)
         f.close()
     # extract pitch energy    
-    src_wav, _ = librosa.load(source_wav, sampling_rate = config['sampling_rate'])
+    src_wav, _ = librosa.load(source_wav, sr = config['sampling_rate'])
     pitch_energy = extract_pitch_energy(src_wav, config)
     pitch = pitch_energy[0, :]
     energy = pitch_energy[1, :]
     # load pitch energy mean std
     scaler_pitch = StandardScaler()
     scaler_energy = StandardScaler()
-    pitch_energy_stats = np.load(stats_path)
+    pitch_energy_stats = np.load(stats)
     scaler_pitch.mean_ = pitch_energy_stats[0]
     scaler_pitch.scale_ = pitch_energy_stats[1]
     scaler_energy.mean_ = pitch_energy_stats[2]

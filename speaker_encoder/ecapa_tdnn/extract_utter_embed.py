@@ -11,6 +11,7 @@ from functools import partial
 import subprocess
 
 
+sampling_rate = 16000
 def process_speaker(spk_meta, spk, args):
     classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb")
 
@@ -19,6 +20,9 @@ def process_speaker(spk_meta, spk, args):
         wav_path = row['wav_path']
 
         signal, fs =torchaudio.load(wav_path)
+        if fs != sampling_rate:
+            signal = torchaudio.functional.resample(signal, fs, 16000)
+
         embeddings = classifier.encode_batch(signal)
         spk_emb = embeddings[0][0].data.numpy()
 

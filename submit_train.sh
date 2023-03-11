@@ -8,9 +8,11 @@ conda_env=torch_1.9
 dataset=vctk
 #ling=vqwav2vec
 #ling=conformerppg
-ling=contentvec100
-spk=uttdvec
-pros=ppgvcf0
+#ling=contentvec100
+ling=whisperppgsmall
+
+spk=uttecapatdnn
+pros=fs2pitchenergy
 #dec=fs2
 dec=vits
 #dec=gradtts
@@ -28,13 +30,13 @@ fi
 exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name
-njobs=12
+njobs=48
 ngpus=2
 slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
-#gputypes="GeForceRTX3090"
+gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
-gputypes="GeForceGTX1080Ti|GeForceRTX3090"
+#gputypes="GeForceGTX1080Ti|GeForceRTX3090"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp

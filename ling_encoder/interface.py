@@ -1,5 +1,30 @@
 from .conformer_ppg.conformer_ppg_model.build_ppg_model import load_ppg_model
+from .whisper_ppg.whisper_ppg_model.audio import  pad_or_trim as whisper_ppg_pad_or_trim, log_mel_spectrogram as whisper_ppg_log_mel_spectrogram
+from .whisper_ppg.whisper_ppg_model.model import Whisper, ModelDimensions
 import torch
+
+
+def load_whisper_ppg_small(ckpt = 'ling_encoder/whisper_ppg/ckpt/small.pt', config = None, device = 'cpu'):
+    checkpoint = torch.load(ckpt, map_location=device)
+    dims = ModelDimensions(**checkpoint["dims"])
+    model = Whisper(dims)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
+    return model.to(device)
+    
+
+def load_contentvec_500(ckpt = 'ling_encoder/contentvec_500/contentvec_500_model.pt', config = None, device = 'cpu'):
+    import fairseq
+    model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([ckpt])
+    model = model[0]
+    model.eval()
+    return model
+def load_contentvec_100(ckpt = 'ling_encoder/contentvec_100/contentvec_100_model.pt', config = None, device = 'cpu'):
+    import fairseq
+    model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([ckpt])
+    model = model[0]
+    model.eval()
+    return model
 
 def load_vqwav2vec(ckpt = 'ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt' , config = None, device = 'cpu'):
     import fairseq
@@ -61,13 +86,30 @@ def hubert_soft(model, wav_tensor):
     with torch.inference_mode():
 
        dense = model.units(wav_tensor)
-
-
-    
     return dense
+
+def contentvec_500(model, wav_tensor):
         
+    dense = model.feature_extractor(wav_tensor)
+
+    return dense.transpose(1,2)    
+def contentvec_100(model, wav_tensor):
         
+    dense = model.feature_extractor(wav_tensor)
+
+    return dense.transpose(1,2)    
         
+def whisper_ppg_small(model, wav_tensor):
+    wav_tensor = wav_tensor.view(-1)
+    wav_len = wav_tensor.size(0)
+    ppg_len = wav_len // 320
+    wav_tensor = whisper_ppg_pad_or_trim(wav_tensor)
+    mel = whisper_ppg_log_mel_spectrogram(wav_tensor).to(model.device)
+    
+    ppg = model.encoder(mel.unsqueeze(0))
+    ppg = ppg[:,:ppg_len,:]
+    return ppg
+            
     
 
 

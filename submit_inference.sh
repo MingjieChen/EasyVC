@@ -3,9 +3,9 @@
 dataset=vctk
 split=eval_all
 # model setup
-ling_enc=conformerppg
-spk_enc=uttdvec
-pros_enc=ppgvcf0
+ling_enc=whisperppgsmall
+spk_enc=uttecapatdnn
+pros_enc=fs2pitchenergy
 dec=vits
 vocoder=none
 
