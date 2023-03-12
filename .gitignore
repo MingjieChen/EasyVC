@@ -13,11 +13,11 @@ ling_encoder/contentvec_500/contentvec_500_model.pt
 ling_encoder/whisper_ppg/ckpt
 exp/
 vocoder/libritts_hifigan/*.pkl
-decoder/grad_tts
 pretrained_models
 
 # parts that are not public yet
 evaluation/UTMOS-demo
+
 
 
 

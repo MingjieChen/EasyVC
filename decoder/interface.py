@@ -133,12 +133,12 @@ def infer_GradTTS(model, ling, pros, spk):
     ling = ling.transpose(1,2)
     pros = pros.transpose(1,2)
     if ling.size(2) %4 != 0:
-        pad_length = ling.size(2) % 4
+        pad_length = 4- ling.size(2) % 4
         ling = torch.nn.functional.pad(ling, [0, pad_length])
         pros = torch.nn.functional.pad(pros, [0, pad_length])
     
     
     ling_lengths = torch.LongTensor([ling.size(2)]).to(ling.device)
-    mel = model(ling, ling_lengths, spk, pros, 100)        
+    mel = model(ling, ling_lengths, spk, pros, 10)        
     mel = mel.transpose(1,2)
     return mel

@@ -3,11 +3,11 @@
 dataset=vctk
 split=eval_all
 # model setup
-ling_enc=whisperppgsmall
-spk_enc=uttecapatdnn
-pros_enc=fs2pitchenergy
-dec=vits
-vocoder=none
+ling_enc=vqwav2vec
+spk_enc=uttdvec
+pros_enc=ppgvcf0
+dec=gradtts
+vocoder=ppgvchifigan
 
 # exp setup
 exp_name=vctk_first_train
@@ -20,6 +20,8 @@ fi
 # eval setup
 #task=oneshot_vc
 task=m2m_vc
+
+#epochs=210
 epochs=$( ls -t $exp_dir/ckpt | head -n 1 | sed 's/[^0-9]*//g')
 eval_list=eval_list_m2m_vc_small_oneshot.json
 eval_list_path=data/$dataset/$split/$eval_list

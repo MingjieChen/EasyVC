@@ -6,21 +6,21 @@ conda_env=torch_1.9
 
 #choose config
 dataset=vctk
-#ling=vqwav2vec
+ling=vqwav2vec
 #ling=conformerppg
 #ling=contentvec100
-ling=whisperppgsmall
+#ling=whisperppgsmall
 
-spk=uttecapatdnn
-pros=fs2pitchenergy
+spk=uttdvec
+pros=ppgvcf0
 #dec=fs2
 #dec=vits
-#dec=gradtts
-dec=diffwave
+dec=gradtts
+#dec=diffwave
 #dec=tacoar
 #dec=tacomol
-#vocoder=ppgvchifigan
-vocoder=none
+vocoder=ppgvchifigan
+#vocoder=none
 #vocoder=bigvgan
 
 exp_name=vctk_first_train
@@ -33,8 +33,8 @@ exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name
 njobs=48
-ngpus=2
-slots=8
+ngpus=1
+slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
@@ -48,7 +48,7 @@ gputypes="GeForceRTX3090"
 job_dir=$exp/scripts
 log_dir=$exp/logs
 exp_config=$exp/$(basename $config)
-cp $config $exp_config
+[ ! -e $exp_config ] && cp $config $exp_config
 
 #submit first job
 #jid=$(submitjob -m 10000 -g${ngpus} -M${slots} -o -l gputype=$gputypes  -eo  $log_dir/train.log  ./bin/train.sh | grep -E [0-9]+)
