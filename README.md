@@ -72,7 +72,7 @@ conda create --name torch_1.9 --file requirements.txt
 - **Evaluation**
     - [x] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
     - [x] ASR WER
-    - [ ] ASV EER
+    - [x] ASV EER
     - [ ] MCD, F0-RMSE, F0-CORR
 # How to run
 
@@ -150,3 +150,9 @@ E.g.
 ```
 ./bin/train.sh configs/vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan.yaml
 ```
+
+
+# Authors
+
+- Mingjie Chen, University of Sheffield
+- Prof. Thomas Hain, University of Sheffield
