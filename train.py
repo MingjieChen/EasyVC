@@ -111,6 +111,11 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
         epoch = trainer.epochs+1
         print(f'start epoch {epoch}')
         train_results = trainer._train_epoch()
+        # save            
+        if epoch % config['save_freq'] == 0:
+            if replica_id == 0 or replica_id is None:
+                trainer.save_checkpoint(osp.join(exp_dir, 'ckpt',f'epoch_{epoch}.pth'))
+                clean_checkpoints(osp.join(exp_dir, 'ckpt'), prefix = 'epoch' )
         eval_results = trainer._eval_epoch()
         results = train_results.copy()
         results.update(eval_results)
@@ -124,11 +129,6 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
                     writer.add_figure('eval_spec', v, epoch)
         
         
-        # save            
-        if epoch % config['save_freq'] == 0:
-            if replica_id == 0 or replica_id == None:
-                trainer.save_checkpoint(osp.join(exp_dir, 'ckpt',f'epoch_{epoch}.pth'))
-                clean_checkpoints(osp.join(exp_dir, 'ckpt'), prefix = 'epoch' )
 
 
 

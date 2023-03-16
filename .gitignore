@@ -17,6 +17,7 @@ pretrained_models
 
 # parts that are not public yet
 evaluation/UTMOS-demo
+evaluation/eval_list*.txt
 
 
 

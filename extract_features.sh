@@ -7,7 +7,7 @@ source $conda/bin/activate $conda_env
 
 # stage
 stage=1
-stop_stage=4
+stop_stage=1
 
 # set up
 dataset=vctk # vctk or libritts
@@ -15,12 +15,14 @@ linguistic_encoder=vqwav2vec
 speaker_encoder=utt_dvec
 prosodic_encoder=ppgvc_f0
 decoder=fastspeech2
-vocoder=ppgvc_hifigan
+vocoder=bigvgan
 . bin/parse_options.sh || exit 1;
 
 # decide feature_type based on choices of vocoder and decoder
 if [ "$vocoder" == "ppgvc_hifigan" ]; then
     feature_type=ppgvc_mel # mel, vits_spec, ppgvc_mel
+elif [ "$vocoder" == "bigvgan" ]; then
+    feature_type=bigvgan_mel
 elif [ "$decoder" == "vits"]; then
     feature_type=vits_spec
 else
@@ -47,9 +49,9 @@ fi
 # step 1: spectrogram extraction
 if [ "${stage}" -le 1 ] && [ "${stop_stage}" -ge 1 ]; then
     echo "extract $feature_type for $dataset"
-    ./bin/feature_extraction.sh $dataset $feature_type "$splits"
+    #./bin/feature_extraction.sh $dataset $feature_type "$splits"
     echo "done!"
-    if [ "$feature_type" == "mel" ]; then
+    if [ "$feature_type" == "mel" ] || [ "$feature_type" == "bigvgan_mel" ]; then
         # normalize as parallel_wavegan
         echo "compute_statistics $feature_type for $dataset"
         stats_path=dump/$dataset/$train_split/$feature_type/${train_split}.npy

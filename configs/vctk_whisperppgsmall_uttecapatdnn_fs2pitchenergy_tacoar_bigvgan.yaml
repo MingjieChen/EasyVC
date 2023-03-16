@@ -11,9 +11,10 @@ ling_enc: whisper_ppg_small
 spk_enc: utt_ecapa_tdnn
 pros_enc: norm_fastspeech2_pitch_energy
 decoder: TacoAR
-mel_type: bigvgan_mel
+mel_type: norm_bigvgan_mel
 vocoder: bigvgan
 pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
+mel_stats: dump/vctk/train_nodev_all/bigvgan_mel/train_nodev_all.npy
 
 
 # training 
@@ -31,7 +32,7 @@ dataset_class: Dataset
 sort: !!bool True
 dump_dir: dump
 num_workers: !!int 8
-batch_size: 16
+batch_size: 32
 drop_last: !!bool True
 rm_long_utt: !!bool True # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)

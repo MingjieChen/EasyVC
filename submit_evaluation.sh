@@ -3,7 +3,7 @@
 dataset=vctk
 eval_split=eval_all
 # eval step
-step=asr # utmos|asr|asv
+step=asv # utmos|asr|asv
 
 # model setup
 ling_enc=conformerppg
@@ -92,3 +92,37 @@ EOF
 fi        
 
 
+if [[ "$step" == "asv" ]] || [[ "$step" == "all" ]]; then
+    eval_list_basename=$( basename $eval_list | sed -e "s/\.[^\.]*$//g")
+    positive_pairs=evaluation/${eval_list_basename}_asv_positive.txt
+    negative_pairs=evaluation/${eval_list_basename}_asv_negative.txt
+    if [ ! -e $positive_pairs ] || [ ! -e $negative_pairs ]; then
+        python3 evaluation/test_csv_speechbrain_asv.py \
+                --eval_list $eval_list \
+                --positive_output_veri_file $positive_pairs \
+                --negative_output_veri_file $negative_pairs \
+                --data_dir data/$dataset \
+                --splits train_nodev_all dev_all eval_all
+    fi            
+    asv_job=$exp_dir/scripts/asv_${task}_${epochs}.sh
+    asv_log=$exp_dir/logs/asv_${task}_${epochs}.log
+    touch $asv_job
+    chmod +x $asv_job
+    cat <<EOF > $asv_job
+conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
+conda_env=speechbrain
+source \$conda/bin/activate \$conda_env
+export PATH=/share/mini1/sw/std/cuda/cuda11.1/bin:\$PATH
+export CUDA_HOME=/share/mini1/sw/std/cuda/cuda11.1/
+export LD_LIBRARY_PATH=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7/envs/StyleSpeech/lib:/share/mini1/sw/std/cuda/cuda11.1/lib64:\$LD_LIBRARY_PATH
+python3 evaluation/speechbrain_asv.py \
+           $eval_wav_dir \
+           $positive_pairs \
+           $negative_pairs 
+                
+
+EOF
+    submitjob  -g1 -m 20000 -M2 $asv_log $asv_job
+    echo "asv job submited, see ${asv_log}"
+
+fi    

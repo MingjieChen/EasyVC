@@ -44,7 +44,7 @@ decoder_params:
     spk_emb_dim: !!int  256
     prosodic_rep_type: continuous
     prosodic_net:
-        hidden_dim: !!int 80
+        hidden_dim: !!int 512
     n_enc_channels: !!int 192
     filter_channels: !!int 768
     filter_channels_dp: !!int 256

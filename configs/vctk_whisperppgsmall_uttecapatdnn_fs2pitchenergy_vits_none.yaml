@@ -33,7 +33,7 @@ spec_max_len: !!int 480
 sort: !!bool True
 dump_dir: dump
 num_workers: !!int 4
-batch_size: !!int 16
+batch_size: !!int 24
 drop_last: !!bool True
 rm_long_utt: !!bool False # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
@@ -59,9 +59,9 @@ decoder_params:
     resblock : 1
     resblock_kernel_sizes: [3,7,11]
     resblock_dilation_sizes: [[1,3,5], [1,3,5], [1,3,5]]
-    upsample_rates: [10,6,2,2]
+    upsample_rates: [8,5,3,2]
     upsample_initial_channel: !!int 512
-    upsample_kernel_sizes: [20, 12, 4, 4]
+    upsample_kernel_sizes: [15, 15, 5, 5]
     n_layers_q: !!int 3
     use_spectral_norm: !!bool False
     filter_length: !!int 1024

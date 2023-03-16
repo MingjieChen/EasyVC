@@ -3,6 +3,8 @@ from .taco_ar.model import Model as TacoAR
 from .taco_mol.model import MelDecoderMOLv2 as TacoMOL
 from .vits.models import VITS
 from .grad_tts.grad_tts_model import GradTTS
+from .diffwave.model import DiffWave
+import numpy as np
 import torch
 import yaml
 
@@ -17,6 +19,24 @@ def remove_module_from_state_dict(state_dict):
             new_state_dict[k] = v    
     return new_state_dict        
 
+
+
+def load_DiffWave(ckpt = None, config = None, device = 'cpu'):
+    with open(config) as f:
+        model_config = yaml.safe_load(f)
+        f.close()
+    
+    model = DiffWave(model_config['decoder_params'])    
+    params = torch.load(ckpt, map_location = torch.device(device))
+    params = params['model']
+    params = remove_module_from_state_dict(params)
+    model.load_state_dict(params)
+
+    model.eval()
+    model.to(device)
+    return model
+
+    
 
 def load_VITS(ckpt = None, config = None, device = 'cpu'):
     with open(config) as f:
@@ -142,3 +162,11 @@ def infer_GradTTS(model, ling, pros, spk):
     mel = model(ling, ling_lengths, spk, pros, 10)        
     mel = mel.transpose(1,2)
     return mel
+
+def infer_DiffWave(model, ling, pros, spk):
+    ling_lengths = torch.LongTensor([ling.size(1)]).to(ling.device)
+    ling = ling.transpose(1,2)
+    pros = pros.transpose(1,2)
+    spk = spk.transpose(1,2)
+    audio = model.inference(ling, pros, spk, ling_lengths)
+    return audio

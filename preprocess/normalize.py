@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('--dump_dir', type = str)
     parser.add_argument('--metadata', type = str)
     parser.add_argument('--split', type = str)
-    parser.add_argument('--feature_type', type = str, default = 'mel', choices = ['mel', 'fastspeech2_pitch_energy'])
+    parser.add_argument('--feature_type', type = str, default = 'mel', choices = ['mel', 'fastspeech2_pitch_energy', 'bigvgan_mel'])
 
     args = parser.parse_args()
     
@@ -57,7 +57,7 @@ if __name__ == '__main__':
         
     
     # normalize
-    for _meta in tqdm(metadata):
+    for _meta in tqdm(metadata, total = len(metadata)):
         ID = _meta['ID']
         spk = _meta['spk']
         feature_path = os.path.join(args.dump_dir, args.split, args.feature_type, spk, ID + '.npy')

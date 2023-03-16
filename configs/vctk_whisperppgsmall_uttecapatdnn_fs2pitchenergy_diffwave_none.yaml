@@ -12,7 +12,6 @@ spk_enc: utt_ecapa_tdnn
 pros_enc: norm_fastspeech2_pitch_energy
 decoder: DiffWave
 mel_type: vits_spec # will not use it 
-vocoder: none
 pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
 
 # training 
@@ -23,13 +22,13 @@ show_freq: 100 # show training information frequency
 load_only_params: !!bool False
 seed: !!int 1234
 trainer: DiffWaveTrainer
-ngpu: 2
+ngpu: 1
 
 #dataloader
 dataset_class: VITSDataset
 sampling_rate: !!int 24000
 vits_hop_size: !!int 240
-spec_max_len: !!int 80
+spec_max_len: !!int 60
 sort: !!bool False
 dump_dir: dump
 num_workers: !!int 8
@@ -41,7 +40,7 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
-    segment_size: 19200 
+    segment_size: 14400 
     input_dim: !!int 768
     spk_emb_dim: !!int  192
     prosodic_rep_type: discrete

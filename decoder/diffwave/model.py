@@ -24,6 +24,8 @@ from math import sqrt
 from torch.nn.utils import weight_norm, remove_weight_norm, spectral_norm
 from torch.nn import Conv1d, ConvTranspose1d, AvgPool1d, Conv2d
 
+from tqdm import tqdm
+
 Linear = nn.Linear
 ConvTranspose2d = nn.ConvTranspose2d
 
@@ -185,6 +187,7 @@ class DiffusionEmbedding(nn.Module):
 class Upsampler(nn.Module):
   def __init__(self, n_mels):
     super().__init__()
+    # hard code upsampling scale to 240
     self.conv1 = ConvTranspose2d(1, 1, [3, 24], stride=[1, 12], padding=[1, 6])
     self.conv2 = ConvTranspose2d(1, 1,  [3, 40], stride=[1, 20], padding=[1, 10])
 
@@ -199,7 +202,7 @@ class Upsampler(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-  def __init__(self, n_mels, residual_channels, dilation, uncond=False):
+  def __init__(self, n_mels, residual_channels, dilation, spk_emb_dim):
     '''
     :param n_mels: inplanes of conv1x1 for spectrogram conditional
     :param residual_channels: audio conv
@@ -209,23 +212,19 @@ class ResidualBlock(nn.Module):
     super().__init__()
     self.dilated_conv = Conv1d(residual_channels, 2 * residual_channels, 3, padding=dilation, dilation=dilation)
     self.diffusion_projection = Linear(512, residual_channels)
-    if not uncond: # conditional model
-      self.conditioner_projection = Conv1d(n_mels, 2 * residual_channels, 1)
-    else: # unconditional model
-      self.conditioner_projection = None
+    self.local_conditioner_projection = Conv1d(n_mels, 2 * residual_channels, 1)
+    self.global_conditioner_projection = Conv1d(spk_emb_dim, 2 * residual_channels, 1)
 
     self.output_projection = Conv1d(residual_channels, 2 * residual_channels, 1)
 
-  def forward(self, x, diffusion_step, conditioner=None):
+  def forward(self, x, diffusion_step, c, g):
 
     diffusion_step = self.diffusion_projection(diffusion_step).unsqueeze(-1)
     y = x + diffusion_step
-    if self.conditioner_projection is None: # using a unconditional model
-      y = self.dilated_conv(y)
-    else:
-      conditioner = self.conditioner_projection(conditioner)
-      y = self.dilated_conv(y) + conditioner
-
+    local_condition = self.local_conditioner_projection(c)
+    global_condition = self.global_conditioner_projection(g)
+    y = self.dilated_conv(y) + local_condition + global_condition
+    
     gate, filter = torch.chunk(y, 2, dim=1)
     y = torch.sigmoid(gate) * torch.tanh(filter)
 
@@ -254,6 +253,7 @@ class DiffWave(nn.Module):
 
 
     noise_schedule = np.linspace(1e-4, 0.05, 50).tolist()
+    self.noise_schedule = noise_schedule
     self.diffusion_embedding = DiffusionEmbedding(len(noise_schedule))
     
     
@@ -279,11 +279,11 @@ class DiffWave(nn.Module):
         elif config['prosodic_rep_type'] == 'continuous':
             self.prosodic_net = ContinuousProsodicNet(config['prosodic_net'])    
     
-    self.reduce_proj = nn.Conv1d(self.spk_emb_dim + inter_channels, inter_channels, 1,1,0)
+    #self.reduce_proj = nn.Conv1d(self.spk_emb_dim + inter_channels, inter_channels, 1,1,0)
 
     self.input_projection = Conv1d(1, residual_channels, 1)
     self.residual_layers = nn.ModuleList([
-        ResidualBlock(inter_channels, residual_channels, 2**(i % dilation_cycle_length), uncond=False)
+        ResidualBlock(inter_channels, residual_channels, 2**(i % dilation_cycle_length), spk_emb_dim = self.spk_emb_dim)
         for i in range(residual_layers)
     ])
 
@@ -300,9 +300,9 @@ class DiffWave(nn.Module):
         x += pros
     
     spk_embeds = F.normalize(
-            spk.squeeze(2)).unsqueeze(2).expand(ling.size(0), self.spk_emb_dim, ling.size(2))
-    x = torch.cat([x, spk_embeds], dim=1)
-    x = self.reduce_proj(x)
+            spk.squeeze(2)).unsqueeze(2).expand(ling.size(0), self.spk_emb_dim, ling.size(2) * 240)
+    #x = torch.cat([x, spk_embeds], dim=1)
+    #x = self.reduce_proj(x)
         
     x = self.upsampler(x)
 
@@ -314,7 +314,7 @@ class DiffWave(nn.Module):
 
     skip = None
     for layer in self.residual_layers:
-      y, skip_connection = layer(y, diffusion_step, x)
+      y, skip_connection = layer(y, diffusion_step, x, spk_embeds)
       skip = skip_connection if skip is None else skip_connection + skip
 
     y = skip / sqrt(len(self.residual_layers))
@@ -322,3 +322,41 @@ class DiffWave(nn.Module):
     y = F.relu(y)
     y = self.output_projection(y)
     return y
+  
+  def inference(self, ling, pros, spk, lengths):
+    fast_sampling = True
+    training_noise_schedule = np.array(self.noise_schedule)    
+    inference_noise_schedule=np.array([0.0001, 0.001, 0.01, 0.05, 0.2, 0.5])
+    inference_noise_schedule = np.array(inference_noise_schedule) if fast_sampling else training_noise_schedule
+    
+    talpha = 1 - training_noise_schedule
+    talpha_cum = np.cumprod(talpha)
+
+    beta = inference_noise_schedule
+    alpha = 1 - beta
+    alpha_cum = np.cumprod(alpha)
+
+    T = []
+    for s in range(len(inference_noise_schedule)):
+      for t in range(len(training_noise_schedule) - 1):
+        if talpha_cum[t+1] <= alpha_cum[s] <= talpha_cum[t]:
+          twiddle = (talpha_cum[t]**0.5 - alpha_cum[s]**0.5) / (talpha_cum[t]**0.5 - talpha_cum[t+1]**0.5)
+          T.append(t + twiddle)
+          break
+    T = np.array(T, dtype=np.float32)
+    
+    # hard code hop_size = 240
+    audio = torch.randn(ling.shape[0], 240 * ling.shape[-1], device=ling.device)
+    noise_scale = torch.from_numpy(alpha_cum**0.5).float().unsqueeze(1).to(ling.device)
+    for n in tqdm(range(len(alpha) - 1, -1, -1)):
+      c1 = 1 / alpha[n]**0.5
+      c2 = beta[n] / (1 - alpha_cum[n])**0.5
+      audio = c1 * (audio - c2 * self.forward(audio, torch.tensor([T[n]], device=audio.device), ling, pros, spk, lengths).squeeze(1))
+      if n > 0:
+        noise = torch.randn_like(audio)
+        sigma = ((1.0 - alpha_cum[n-1]) / (1.0 - alpha_cum[n]) * beta[n])**0.5
+        audio += sigma * noise
+      audio = torch.clamp(audio, -1.0, 1.0)
+    return audio 
+    
+    

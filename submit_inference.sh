@@ -3,14 +3,14 @@
 dataset=vctk
 split=eval_all
 # model setup
-ling_enc=vqwav2vec
-spk_enc=uttdvec
-pros_enc=ppgvcf0
+ling_enc=whisperppgsmall
+spk_enc=uttecapatdnn
+pros_enc=fs2pitchenergy
 dec=gradtts
-vocoder=ppgvchifigan
+vocoder=bigvgan
 
 # exp setup
-exp_name=vctk_first_train
+exp_name=vctk_train_1
 exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
 if [ ! -e $exp_dir ]; then
     echo "$exp_dir does not exist"
@@ -53,5 +53,5 @@ python inference.py \
 EOF
 
 #submit to sge
-submitjob -m 20000 -n $n_parallel_jobs   $log $job
+submitjob -m 30000 -n $n_parallel_jobs   $log $job
 echo "job submitted, see log in ${log}"

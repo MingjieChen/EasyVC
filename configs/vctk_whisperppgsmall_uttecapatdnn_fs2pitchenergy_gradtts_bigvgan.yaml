@@ -11,9 +11,10 @@ ling_enc: whisper_ppg_small
 spk_enc: utt_ecapa_tdnn
 pros_enc: norm_fastspeech2_pitch_energy
 decoder: GradTTS
-mel_type: bigvgan_mel
+mel_type: norm_bigvgan_mel
 vocoder: bigvgan
 pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
+mel_stats: dump/vctk/train_nodev_all/bigvgan_mel/train_nodev_all.npy
 
 # training 
 fp16_run: !!bool False
@@ -39,13 +40,13 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
-    use_prior_loss: !!bool False
+    use_prior_loss: !!bool True
     n_feats: !!int 100
     input_dim: !!int 768
     spk_emb_dim: !!int  192
     prosodic_rep_type: discrete
     prosodic_net:
-        hidden_dim: 100
+        hidden_dim: 256
         prosodic_bins: !!int 256
         prosodic_stats_path: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/pitch_energy_min_max.npy
     n_enc_channels: !!int 192

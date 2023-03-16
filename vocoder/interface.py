@@ -12,7 +12,7 @@ class AttrDict(dict):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
-def load_bigvgan(ckpt = '/share/mini1/res/t/vc/studio/timap-en/svcc2023/BigVGAN/exp/bigvgan/g_00160000', config = '/share/mini1/res/t/vc/studio/timap-en/svcc2023/BigVGAN/exp/bigvgan/config.json', device = 'cpu'):
+def load_bigvgan(ckpt = '/share/mini1/res/t/vc/studio/timap-en/svcc2023/BigVGAN/exp/bigvgan/g_00420000', config = '/share/mini1/res/t/vc/studio/timap-en/svcc2023/BigVGAN/exp/bigvgan/config.json', device = 'cpu'):
     with open(config) as f:
         model_config = f.read()
     h = json.loads(model_config)

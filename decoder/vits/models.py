@@ -194,6 +194,25 @@ class PosteriorEncoder(nn.Module):
         return z, m, logs, x_mask
 
 
+class InterpolationBlock(torch.nn.Module):
+    def __init__(self, scale_factor, mode='nearest', align_corners=None, downsample=False):
+        super(InterpolationBlock, self).__init__()
+        self.downsample = downsample
+        self.scale_factor = scale_factor
+        self.mode = mode
+        self.align_corners = align_corners
+    
+    def forward(self, x):
+        outputs = torch.nn.functional.interpolate(
+            x,
+            size=x.shape[-1] * self.scale_factor \
+                if not self.downsample else x.shape[-1] // self.scale_factor,
+            mode=self.mode,
+            align_corners=self.align_corners,
+            recompute_scale_factor=False
+        )
+        return outputs
+
 class Generator(torch.nn.Module):
     def __init__(self, initial_channel, resblock, resblock_kernel_sizes, resblock_dilation_sizes, upsample_rates, upsample_initial_channel, upsample_kernel_sizes, gin_channels=0):
         super(Generator, self).__init__()
@@ -204,9 +223,19 @@ class Generator(torch.nn.Module):
 
         self.ups = nn.ModuleList()
         for i, (u, k) in enumerate(zip(upsample_rates, upsample_kernel_sizes)):
-            self.ups.append(weight_norm(
-                ConvTranspose1d(upsample_initial_channel//(2**i), upsample_initial_channel//(2**(i+1)),
-                                k, u, padding=(k-u)//2)))
+            #self.ups.append(weight_norm(
+            #    ConvTranspose1d(upsample_initial_channel//(2**i), upsample_initial_channel//(2**(i+1)),
+            #                   k, u, padding=(k-u)//2)))
+            self.ups.append(
+                torch.nn.Sequential(
+                    InterpolationBlock(u),
+                    weight_norm(torch.nn.Conv1d(
+                        upsample_initial_channel//(2**i),
+                        upsample_initial_channel//(2**(i+1)),
+                        k, padding=(k-1)//2,
+                    ))
+                )
+            )
 
         self.resblocks = nn.ModuleList()
         for i in range(len(self.ups)):
@@ -390,9 +419,9 @@ class SynthesizerTrn(nn.Module):
         self.enc_p = TextEncoder(self.input_dim, 
                         self.inter_channels, 
                         self.hidden_channels, 
-                        5, 
+                        self.kernel_size, 
                         1, 
-                        16,
+                        self.n_layers,
                         0, 
                         self.filter_channels, 
                         self.n_heads, 

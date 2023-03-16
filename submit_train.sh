@@ -6,24 +6,30 @@ conda_env=torch_1.9
 
 #choose config
 dataset=vctk
-ling=vqwav2vec
+#ling=vqwav2vec
 #ling=conformerppg
 #ling=contentvec100
-#ling=whisperppgsmall
+ling=whisperppgsmall
 
-spk=uttdvec
-pros=ppgvcf0
+#spk=uttdvec
+spk=uttecapatdnn
+
+#pros=ppgvcf0
+pros=fs2pitchenergy
 #dec=fs2
 #dec=vits
 dec=gradtts
 #dec=diffwave
 #dec=tacoar
 #dec=tacomol
-vocoder=ppgvchifigan
+#vocoder=ppgvchifigan
 #vocoder=none
-#vocoder=bigvgan
+vocoder=bigvgan
 
-exp_name=vctk_first_train
+exp_name=vctk_train_1
+#exp_name=vctk_no16fp_split
+
+
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 if [ ! -e $config ] ; then
     echo "can't find config file $config" 
@@ -32,13 +38,13 @@ fi
 exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name
-njobs=48
+njobs=60
 ngpus=1
 slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
-#gputypes="GeForceGTX1080Ti|GeForceRTX3090"
+#gputypes="GeForceGTX1080Ti"
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp
