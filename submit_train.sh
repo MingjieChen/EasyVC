@@ -17,16 +17,16 @@ spk=uttdvec
 pros=ppgvcf0
 #pros=fs2pitchenergy
 
-#dec=fs2
+dec=fs2
 #dec=vits
 #dec=gradtts
-dec=diffwave
+#dec=diffwave
 #dec=tacoar
 #dec=tacomol
 
 #vocoder=ppgvchifigan
-vocoder=none
-#vocoder=bigvgan
+#vocoder=none
+vocoder=bigvgan
 
 exp_name=vctk_train_0
 #exp_name=vctk_no16fp_split
@@ -40,7 +40,7 @@ fi
 exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name
-njobs=60
+njobs=1
 ngpus=1
 slots=4
 #gputypes="GeForceRTX3060|GeForceRTX3090"

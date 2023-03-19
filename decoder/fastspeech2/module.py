@@ -99,13 +99,13 @@ class VarianceAdaptor(nn.Module):
     def forward(self, x, spk_emb, pros_rep, mask, max_len):
         batch_size = x.size(0)
         # integrate speaker embedding
-        spk_emb = F.normalize(spk_emb.squeeze(1)).unsqueeze(1)
-        x = torch.cat([x,spk_emb.expand(batch_size, max_len, self.d_model )], dim = -1)
-        x = self.reduce_projection(x)
         if self.pros_net is not None:
             # integrate prosodic_rep
             processed_pros_rep = self.pros_net(pros_rep)
             x = x + processed_pros_rep
+        spk_emb = F.normalize(spk_emb.squeeze(1)).unsqueeze(1)
+        x = torch.cat([x,spk_emb.expand(batch_size, max_len, self.d_model )], dim = -1)
+        x = self.reduce_projection(x)
 
         if mask is not None:
             x = x.masked_fill(mask.unsqueeze(-1), 0)
