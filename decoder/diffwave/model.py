@@ -212,8 +212,8 @@ class ResidualBlock(nn.Module):
     super().__init__()
     self.dilated_conv = Conv1d(residual_channels, 2 * residual_channels, 3, padding=dilation, dilation=dilation)
     self.diffusion_projection = Linear(512, residual_channels)
-    self.local_conditioner_projection = Conv1d(n_mels, 2 * residual_channels, 1)
-    self.global_conditioner_projection = Conv1d(spk_emb_dim, 2 * residual_channels, 1)
+    self.local_conditioner_projection = Conv1d(n_mels,  residual_channels, 1)
+    self.global_conditioner_projection = Conv1d(spk_emb_dim, residual_channels, 1)
 
     self.output_projection = Conv1d(residual_channels, 2 * residual_channels, 1)
 
@@ -223,7 +223,8 @@ class ResidualBlock(nn.Module):
     y = x + diffusion_step
     local_condition = self.local_conditioner_projection(c)
     global_condition = self.global_conditioner_projection(g)
-    y = self.dilated_conv(y) + local_condition + global_condition
+    y = y + global_condition + local_condition
+    y = self.dilated_conv(y) 
     
     gate, filter = torch.chunk(y, 2, dim=1)
     y = torch.sigmoid(gate) * torch.tanh(filter)
@@ -250,16 +251,18 @@ class DiffWave(nn.Module):
     residual_layers = config['residual_layers']
     dilation_cycle_length = config['dilation_cycle_length']
     self.spk_emb_dim = config['spk_emb_dim']
+    
+    self.use_text_encoder = config['use_text_encoder']
 
 
     noise_schedule = np.linspace(1e-4, 0.05, 50).tolist()
     self.noise_schedule = noise_schedule
     self.diffusion_embedding = DiffusionEmbedding(len(noise_schedule))
     
-    
     self.upsampler = Upsampler(inter_channels)
     
-    self.text_encoder = TextEncoder(
+    if self.use_text_encoder:
+        self.text_encoder = TextEncoder(
                         input_dim, 
                         inter_channels, 
                         hidden_channels, 
@@ -270,6 +273,8 @@ class DiffWave(nn.Module):
                         filter_channels, 
                         n_heads, 
                         p_dropout)
+    else:
+        self.text_encoder = nn.Conv1d(input_dim, inter_channels, 3,1,1)        
     
     if 'prosodic_rep_type' not in config:
         self.prosodic_net = None
@@ -294,15 +299,17 @@ class DiffWave(nn.Module):
   def forward(self, audio, diffusion_step, ling, pros, spk, lengths):
     
     
-    x, x_masks = self.text_encoder(ling, lengths)
+    if self.use_text_encoder:
+        x, x_masks = self.text_encoder(ling, lengths)
+    else:
+        x = self.text_encoder(ling)    
+
     if self.prosodic_net is not None and pros is not None:
         pros = self.prosodic_net(pros)
         x += pros
     
-    spk_embeds = F.normalize(
+    up_spk_embeds = F.normalize(
             spk.squeeze(2)).unsqueeze(2).expand(ling.size(0), self.spk_emb_dim, ling.size(2) * 240)
-    #x = torch.cat([x, spk_embeds], dim=1)
-    #x = self.reduce_proj(x)
         
     x = self.upsampler(x)
 
@@ -314,7 +321,7 @@ class DiffWave(nn.Module):
 
     skip = None
     for layer in self.residual_layers:
-      y, skip_connection = layer(y, diffusion_step, x, spk_embeds)
+      y, skip_connection = layer(y, diffusion_step, x, up_spk_embeds)
       skip = skip_connection if skip is None else skip_connection + skip
 
     y = skip / sqrt(len(self.residual_layers))

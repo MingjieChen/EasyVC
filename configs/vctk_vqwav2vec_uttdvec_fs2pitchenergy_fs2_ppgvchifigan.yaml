@@ -23,7 +23,7 @@ show_freq: 100 # show training information frequency
 load_only_params: !!bool False
 seed: !!int 1234
 trainer: FS2Trainer
-ngpu: 2
+ngpu: 1
 
 #dataloader
 dataset_class: Dataset
@@ -38,9 +38,11 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
+    use_text_encoder: !!bool False
     max_len: 1000
     max_seq_len: 1000
     spk_emb_dim: 256
+    out_dim: 80
     prosodic_rep_type: discrete
     prosodic_net:
         hidden_dim: !!int 256

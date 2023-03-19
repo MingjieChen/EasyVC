@@ -11,8 +11,9 @@ ling_enc: vqwav2vec
 spk_enc: utt_dvec
 pros_enc: ppgvc_f0
 decoder: GradTTS
-mel_type: ppgvc_mel
-vocoder: ppgvc_hifigan
+mel_type: norm_bigvgan_mel
+vocoder: bigvgan
+mel_stats: dump/vctk/train_nodev_all/bigvgan_mel/train_nodev_all.npy
 
 # training 
 fp16_run: !!bool False
@@ -38,13 +39,14 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
+    use_text_encoder: !!bool False
     use_prior_loss: !!bool False
-    n_feats: !!int 80
+    n_feats: !!int 100
     input_dim: !!int 512
     spk_emb_dim: !!int  256
     prosodic_rep_type: continuous
     prosodic_net:
-        hidden_dim: !!int 80
+        hidden_dim: !!int 100
     n_enc_channels: !!int 192
     filter_channels: !!int 768
     filter_channels_dp: !!int 256

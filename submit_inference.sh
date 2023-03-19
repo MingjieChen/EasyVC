@@ -3,14 +3,14 @@
 dataset=vctk
 split=eval_all
 # model setup
-ling_enc=whisperppgsmall
-spk_enc=uttecapatdnn
-pros_enc=fs2pitchenergy
+ling_enc=vqwav2vec
+spk_enc=uttdvec
+pros_enc=ppgvcf0
 dec=gradtts
 vocoder=bigvgan
 
 # exp setup
-exp_name=vctk_train_1
+exp_name=vctk_train_0
 exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
 if [ ! -e $exp_dir ]; then
     echo "$exp_dir does not exist"

@@ -10,9 +10,9 @@ dev_set: dev_all
 ling_enc: vqwav2vec
 spk_enc: utt_dvec
 pros_enc: ppgvc_f0
-decoder: GradTTS
-mel_type: ppgvc_mel
-vocoder: ppgvc_hifigan
+decoder: DiffWave
+mel_type: vits_spec # will not use it 
+pros_stats: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/train_nodev_all.npy
 
 # training 
 fp16_run: !!bool False
@@ -21,46 +21,48 @@ save_freq: 1 # save ckpt frequency
 show_freq: 100 # show training information frequency
 load_only_params: !!bool False
 seed: !!int 1234
-trainer: GradTTSTrainer
+trainer: DiffWaveTrainer
 ngpu: 1
 
 #dataloader
-dataset_class: Dataset
-mel_segment_length: !!int 128
+dataset_class: VITSDataset
+sampling_rate: !!int 24000
+vits_hop_size: !!int 240
+spec_max_len: !!int 60
 sort: !!bool False
 dump_dir: dump
 num_workers: !!int 8
 batch_size: 16
 drop_last: !!bool True
-rm_long_utt: !!bool True # remove too long utterances from metadata
+rm_long_utt: !!bool False # remove too long utterances from metadata
 max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 
 # decoder params
 decoder_params: 
-    use_prior_loss: !!bool False
-    n_feats: !!int 80
+    segment_size: 14400 
+    use_text_encoder: !!bool False
     input_dim: !!int 512
     spk_emb_dim: !!int  256
     prosodic_rep_type: continuous
     prosodic_net:
-        hidden_dim: !!int 80
-    n_enc_channels: !!int 192
-    filter_channels: !!int 768
-    filter_channels_dp: !!int 256
-    n_enc_layers: !!int 6
-    enc_kernel: !!int 3
-    enc_dropout: !!float 0.1
+        hidden_dim: 64
+    inter_channels: !!int 64
+    hidden_channels: !!int 64
+    filter_channels: !!int 128
     n_heads: !!int 2
-    window_size: !!int 4
-    dec_dim: !!int 64
-    beta_min: !!float 0.05
-    beta_max: !!float 20.0
-    pe_scale: !!int 1000  # 1 for `grad-tts-old.pt` checkpoint
+    n_layers: !!int 6
+    kernel_size: !!int 3
+    p_dropout: !!float 0.1
+    residual_channels: 64
+    residual_layers: 30
+    dilation_cycle_length: 10
+
+    
 
 #optimizer & scheduler
 optimizer:
-    lr: !!float 1e-4
+    lr: !!float 2e-4
 
 # loss hyper-parameters
 losses:

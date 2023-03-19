@@ -6,27 +6,29 @@ conda_env=torch_1.9
 
 #choose config
 dataset=vctk
-#ling=vqwav2vec
+ling=vqwav2vec
 #ling=conformerppg
 #ling=contentvec100
-ling=whisperppgsmall
+#ling=whisperppgsmall
 
-#spk=uttdvec
-spk=uttecapatdnn
+spk=uttdvec
+#spk=uttecapatdnn
 
-#pros=ppgvcf0
-pros=fs2pitchenergy
+pros=ppgvcf0
+#pros=fs2pitchenergy
+
 #dec=fs2
 #dec=vits
-dec=gradtts
-#dec=diffwave
+#dec=gradtts
+dec=diffwave
 #dec=tacoar
 #dec=tacomol
-#vocoder=ppgvchifigan
-#vocoder=none
-vocoder=bigvgan
 
-exp_name=vctk_train_1
+#vocoder=ppgvchifigan
+vocoder=none
+#vocoder=bigvgan
+
+exp_name=vctk_train_0
 #exp_name=vctk_no16fp_split
 
 

@@ -110,16 +110,22 @@ class GradTTS(BaseModule):
         self.beta_max = config['beta_max']
         self.pe_scale = config['pe_scale']
         self.use_prior_loss = config['use_prior_loss']
-        self.encoder = TextEncoder(self.input_dim, 
-                                    self.n_feats, 
-                                    self.n_enc_channels, 
-                                    self.filter_channels, 
-                                    self.filter_channels_dp, 
-                                    self.n_heads, 
-                                    self.n_enc_layers, 
-                                    self.enc_kernel, 
-                                    self.enc_dropout, 
-                                    self.window_size)
+        
+        self.use_text_encoder = config['use_text_encoder']
+        if self.use_text_encoder:
+            self.encoder = TextEncoder(self.input_dim, 
+                                        self.n_feats, 
+                                        self.n_enc_channels, 
+                                        self.filter_channels, 
+                                        self.filter_channels_dp, 
+                                        self.n_heads, 
+                                        self.n_enc_layers, 
+                                        self.enc_kernel, 
+                                        self.enc_dropout, 
+                                        self.window_size)
+        else:
+            self.encoder = nn.Conv1d(self.input_dim, self.n_feats, 3,1,1)
+
         self.decoder = Diffusion(self.n_feats, self.dec_dim, self.beta_min, self.beta_max, self.pe_scale)
 
         if 'prosodic_rep_type' not in config:
@@ -131,11 +137,15 @@ class GradTTS(BaseModule):
         else:
             raise Exception    
         # speaker embedding integration    
-        self.reduce_proj = torch.nn.Conv1d(self.input_dim + self.spk_emb_dim, self.input_dim, 1,1,0)
+        self.reduce_proj = torch.nn.Conv1d(self.n_feats + self.spk_emb_dim, self.n_feats, 1,1,0)
 
     @torch.no_grad()
     def forward(self, ling, ling_lengths, spk, pros, n_timesteps, temperature=1.0, stoc=False, length_scale=1.0):
-
+        
+        if self.use_text_encoder:
+            mu_x, x_mask = self.encoder(ling, ling_lengths)
+        else:
+            mu_x = self.encoder(ling)    
 
         # Get encoder_outputs `mu_x` and log-scaled token durations `logw`
         y_max_length = int(ling_lengths.max())
@@ -144,19 +154,18 @@ class GradTTS(BaseModule):
         
         # integrate prosodic representation
         if self.prosodic_net is not None and pros is not None:
-            ling = ling + self.prosodic_net(pros)
+            mu_x = mu_x + self.prosodic_net(pros)
         
         # integrate speaker representation
         spk_embeds = F.normalize(
                 spk.squeeze(1)).unsqueeze(2).expand(ling.size(0), self.spk_emb_dim, y_max_length)
-        ling = torch.cat([ling, spk_embeds], dim=1)
-        ling = self.reduce_proj(ling)
+        mu_x = torch.cat([mu_x, spk_embeds], dim=1)
+        mu_x = self.reduce_proj(mu_x)
 
-        mu_x, x_mask = self.encoder(ling, ling_lengths)
 
 
         # Using obtained durations `w` construct alignment map `attn`
-        y_mask = sequence_mask(ling_lengths, y_max_length_).unsqueeze(1).to(x_mask.dtype)
+        y_mask = sequence_mask(ling_lengths, y_max_length_).unsqueeze(1).to(ling.dtype)
         
         
         #if y_max_length_ > y_max_length:
@@ -174,26 +183,31 @@ class GradTTS(BaseModule):
     def compute_loss(self, ling, ling_lengths, mel, mel_lengths, spk, pros, out_size=None):
         # input dim: [B,C,T]
         
+        if self.use_text_encoder:
+            mu_x, x_mask = self.encoder(ling, ling_lengths)
+        else:
+            mu_x = self.encoder(ling)    
+        
+        
         # integrate prosodic representation
         if self.prosodic_net is not None and pros is not None:
-            ling = ling + self.prosodic_net(pros)
+            mu_x = mu_x + self.prosodic_net(pros)
         
         # integrate speaker representation
         spk_embeds = F.normalize(
                 spk.squeeze(1)).unsqueeze(2).expand(ling.size(0), self.spk_emb_dim, ling.size(2))
-        ling = torch.cat([ling, spk_embeds], dim=1)
-        conditions = self.reduce_proj(ling)
+        mu_x = torch.cat([mu_x, spk_embeds], dim=1)
         
-        mu_x, ling_mask = self.encoder(conditions, ling_lengths)
+        mu_x = self.reduce_proj(mu_x)
+
         mel_max_length = mel.shape[-1]
         _mel_max_length = fix_len_compatibility(mel_max_length) 
-        mel_mask = sequence_mask(mel_lengths, _mel_max_length).unsqueeze(1).to(ling_mask.device)
+        mel_mask = sequence_mask(mel_lengths, _mel_max_length).unsqueeze(1).to(ling.dtype)
         
         # pad mu_x
         if _mel_max_length > mel_max_length:
             mu_x = torch.nn.functional.pad(mu_x, (0, _mel_max_length - mel_max_length))
             mel = torch.nn.functional.pad(mel, (0, _mel_max_length - mel_max_length))
-            conditions = torch.nn.functional.pad(conditions, (0, _mel_max_length - mel_max_length))
 
 
         # Compute loss of score-based decoder

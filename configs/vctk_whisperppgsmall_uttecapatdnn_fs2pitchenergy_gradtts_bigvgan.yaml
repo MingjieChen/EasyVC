@@ -40,13 +40,13 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
-    use_prior_loss: !!bool True
+    use_prior_loss: !!bool False
     n_feats: !!int 100
     input_dim: !!int 768
     spk_emb_dim: !!int  192
     prosodic_rep_type: discrete
     prosodic_net:
-        hidden_dim: 256
+        hidden_dim: 100
         prosodic_bins: !!int 256
         prosodic_stats_path: dump/vctk/train_nodev_all/fastspeech2_pitch_energy/pitch_energy_min_max.npy
     n_enc_channels: !!int 192
