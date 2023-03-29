@@ -39,7 +39,7 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
-    use_text_encoder: !!bool False
+    use_text_encoder: !!bool True
     use_prior_loss: !!bool False
     n_feats: !!int 100
     input_dim: !!int 512

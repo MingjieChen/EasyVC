@@ -33,8 +33,6 @@ from sklearn.preprocessing import StandardScaler
 def denorm_mel(mean_tensor, std_tensor, mel):
     
     if mean_tensor is not None and std_tensor is not None:
-        mean_tensor = torch.FloatTensor(scaler.mean_)
-        std_tensor = torch.FloatTensor(scaler.scale_)
         
         mel = mel * std_tensor + mean_tensor
     
@@ -66,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--task', type = str) 
     parser.add_argument('--src_resyn', default = False, action = 'store_true')
     # vocoder
-    parser.add_argument('--vocoder', type = str, default = 'ppg_vc_hifigan')
+    #parser.add_argument('--vocoder', type = str, default = 'ppg_vc_hifigan')
     # sge task 
     parser.add_argument('--sge_task_id', type = int, default = 1)
     parser.add_argument('--sge_n_tasks', type = int, default = 1)
@@ -108,10 +106,10 @@ if __name__ == '__main__':
     
     # load ling_encoder
     ling_enc_load_func = f'load_{ling_encoder}'
-    ling_enc_model = eval(ling_enc_load_func)(device = args.device)
+    ling_enc_model = eval(ling_enc_load_func)(device = 'cpu')
     ling_encoder_func = f'{ling_encoder}'
     # load speaker encoder
-    speaker_enc_model = load_speaker_encoder(speaker_encoder, device = args.device)
+    speaker_enc_model = load_speaker_encoder(speaker_encoder, device = 'cpu')
     speaker_encoder_func = load_speaker_encoder_func(args.task, speaker_encoder)
     print(f'load ling_encoder {ling_encoder} done')
     print(f'load speaker_encoder {speaker_encoder} done')
@@ -127,7 +125,7 @@ if __name__ == '__main__':
     if 'vocoder' in exp_config:
         vocoder = exp_config['vocoder']
         vocoder_load_func = f'load_{vocoder}'
-        vocoder_model = eval(vocoder_load_func)(device = args.device)
+        vocoder_model = eval(vocoder_load_func)(device = 'cpu')
         vocoder_func = f'{vocoder}'
         print(f'load vocoder {vocoder} done')
     else:
@@ -163,31 +161,45 @@ if __name__ == '__main__':
         src_wav_path = meta['src_wav']
         trg_wav_path = meta['trg_wav']
         
-        if args.src_resyn and vocoder == 'ppgvc_hifigan':
-            from feature_extraction import ppgvc_hifigan_logmelspectrogram
-            src_audio = load_wav(src_wav_path, 24000)
-            ppgvc_mel_config = {'sampling_rate':24000, 
-                                'fft_size': 1024, 
-                                'hop_size': 240,
-                                'win_length': 1024,
-                                'window': 'hann',
-                                'num_mels': 80,
-                                'fmin': 0,
-                                'fmax': 8000,
-                                'mel_min': -12.0,
-                                'mel_max': 2.5
-                                }
-            src_mel_resyn = ppgvc_hifigan_logmelspectrogram(src_audio,ppgvc_mel_config)
+        if args.src_resyn:
+            if vocoder == 'ppgvc_hifigan':
+                from feature_extraction import ppgvc_hifigan_logmelspectrogram
+                src_audio = load_wav(src_wav_path, 24000)
+                ppgvc_mel_config = {'sampling_rate':24000, 
+                                    'fft_size': 1024, 
+                                    'hop_size': 240,
+                                    'win_length': 1024,
+                                    'window': 'hann',
+                                    'num_mels': 80,
+                                    'fmin': 0,
+                                    'fmax': 8000,
+                                    'mel_min': -12.0,
+                                    'mel_max': 2.5
+                                    }
+                src_mel_resyn = ppgvc_hifigan_logmelspectrogram(src_audio,ppgvc_mel_config)
+            elif vocoder  == 'bigvgan':
+                from feature_extraction import bigvgan_logmelspectrogram
+                src_audio = load_wav(src_wav_path, 24000)
+                bigvgan_mel_config = {'sampling_rate':24000, 
+                                    'n_fft': 1024, 
+                                    'hop_size': 240,
+                                    'win_size': 1024,
+                                    'num_mels': 100,
+                                    'fmin': 0,
+                                    'fmax': 12000,
+                                    }
+                src_mel_resyn = bigvgan_logmelspectrogram(src_audio,bigvgan_mel_config)
+                    
         
         # load src wav & trg wav
         src_wav = load_wav(src_wav_path, 16000)
         mel_duration = len(src_wav) // 160 # estimate a mel duration for pad ling and pros reps
         
         # to tensor
-        src_wav_tensor = torch.FloatTensor(src_wav).unsqueeze(0).to(args.device) 
+        src_wav_tensor = torch.FloatTensor(src_wav).unsqueeze(0)#.to(args.device) 
         start_time = time.time()
         # extract ling representations
-        ling_rep = eval(ling_encoder_func)(ling_enc_model, src_wav_tensor)
+        ling_rep = eval(ling_encoder_func)(ling_enc_model, src_wav_tensor).to(args.device)
         ling_duration = ling_rep.size(1)
         # check if need upsample ling rep
         factor = int(round(mel_duration / ling_duration))
@@ -210,6 +222,7 @@ if __name__ == '__main__':
             elif mel_duration > pros_duration:
                 pad_vec = pros_rep[:, -1, :]
                 pros_rep = torch.cat([pros_rep, pad_vec.unsqueeze(1).expand(1, mel_duration - pros_duration, pros_rep.size(2))], dim = 1)
+            pros_rep = pros_rep.to(args.device)    
         else:
             pros_rep = None    
         # trg spk emb
@@ -222,12 +235,15 @@ if __name__ == '__main__':
         
         if vocoder is not None:
             # vocoder
+            decoder_out = decoder_out.cpu()
             wav = eval(vocoder_func)(vocoder_model, decoder_out)
             if args.src_resyn:
                 src_mel_tensor = torch.FloatTensor([src_mel_resyn])
                 src_resyn_wav = eval(vocoder_func)(vocoder_model, src_mel_tensor)
         else:
             wav = decoder_out.view(-1)    
+        if args.device == 'cuda':
+            torch.cuda.empty_cache()    
         end_time = time.time()
         rtf = (end_time - start_time) / (0.01 * ling_rep.size(1))
         total_rtf += rtf
@@ -237,6 +253,7 @@ if __name__ == '__main__':
         if args.src_resyn:
             resyn_wav_basename = f'{ID}_resyn.wav'
             sf.write(os.path.join(out_wav_dir, resyn_wav_basename), src_resyn_wav.data.cpu().numpy(), 24000, "PCM_16")
+            
 
     print(f"RTF: {total_rtf/cnt :.2f}")    
 

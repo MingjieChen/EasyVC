@@ -254,11 +254,18 @@ class DiffWave(nn.Module):
     
     self.use_text_encoder = config['use_text_encoder']
 
+    
+    noise_steps = config['noise_steps']
+    noise_start = config['noise_start']
+    noise_end = config['noise_end']   
 
-    noise_schedule = np.linspace(1e-4, 0.05, 50).tolist()
+    self.infer_noise = config['infer_noise']
+
+
+    noise_schedule = np.linspace(noise_start, noise_end, noise_steps).tolist()
     self.noise_schedule = noise_schedule
     self.diffusion_embedding = DiffusionEmbedding(len(noise_schedule))
-    
+    self.fast_sampling  = config['fast_sampling'] if 'fast_sampling' in config else True
     self.upsampler = Upsampler(inter_channels)
     
     if self.use_text_encoder:
@@ -331,11 +338,12 @@ class DiffWave(nn.Module):
     return y
   
   def inference(self, ling, pros, spk, lengths):
-    fast_sampling = True
+    fast_sampling = self.fast_sampling
     training_noise_schedule = np.array(self.noise_schedule)    
-    inference_noise_schedule=np.array([0.0001, 0.001, 0.01, 0.05, 0.2, 0.5])
+    #inference_noise_schedule= np.array([0.0001, 0.001, 0.01, 0.1, 0.2, 0.5])
+    inference_noise_schedule = np.array(self.infer_noise)
     inference_noise_schedule = np.array(inference_noise_schedule) if fast_sampling else training_noise_schedule
-    
+    print(f'inference noise schedule {inference_noise_schedule}')  
     talpha = 1 - training_noise_schedule
     talpha_cum = np.cumprod(talpha)
 
@@ -351,6 +359,7 @@ class DiffWave(nn.Module):
           T.append(t + twiddle)
           break
     T = np.array(T, dtype=np.float32)
+    print(f'inference T {T}')
     
     # hard code hop_size = 240
     audio = torch.randn(ling.shape[0], 240 * ling.shape[-1], device=ling.device)
@@ -363,6 +372,7 @@ class DiffWave(nn.Module):
         noise = torch.randn_like(audio)
         sigma = ((1.0 - alpha_cum[n-1]) / (1.0 - alpha_cum[n]) * beta[n])**0.5
         audio += sigma * noise
+      print(f'c1 {c1} c2 {c2} sigma {sigma}', flush = True)
       audio = torch.clamp(audio, -1.0, 1.0)
     return audio 
     

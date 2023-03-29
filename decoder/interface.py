@@ -164,6 +164,7 @@ def infer_GradTTS(model, ling, pros, spk):
     return mel
 
 def infer_DiffWave(model, ling, pros, spk):
+    print(f'ling length {ling.size(1)}', flush = True)
     ling_lengths = torch.LongTensor([ling.size(1)]).to(ling.device)
     ling = ling.transpose(1,2)
     pros = pros.transpose(1,2)

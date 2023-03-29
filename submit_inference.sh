@@ -6,11 +6,11 @@ split=eval_all
 ling_enc=vqwav2vec
 spk_enc=uttdvec
 pros_enc=ppgvcf0
-dec=gradtts
-vocoder=bigvgan
+dec=diffwave
+vocoder=none
 
 # exp setup
-exp_name=vctk_train_0
+exp_name=vctk_train_1
 exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
 if [ ! -e $exp_dir ]; then
     echo "$exp_dir does not exist"
@@ -26,7 +26,7 @@ epochs=$( ls -t $exp_dir/ckpt | head -n 1 | sed 's/[^0-9]*//g')
 eval_list=eval_list_m2m_vc_small_oneshot.json
 eval_list_path=data/$dataset/$split/$eval_list
 # sge submitjob setup
-n_parallel_jobs=50
+n_parallel_jobs=360
 device=cpu
 job=$exp_dir/scripts/inference_${task}_${epochs}.sh
 log=$exp_dir/logs/inference_${task}_${epochs}.log
@@ -53,5 +53,5 @@ python inference.py \
 EOF
 
 #submit to sge
-submitjob -m 30000 -n $n_parallel_jobs   $log $job
+submitjob -m 40000 -n $n_parallel_jobs   $log $job
 echo "job submitted, see log in ${log}"

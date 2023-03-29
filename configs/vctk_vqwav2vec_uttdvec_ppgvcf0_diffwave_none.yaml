@@ -40,8 +40,12 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
+    noise_steps: 100
+    noise_start: !!float 1e-5
+    noise_end: 0.05
+    infer_noise: [0.00001, 0.0001, 0.001, 0.01, 0.05, 0.1, 0.2, 0.5]
     segment_size: 14400 
-    use_text_encoder: !!bool False
+    use_text_encoder: !!bool True
     input_dim: !!int 512
     spk_emb_dim: !!int  256
     prosodic_rep_type: continuous

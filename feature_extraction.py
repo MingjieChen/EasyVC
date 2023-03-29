@@ -118,7 +118,6 @@ def process_speaker(spk_meta, spk, config, args):
         ID = row['ID']
         wav_path = row['wav_path'].strip()
         audio, fs = librosa.load(wav_path, sr = config['sampling_rate'])
-        
         # trim silence
         start, end = float(row['start']), float(row['end'])
         audio = audio[ int(start * config['sampling_rate']):
