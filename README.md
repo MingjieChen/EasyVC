@@ -151,6 +151,37 @@ E.g.
 ./bin/train.sh configs/vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan.yaml
 ```
 
+## Step5: Generate Eval List & Inference
+
+To generate a eval list, you need to run e.g.
+```
+./bin/generate_eval_list.sh --task vc \
+                            --dataset vctk \
+                            --split eval_all #eval set name\
+                            --eval_list eval_list.json #eval_list file name \
+                            --n_trg_spk_samples 10 #number of randomly selected samples of target speakers to get averaged speaker embedding \
+                            --n_src_spk_samples 10 # number of randomly selected samples of source speakers to test \
+                            --n_eval_spks # number of randomly selected speakers from eval set
+```
+
+Then run inference using the genertated eval_list, e.g.
+
+```
+python inference.py \
+          --exp_dir exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name} \
+          --eval_list data/$dataset/$split/$eval_list \
+          --epochs 200 \
+          --task a2a_vc # a2a_vc, m2m_vc or oneshot_vc, will decide how many target speaker embeddings to be used. \
+          --device cpu \
+
+```
+
+## Step6: Evaluation
+
+```
+./submit_evaluation.sh
+```
+
 
 # Authors
 
