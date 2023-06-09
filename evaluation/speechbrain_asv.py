@@ -4,6 +4,7 @@ from speechbrain.utils.metric_stats import EER
 import sys
 from tqdm import tqdm
 import torch
+import torchaudio
 
 class SpeakerRecognition(EncoderClassifier):
     """A ready-to-use model for speaker recognition. It can be used to
@@ -78,7 +79,7 @@ class SpeakerRecognition(EncoderClassifier):
         score = self.similarity(emb1, emb2)
         return score, score > threshold
 
-    def verify_files(self, path_x, path_y):
+    def verify_files(self, path_x, path_y, save_dir):
         """Speaker verification with cosine distance
 
         Returns the score and the decision (0 different speakers,
@@ -93,8 +94,9 @@ class SpeakerRecognition(EncoderClassifier):
             The prediction is 1 if the two signals in input are from the same
             speaker and 0 otherwise.
         """
-        waveform_x = self.load_audio(path_x, savedir = "pretrained_models/spkrec-ecapa-voxceleb") 
-        waveform_y = self.load_audio(path_y, savedir = "pretrained_models/spkrec-ecapa-voxceleb")
+
+        waveform_x = self.load_audio(path_x, savedir = save_dir) 
+        waveform_y = self.load_audio(path_y, savedir = save_dir)
         # Fake batches:
         batch_x = waveform_x.unsqueeze(0)
         batch_y = waveform_y.unsqueeze(0)
@@ -107,8 +109,9 @@ if __name__ == '__main__':
     converted_wav_dir = sys.argv[1]
     positive_pairs_path = sys.argv[2]
     negative_pairs_path = sys.argv[3]
-    device = 'cuda'   
-
+    device = sys.argv[4]   
+    save_dir = sys.argv[5]
+    
 
     verification = SpeakerRecognition.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir="pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":f"{device}"})
     print(f'load verification model done')
@@ -117,15 +120,15 @@ if __name__ == '__main__':
     positive_pairs = []
     with open(positive_pairs_path) as f:
         for line in f:
-            ID, wav = line.split()[0], line.split()[1].strip()
-            positive_pairs.append((ID, wav))
+            pos_ID, pos_wav = line.split()[0], line.split()[1].strip()
+            positive_pairs.append((pos_ID, pos_wav))
         f.close()    
     
     negative_pairs = []
     with open(negative_pairs_path) as f:
         for line in f:
-            ID, wav = line.split()[0], line.split()[1].strip()
-            negative_pairs.append((ID, wav))
+            neg_ID, neg_wav = line.split()[0], line.split()[1].strip()
+            negative_pairs.append((neg_ID, neg_wav))
         f.close()    
     
     positive_scores = []
@@ -134,8 +137,9 @@ if __name__ == '__main__':
         wav_1 = os.path.join(converted_wav_dir, ID + '_gen.wav')
         wav_2 = wav
 
-        score, prediction = verification.verify_files(wav_1, wav_2) 
+        score, prediction = verification.verify_files(wav_1, wav_2, save_dir) 
         positive_scores.append(score)
+        print(f'{wav_1} {wav_2} {score} {prediction}', flush = True)
 
     negative_scores = []
     for pair in tqdm(negative_pairs, total = len(negative_pairs)):
@@ -143,8 +147,9 @@ if __name__ == '__main__':
         wav_1 = os.path.join(converted_wav_dir, ID + '_gen.wav')
         wav_2 = wav
 
-        score, prediction = verification.verify_files(wav_1, wav_2) 
+        score, prediction = verification.verify_files(wav_1, wav_2, save_dir) 
         negative_scores.append(score)
+        print(f'{wav_1} {wav_2} {score} {prediction}', flush = True)
     
     positive_scores = torch.tensor(positive_scores)     
     negative_scores = torch.tensor(negative_scores)     

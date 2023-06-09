@@ -111,18 +111,20 @@ def logmelfilterbank(
         raise ValueError(f"{log_base} is not supported.")
 
 
-def process_speaker(spk_meta, spk, config, args):
+def process_speaker(spk_meta, config, args):
     
     for row in tqdm(spk_meta):
         # load wav
         ID = row['ID']
         wav_path = row['wav_path'].strip()
+        spk = row['dataset'] + '_'+ row['spk'] if 'dataset' in row else row['spk']
         audio, fs = librosa.load(wav_path, sr = config['sampling_rate'])
         # trim silence
-        start, end = float(row['start']), float(row['end'])
-        audio = audio[ int(start * config['sampling_rate']):
-                        int(end * config['sampling_rate'])
-            ]
+        if 'start' in row and 'end' in row:
+            start, end = float(row['start']), float(row['end'])
+            audio = audio[ int(start * config['sampling_rate']):
+                            int(end * config['sampling_rate'])
+                ]
         
         if args.feature_type == 'mel':
             feature = logmelfilterbank(
@@ -171,6 +173,8 @@ if __name__ == '__main__':
     parser.add_argument('--feature_type', type = str, default = 'mel', 
         choices = ['mel','ppgvc_mel', 'bigvgan_mel', 'ppgvc_f0', 'fastspeech2_pitch_energy', 'vits_spec'])
     parser.add_argument('--pitch', default = False, action = 'store_true')
+    parser.add_argument('--sge_task_id', type = int, default = None)
+    parser.add_argument('--sge_n_tasks', type = int, default = None)
     args = parser.parse_args()
     
     # load in config
@@ -180,6 +184,7 @@ if __name__ == '__main__':
     print(config)   
     
     # build a dict for spk2metadata
+    all_metadata = []
     spk2meta = {}
     with open(args.metadata) as f:
         reader = csv.DictReader(f)
@@ -187,6 +192,7 @@ if __name__ == '__main__':
             _spk = row['spk']
             if _spk not in spk2meta:
                 spk2meta[_spk] = []
+            all_metadata.append(row)
             
             spk2meta[_spk].append(row)         
         
@@ -198,7 +204,18 @@ if __name__ == '__main__':
             raise Exception(f"speaker {speaker} should be in the metadata")
 
         spk_meta = spk2meta[args.speaker]
-        process_speaker(spk_meta, args.speaker, config, args)
+        process_speaker(spk_meta, config, args)
+    elif args.sge_task_id is not None:
+        
+        n_per_task = np.ceil(len(all_metadata) / args.sge_n_tasks)    
+        start = int(( args.sge_task_id -1 ) * n_per_task)
+        if int( args.sge_task_id * n_per_task) >= len(all_metadata):
+            end = len(all_metadata) 
+        else:
+            end = int(args.sge_task_id  * n_per_task)    
+        print(f'selected_metadata from {start} to {end}', flush = True)    
+        selected_metadata = all_metadata[start: end]
+        process_speaker(selected_metadata, config, args)
     
     else:
         # process all speakers
@@ -209,5 +226,5 @@ if __name__ == '__main__':
         for spk in spk2meta:
             spk_meta = spk2meta[spk]        
         
-            futures.append(executor.submit(partial(process_speaker, spk_meta, spk, config, args)))
+            futures.append(executor.submit(partial(process_speaker, spk_meta, config, args)))
         results = [future.result() for future in tqdm(futures)]    

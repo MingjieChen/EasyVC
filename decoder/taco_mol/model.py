@@ -41,14 +41,12 @@ class MelDecoderMOLv2(AbsMelDecoder):
         postnet_hidden_dim = 512
         mask_padding = True
         use_spk_dvec = True
-        use_postnet = config['use_postnet']
         assert check_argument_types()
         super().__init__()
         
-        self.use_postnet = use_postnet
         self.mask_padding = mask_padding
         self.bottle_neck_feature_dim = bottle_neck_feature_dim
-        self.num_mels = 80
+        self.num_mels = config['out_dim']
         self.encoder_down_factor=np.cumprod(encoder_downsample_rates)[-1]
         self.frames_per_step = frames_per_step
         self.multi_speaker = True #if num_speakers > 1 or self.use_spk_dvec else False
@@ -108,10 +106,7 @@ class MelDecoderMOLv2(AbsMelDecoder):
         )
 
         # Mel-Spec Postnet: some residual CNN layers
-        if self.use_postnet:
-            self.postnet = Postnet(num_layers = postnet_num_layers, hidden_dim = postnet_hidden_dim)
-        else:
-            self.postnet = None    
+        self.postnet = Postnet(num_layers = postnet_num_layers, hidden_dim = postnet_hidden_dim)
     
     def parse_output(self, outputs, output_lengths=None):
         if self.mask_padding and output_lengths is not None:

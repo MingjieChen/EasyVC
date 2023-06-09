@@ -10,7 +10,7 @@ stage=1
 stop_stage=1
 
 # set up
-dataset=vctk # vctk or libritts
+dataset=libritts # vctk or libritts
 linguistic_encoder=vqwav2vec 
 speaker_encoder=utt_dvec
 prosodic_encoder=ppgvc_f0

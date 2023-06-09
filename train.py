@@ -127,6 +127,7 @@ def main(replica_id = None, replica_count = None, port = None, args = None, conf
             else:
                 for v in value:
                     writer.add_figure('eval_spec', v, epoch)
+        print(loss_string)            
         
         
 

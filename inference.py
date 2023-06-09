@@ -63,6 +63,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type = str)
     parser.add_argument('--task', type = str) 
     parser.add_argument('--src_resyn', default = False, action = 'store_true')
+    parser.add_argument('--infer_dataset', type = str)
     # vocoder
     #parser.add_argument('--vocoder', type = str, default = 'ppg_vc_hifigan')
     # sge task 
@@ -81,8 +82,8 @@ if __name__ == '__main__':
         f.close()
 
     # make dir
-    os.makedirs(os.path.join(args.exp_dir, 'inference', args.task, args.epochs), exist_ok = True)
-    out_wav_dir = os.path.join(args.exp_dir, 'inference', args.task, args.epochs)
+    os.makedirs(os.path.join(args.exp_dir, 'inference_' + args.infer_dataset, args.task, args.epochs), exist_ok = True)
+    out_wav_dir = os.path.join(args.exp_dir, 'inference_' + args.infer_dataset, args.task, args.epochs)
     # load eval_list
     with open(args.eval_list ) as f:
         eval_list = json.load(f)
@@ -211,7 +212,7 @@ if __name__ == '__main__':
         elif mel_duration > ling_duration:
             pad_vec = ling_rep[:, -1, :]
             ling_rep = torch.cat([ling_rep, pad_vec.unsqueeze(1).expand(1, mel_duration - ling_duration, ling_rep.size(2))], dim = 1)
-            
+        print(f'ling_rep {ling_rep.size()}')    
         # extract prosodic representations
         if prosodic_encoder != 'none':
             prosodic_func = f'infer_{prosodic_encoder}'
@@ -223,6 +224,7 @@ if __name__ == '__main__':
                 pad_vec = pros_rep[:, -1, :]
                 pros_rep = torch.cat([pros_rep, pad_vec.unsqueeze(1).expand(1, mel_duration - pros_duration, pros_rep.size(2))], dim = 1)
             pros_rep = pros_rep.to(args.device)    
+            print(f'prosodic_rep {pros_rep.size()}')
         else:
             pros_rep = None    
         # trg spk emb

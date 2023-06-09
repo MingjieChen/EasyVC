@@ -1,9 +1,9 @@
 #!/bin/bash
 
 task=vc
-dataset=vctk
-split=eval_all
-eval_list=eval_list_m2m_vc_small_oneshot.json
+dataset=libritts
+split=eval_clean
+eval_list=eval_list_a2a_vc_small_oneshot.json
 n_trg_spk_samples=1
 n_src_spk_samples=4
 n_eval_spks=10

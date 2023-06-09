@@ -146,6 +146,10 @@ def load_TacoMOL(ckpt = None, config = None, device = 'cpu'):
 
 def infer_TacoMOL(model, ling, pros, spk):
     
+    if ling.size(1) % 4 != 0:
+        pad_length = 4 - (ling.size(1) % 4)
+        ling = torch.nn.functional.pad(ling, [0,0,0,pad_length])
+        pros = torch.nn.functional.pad(pros, [0,0,0,pad_length])
     mel = model.inference(ling, pros, spk)    
     return mel
 

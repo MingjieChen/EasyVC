@@ -5,9 +5,9 @@ conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
 conda_env=torch_1.9
 
 #choose config
-dataset=vctk
-ling=vqwav2vec
-#ling=conformerppg
+dataset=libritts
+#ling=vqwav2vec
+ling=conformerppg
 #ling=contentvec100
 #ling=whisperppgsmall
 
@@ -20,15 +20,15 @@ pros=ppgvcf0
 #dec=fs2
 #dec=vits
 #dec=gradtts
-dec=diffwave
-#dec=tacoar
+#dec=diffwave
+dec=tacoar
 #dec=tacomol
 
-#vocoder=ppgvchifigan
-vocoder=none
+vocoder=ppgvchifigan
+#vocoder=none
 #vocoder=bigvgan
 
-exp_name=vctk_train_2
+exp_name=libritts_train_0
 #exp_name=vctk_no16fp_split
 
 
@@ -41,8 +41,8 @@ exp_dir=exp
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name
 njobs=24
-ngpus=1
-slots=4
+ngpus=2
+slots=8
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"

@@ -1,35 +1,41 @@
 #!/bin/bash
 
-dataset=vctk
+train_dataset=libritts
+infer_dataset=vctk
 split=eval_all
 # model setup
 ling_enc=vqwav2vec
 spk_enc=uttdvec
 pros_enc=ppgvcf0
-dec=diffwave
-vocoder=none
+dec=fs2
+vocoder=ppgvchifigan
 
 # exp setup
-exp_name=vctk_train_1
-exp_dir=exp/${dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
+exp_name=libritts_train_0
 if [ ! -e $exp_dir ]; then
     echo "$exp_dir does not exist"
     exit 1;
 fi    
 
 # eval setup
-#task=oneshot_vc
-task=m2m_vc
+task=oneshot_vc
+#task=m2m_vc
 
 #epochs=210
-epochs=$( ls -t $exp_dir/ckpt | head -n 1 | sed 's/[^0-9]*//g')
 eval_list=eval_list_m2m_vc_small_oneshot.json
-eval_list_path=data/$dataset/$split/$eval_list
+eval_list_path=data/$infer_dataset/$split/$eval_list
 # sge submitjob setup
-n_parallel_jobs=360
+n_parallel_jobs=100
 device=cpu
-job=$exp_dir/scripts/inference_${task}_${epochs}.sh
-log=$exp_dir/logs/inference_${task}_${epochs}.log
+
+. bin/parse_options.sh || exit 1;
+
+exp_dir=exp/${train_dataset}_${ling_enc}_${spk_enc}_${pros_enc}_${dec}_${vocoder}/${exp_name}
+epochs=$( ls -t $exp_dir/ckpt | head -n 1 | sed 's/[^0-9]*//g')
+
+
+job=$exp_dir/scripts/inference_${task}_${epochs}_${infer_dataset}.sh
+log=$exp_dir/logs/inference_${task}_${epochs}_${infer_dataset}.log
 touch $job
 chmod +x $job
 
@@ -49,6 +55,7 @@ python inference.py \
         --device ${device} \
         --sge_task_id \$SGE_TASK_ID \
         --sge_n_tasks ${n_parallel_jobs} \
+        --infer_dataset ${infer_dataset}
 
 EOF
 

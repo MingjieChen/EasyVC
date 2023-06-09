@@ -1,13 +1,13 @@
 #!/bin/bash
 
 conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
-conda_env=torch_1.7
+conda_env=torch_1.9
 
 # setup
 
 dataset=libritts
-config=configs/preprocess_ppgvc_f0.yaml
-feature_type=ppgvc_f0
+config=configs/preprocess_ppgvc_mel.yaml
+feature_type=ppgvc_mel
 splits="train_nodev_clean dev_clean"
 
 script_dir=scripts/$dataset/preprocess
@@ -17,11 +17,9 @@ script_dir=scripts/$dataset/preprocess
 for split in $splits ; do
     
     echo "[feature extraction]: $split $dataset $feature_type"
-    speakers=$(cat data/$dataset/$split/speakers.txt)
-    for spk in $speakers ; do 
-        b=$script_dir/feature_extraction_${feature_type}_${split}_${spk}.sh
-        l=logs/feature_extraction_${feature_type}_${split}_${spk}.log
-        cat <<EOF > $b
+    b=$script_dir/feature_extraction_${feature_type}_${split}.sh
+    l=logs/feature_extraction_${feature_type}_${split}.log
+    cat <<EOF > $b
 #!/bin/bash
 source $conda/bin/activate $conda_env
 python3 feature_extraction.py \
@@ -31,10 +29,10 @@ python3 feature_extraction.py \
     --split $split \
     --max_workers 20 \
     --feature_type $feature_type \
-    --speaker $spk
+    --sge_task_id \$SGE_TASK_ID \
+    --sge_n_tasks 5000
 EOF
     chmod +x $b
-    submitjob -m 10000 $l $b
-    echo "submitjob for $dataset $split  $spk $feature_type see log $l"
-    done
+    submitjob -m 10000 -n 5000  $l $b
+    echo "submitjob for $dataset $split  $feature_type see log $l"
 done        

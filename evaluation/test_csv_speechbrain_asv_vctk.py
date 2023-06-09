@@ -5,6 +5,7 @@ import sys
 import argparse
 import random
 import json
+import re
 
 
 '''
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     positive_pairs = []
     negative_pairs = []
 
-    n_samples = 50
+    n_samples = 10
     with open(args.eval_list) as f:
         eval_list = json.load(f)
         f.close()
