@@ -1,6 +1,6 @@
 # **EasyVC**
 
-[demo-page](https://mingjiechen.github.io/easyvc/index.html)
+[[demo-page](https://mingjiechen.github.io/easyvc/index.html)]
 
 A voice conversion framework for different types of encoders, decoders and vocoders. 
 
