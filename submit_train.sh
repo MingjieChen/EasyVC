@@ -43,8 +43,10 @@ slots=8
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
 gputypes="GeForceGTX1080Ti"
 
+. ./bin/parse_options.sh || exit 1;
 model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
 exp=$exp_dir/$model_name/$exp_name
+
 
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 if [ ! -e $config ] ; then
@@ -52,7 +54,6 @@ if [ ! -e $config ] ; then
     exit 1;
 fi    
 
-. ./bin/parse_options.sh || exit 1;
 
 
 # create exp dir

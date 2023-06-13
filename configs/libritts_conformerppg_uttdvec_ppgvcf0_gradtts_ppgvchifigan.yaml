@@ -7,7 +7,7 @@ dev_set: dev_clean
 
 
 # encoder-decoder
-ling_enc: conformerppg
+ling_enc: conformer_ppg
 spk_enc: utt_dvec
 pros_enc: ppgvc_f0
 decoder: GradTTS
