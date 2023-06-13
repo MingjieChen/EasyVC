@@ -111,9 +111,7 @@ class GradTTS(BaseModule):
         self.pe_scale = config['pe_scale']
         self.use_prior_loss = config['use_prior_loss']
         
-        self.use_text_encoder = config['use_text_encoder']
-        if self.use_text_encoder:
-            self.encoder = TextEncoder(self.input_dim, 
+        self.encoder = TextEncoder(self.input_dim, 
                                         self.n_feats, 
                                         self.n_enc_channels, 
                                         self.filter_channels, 
@@ -123,8 +121,6 @@ class GradTTS(BaseModule):
                                         self.enc_kernel, 
                                         self.enc_dropout, 
                                         self.window_size)
-        else:
-            self.encoder = nn.Conv1d(self.input_dim, self.n_feats, 3,1,1)
 
         self.decoder = Diffusion(self.n_feats, self.dec_dim, self.beta_min, self.beta_max, self.pe_scale)
 
@@ -140,12 +136,9 @@ class GradTTS(BaseModule):
         self.reduce_proj = torch.nn.Conv1d(self.n_feats + self.spk_emb_dim, self.n_feats, 1,1,0)
 
     @torch.no_grad()
-    def forward(self, ling, ling_lengths, spk, pros, n_timesteps, temperature=1.0, stoc=False, length_scale=1.0):
+    def inference(self, ling, ling_lengths, spk, pros, n_timesteps, temperature=1.0, stoc=False, length_scale=1.0):
         
-        if self.use_text_encoder:
-            mu_x, x_mask = self.encoder(ling, ling_lengths)
-        else:
-            mu_x = self.encoder(ling)    
+        mu_x, x_mask = self.encoder(ling, ling_lengths)
 
         # Get encoder_outputs `mu_x` and log-scaled token durations `logw`
         y_max_length = int(ling_lengths.max())
@@ -180,13 +173,10 @@ class GradTTS(BaseModule):
 
         return decoder_outputs 
 
-    def compute_loss(self, ling, ling_lengths, mel, mel_lengths, spk, pros, out_size=None):
+    def forward(self, ling, ling_lengths, mel, mel_lengths, spk, pros, out_size=None):
         # input dim: [B,C,T]
         
-        if self.use_text_encoder:
-            mu_x, x_mask = self.encoder(ling, ling_lengths)
-        else:
-            mu_x = self.encoder(ling)    
+        mu_x, x_mask = self.encoder(ling, ling_lengths)
         
         
         # integrate prosodic representation

@@ -6,8 +6,8 @@ conda_env=torch_1.9
 # setup
 
 dataset=libritts
-config=configs/preprocess_ppgvc_mel.yaml
-feature_type=ppgvc_mel
+config=configs/preprocess_vits_spec.yaml
+feature_type=vits_spec
 splits="train_nodev_clean dev_clean"
 
 script_dir=scripts/$dataset/preprocess

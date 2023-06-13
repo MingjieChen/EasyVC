@@ -4,6 +4,15 @@
 
 splits=$1
 dataset=$2
+
+if [ ! -e ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt ]; then 
+    echo "downloading vqwav2vec model checkpoint"
+    mkdir -p ling_encoder/vqwav2vec 
+    cd ling_encoder/vqwav2vec
+    wget https://dl.fbaipublicfiles.com/fairseq/wav2vec/vq-wav2vec_kmeans.pt
+    cd ../..
+    echo "done!"
+fi   
 for split in $splits ; do
     
     echo "[vqwav2vec feature extraction]: $split for $dataset"

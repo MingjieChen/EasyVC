@@ -6,8 +6,9 @@ conda_env=torch_1.9
 
 #choose config
 dataset=libritts
-#ling=vqwav2vec
-ling=conformerppg
+
+ling=vqwav2vec
+#ling=conformerppg
 #ling=contentvec100
 #ling=whisperppgsmall
 
@@ -19,9 +20,9 @@ pros=ppgvcf0
 
 #dec=fs2
 #dec=vits
-#dec=gradtts
+dec=gradtts
 #dec=diffwave
-dec=tacoar
+#dec=tacoar
 #dec=tacomol
 
 vocoder=ppgvchifigan
@@ -32,21 +33,27 @@ exp_name=libritts_train_0
 #exp_name=vctk_no16fp_split
 
 
+
+exp_dir=exp
+njobs=24
+ngpus=2
+slots=8
+#gputypes="GeForceRTX3060|GeForceRTX3090"
+#gputypes="GeForceRTX3090"
+#gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
+gputypes="GeForceGTX1080Ti"
+
+model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
+exp=$exp_dir/$model_name/$exp_name
+
 config=configs/${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}.yaml
 if [ ! -e $config ] ; then
     echo "can't find config file $config" 
     exit 1;
 fi    
-exp_dir=exp
-model_name=${dataset}_${ling}_${spk}_${pros}_${dec}_${vocoder}
-exp=$exp_dir/$model_name/$exp_name
-njobs=24
-ngpus=2
-slots=8
-#gputypes="GeForceRTX3060|GeForceRTX3090"
-gputypes="GeForceRTX3090"
-#gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"
-#gputypes="GeForceGTX1080Ti"
+
+. ./bin/parse_options.sh || exit 1;
+
 
 # create exp dir
 [ ! -e $exp ] && mkdir -p $exp

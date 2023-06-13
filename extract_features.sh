@@ -14,8 +14,8 @@ dataset=libritts # vctk or libritts
 linguistic_encoder=vqwav2vec 
 speaker_encoder=utt_dvec
 prosodic_encoder=ppgvc_f0
-decoder=fastspeech2
-vocoder=bigvgan
+decoder=vits
+vocoder=none
 . bin/parse_options.sh || exit 1;
 
 # decide feature_type based on choices of vocoder and decoder
@@ -65,14 +65,6 @@ fi
 
 # step 2: linguistic representation extraction
 if [ "${stage}" -le 2 ] && [ "${stop_stage}" -ge 2 ]; then
-    if [ "$linguistic_encoder" == "vqwav2vec" ] && [ ! -e ling_encoder/vqwav2vec/vq-wav2vec_kmeans.pt ]; then 
-        echo "downloading vqwav2vec model checkpoint"
-        mkdir -p ling_encoder/vqwav2vec 
-        cd ling_encoder/vqwav2vec
-        wget https://dl.fbaipublicfiles.com/fairseq/wav2vec/vq-wav2vec_kmeans.pt
-        cd ../..
-        echo "done!"
-    fi   
     echo "start extracting $linguistic_encoder representations" 
     ./bin/${linguistic_encoder}_feature_extraction.sh "$splits" $dataset
     echo "done!"

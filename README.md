@@ -33,9 +33,6 @@ conda create --name torch_1.9 --file requirements.txt
 - **Dataset**
     - [x] VCTK
     - [x] LibriTTS
-    - [ ] M4Singer
-    - [ ] NUS-48E
-    - [ ] NHSS
 
 - **Linguistic Encoder**
     - [x] conformer_ppg from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
@@ -67,7 +64,6 @@ conda create --name torch_1.9 --file requirements.txt
  
 - **Vocoder**
     - [x] hifigan (vctk) from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
-    - [ ] BigVGAN from [bigvgan](https://github.com/NVIDIA/BigVGAN)
 
 - **Evaluation**
     - [x] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
