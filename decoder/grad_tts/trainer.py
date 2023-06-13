@@ -158,12 +158,10 @@ class Trainer(object):
                 loss, losses = compute_loss(self.model, _batch)        
                 self.timer.cnt('fw')    
                 loss.backward()
+                grad_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), 
+                                                            max_norm=1)
                 self.optimizer.step()
                 self.timer.cnt('bw')    
-                enc_grad_norm = torch.nn.utils.clip_grad_norm_(self.model.encoder.parameters(), 
-                                                            max_norm=1)
-                dec_grad_norm = torch.nn.utils.clip_grad_norm_(self.model.decoder.parameters(), 
-                                                            max_norm=1)
             
             loss_string = f"epoch: {self.epochs}| iters: {self.iters}| timer: {self.timer.show()}|" 
             for key in losses:
@@ -171,6 +169,7 @@ class Trainer(object):
                 loss_string += f" {key}:{losses[key]:.3f} "
                 self.step_writer.add_scalar('step/'+key, losses[key], self.iters)
             self.step_writer.add_scalar('step/lr', self._get_lr(), self.iters)    
+            self.step_writer.add_scalar('step/grad_norm', grad_norm, self.iters)    
             self.iters+=1
             if self.iters % self.config['show_freq'] == 0:
                 print(loss_string, flush = True)
