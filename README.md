@@ -1,11 +1,15 @@
 # **EasyVC**
 
 
+[[demo](https://mingjiechen.github.io/easyvc/index.html)]
+
+***
+
+
 > Current state-of-the-art voice conversion (VC) systems typically are developed based on an encoder-decoder framework. In this framework, encoders are used to extract linguistic, speaker or prosodic features from speech, then a decoder is to generate speech from speech features. Recently, there have been more and more advance models deployed as encoders or decoders for VC. Although obtaining good performance, the effects of these encoders and decoders have not been fully studied. On the other hand, VC technologies have been applied in different scenarios, which brings a lot of challenges for VC techiques. Hence, studies and understandings of encoders and decoders are becoming necessary and important. However, due to the complexity of VC systems, it is not always easy to compare and analyse these encoders and decoders. This paper introduces a toolkit, EasyVC, which is built upon the encoder-decoder framework. EasyVC supports a number of encoders and decoders within a unified framework, which makes it easy and convenient for VC training, inference, evaluation and deployment. EasyVC provides step-wise recipes covering from dataset downloading to objective evaluations and online demo presentation. Furthermore, EasyVC focuses on challenging VC scenarios such as one-shot, emotional, singing and real-time, which have not been fully studied at the moment. EasyVC could help researchers and developers to investigate modules of VC systems and also promote the development of VC techniques. 
 
 ***
 
-[[demo-page](https://mingjiechen.github.io/easyvc/index.html)]
 
 
 The encoder-decoder framework is demonstrated in the following figure. ![figure](enc_dec_voice_conversion.drawio.png)
@@ -33,9 +37,16 @@ conda create --name torch_1.9 --file requirements.txt
 
 # Working progress
 
-- **Dataset**
+- **Training Dataset**
     - [x] VCTK
     - [x] LibriTTS
+    
+- **Testing Dataset**
+    - [x] VCTK
+    - [x] LibriTTS
+    - [ ] VCC2020
+    - [ ] SVCC2023
+    - [ ] ESD
 
 - **Linguistic Encoder**
     - [x] conformer_ppg from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
@@ -49,6 +60,8 @@ conda create --name torch_1.9 --file requirements.txt
 - **Prosodic Encoder**
     - [x] log-f0 from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
     - [x] pitch + energy from [fastspeech2](https://github.com/ming024/FastSpeech2)
+    - [ ] f0 VQ-VAE
+    - [ ] SSL f0 encoder
  
  
 - **Speaker Encoder**
@@ -63,16 +76,20 @@ conda create --name torch_1.9 --file requirements.txt
     - [x] vits from [vits](https://github.com/jaywalnut310/vits)
     - [x] grad_tts from [Grad_TTS](https://github.com/huawei-noah/Speech-Backbones)
     - [x] diffwave from [DiffWave](https://github.com/lmnt-com/diffwave)
+    - [ ] DiffSVC from [DiffSVC](https://github.com/CNChTu/Diffusion-SVC)
  
  
 - **Vocoder**
     - [x] hifigan (vctk) from [ppg-vc](https://github.com/liusongxiang/ppg-vc)
+    - [ ] bigvgan from [BigVGAN](https://github.com/NVIDIA/BigVGAN)
 
 - **Evaluation**
     - [x] UTMOS22 mos prediction from [UTMOS22](https://github.com/sarulab-speech/UTMOS22)
-    - [x] ASR WER
-    - [x] ASV EER
-    - [ ] MCD, F0-RMSE, F0-CORR
+    - [x] ASR WER from [speechbrain asr recipe](https://github.com/speechbrain/speechbrain/tree/develop/recipes/LibriSpeech/ASR/transformer)
+    - [x] ASV EER from [speechbrain asv recipe](https://github.com/speechbrain/speechbrain/tree/develop/recipes/VoxCeleb/SpeakerRec)
+    - [ ] MCD, F0-RMSE, F0-CORR from [S3PRL-VC](https://github.com/unilight/s3prl-vc)
+
+    
 # How to run
 
 ## Step1: Dataset download 
