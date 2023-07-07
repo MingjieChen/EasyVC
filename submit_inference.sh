@@ -59,6 +59,7 @@ python inference.py \
 
 EOF
 
+
 #submit to sge
-submitjob -m 40000 -n $n_parallel_jobs   $log $job
+submitjob -m 40000 -n $n_parallel_jobs -o -l hostname="!node20&!node21&!node23&!node24&!node26&!node27&!node28&!node29" -eo   $log $job
 echo "job submitted, see log in ${log}"

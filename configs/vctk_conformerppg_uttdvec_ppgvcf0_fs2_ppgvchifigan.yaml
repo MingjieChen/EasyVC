@@ -7,7 +7,7 @@ dev_set: dev_all
 
 
 # encoder-decoder
-ling_enc: vqwav2vec
+ling_enc: conformer_ppg
 spk_enc: utt_dvec
 pros_enc: ppgvc_f0
 decoder: FastSpeech2
@@ -37,7 +37,6 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
-    out_dim: 80
     max_len: 1000
     max_seq_len: 1000
     spk_emb_dim: 256
@@ -46,7 +45,7 @@ decoder_params:
         hidden_dim: 256
     prenet:
         conv_kernel_size: 3
-        input_dim: 512
+        input_dim: 144
         dropout: 0.1
     postnet:
         idim: 80

@@ -92,7 +92,7 @@ python evaluation/new_speechbrain_asr.py  evaluation/transformer_asr.yaml  \
         --device=cpu
 EOF
                             
-    submitjob -n $n_asr_jobs -m 20000 -M2 $asr_log $asr_job
+    submitjob -n $n_asr_jobs -m 20000 -M2 -o -l hostname="!node20&!node21&!node23&!node24&!node26&!node27&!node28&!node29" -eo  $asr_log $asr_job
     echo "asr job submited, see ${asr_log}"
         
 fi       
@@ -116,7 +116,7 @@ python3 evaluation/speechbrain_asr_wer.py \
         --decoding_output_filename token.txt \
         --wer_output_path $root/$exp_dir/evaluation_${eval_dataset}/asr_out_${task}_${epochs}/wer.all.txt
 EOF
-    submitjob -m 10000 $log $job        
+    submitjob -m 10000 -o -l hostname="!node20&!node21&!node23&!node24&!node26&!node27&!node28&!node29" -eo $log $job        
     echo "asr score job submited, see logs in $log"
 fi     
 
