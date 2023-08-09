@@ -210,17 +210,18 @@ python inference.py \
 
 | Model         | Link          |
 | ------------- | ------------- |
-| `libritts_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1zQnTgCyQib9qgrf8v1KoikFGk6OJ6ncs/view?usp=share_link) |  
-| `libritts_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1Iyf93J5mFGpL0RnL1Xsq4rZkJLlJWf6M/view?usp=share_link) |
-| `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/10Cq7XDTDBDZi9-_tiqQ1UQXyQpLGHzpe/view?usp=share_link) |  
-| `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1bt0absgahiSopgtTaMBVHUZIxMsonrLu/view?usp=share_link) |
-| `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1mNFdw9Mmn0soj5mwQcko7L_EzKyaBLne/view?usp=share_link) |  
-| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/19cf81vtFm2BVZiuTwW37ZNQZz6aGlF-1/view?usp=share_link) |
-| `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1IXonxzpqFhNXOHflxeimGUzhJC5cWd8O/view?usp=share_link) |  
-| `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1yxrmnh2fDbsMPTcniW1Dz1TOUDxkHiza/view?usp=share_link) |
+| `libritts_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1DJpMXcWvgb_w1FhUnNBfEKbsDcByhWm7?usp=share_link) |  
+| `libritts_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1SJQLqwV8QL20NClj5-jZQuRKOLgnKbi7?usp=share_link) |
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1VGwR2sI-hFqveSFoahlj42-bt83NUiW4?usp=share_link) |  
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1-0e9wTUwKvD62o11iWy2P8_lG7jYu4M9?usp=share_link) |
+| `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |  
+| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](hhttps://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1yHoZjhytgy3oExw-Qukng689mWanVgql?usp=share_link) |  
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/173jytBMyi0auU3eYPNi3Mdj47SeV38LE?usp=share_link) |
 
 
 # Authors
 
 - Mingjie Chen, University of Sheffield
 - Prof. Thomas Hain, University of Sheffield
+``
