@@ -247,7 +247,7 @@ if __name__ == '__main__':
         if args.device == 'cuda':
             torch.cuda.empty_cache()    
         end_time = time.time()
-        rtf = (end_time - start_time) / (0.01 * ling_rep.size(1))
+        rtf = (end_time - start_time) / (0.01 * mel_duration)
         total_rtf += rtf
         cnt += 1
         converted_wav_basename = f'{ID}_gen.wav'

@@ -33,18 +33,6 @@ create a conda env
 conda create --name torch_1.9 --file requirements.txt
 ```
 
-# Pretrained Models
-
-| Model         | Link          |
-| ------------- | ------------- |
-| `libritts_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
-| `libritts_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
-| `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
-| `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
-| `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
-| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
-| `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
-| `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
 
 
 
@@ -217,6 +205,19 @@ python inference.py \
 ```
 ./submit_evaluation.sh
 ```
+
+# Pretrained Models
+
+| Model         | Link          |
+| ------------- | ------------- |
+| `libritts_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1zQnTgCyQib9qgrf8v1KoikFGk6OJ6ncs/view?usp=share_link) |  
+| `libritts_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1Iyf93J5mFGpL0RnL1Xsq4rZkJLlJWf6M/view?usp=share_link) |
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/10Cq7XDTDBDZi9-_tiqQ1UQXyQpLGHzpe/view?usp=share_link) |  
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1bt0absgahiSopgtTaMBVHUZIxMsonrLu/view?usp=share_link) |
+| `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1mNFdw9Mmn0soj5mwQcko7L_EzKyaBLne/view?usp=share_link) |  
+| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/19cf81vtFm2BVZiuTwW37ZNQZz6aGlF-1/view?usp=share_link) |
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1IXonxzpqFhNXOHflxeimGUzhJC5cWd8O/view?usp=share_link) |  
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/file/d/1yxrmnh2fDbsMPTcniW1Dz1TOUDxkHiza/view?usp=share_link) |
 
 
 # Authors
