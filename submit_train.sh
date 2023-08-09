@@ -35,9 +35,9 @@ exp_name=libritts_train_0
 
 
 exp_dir=exp
-njobs=24
-ngpus=2
-slots=8
+njobs=48
+ngpus=4
+slots=16
 #gputypes="GeForceRTX3060|GeForceRTX3090"
 #gputypes="GeForceRTX3090"
 #gputypes="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060"

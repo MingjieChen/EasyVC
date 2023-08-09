@@ -163,7 +163,7 @@ def infer_GradTTS(model, ling, pros, spk):
     
     
     ling_lengths = torch.LongTensor([ling.size(2)]).to(ling.device)
-    mel = model(ling, ling_lengths, spk, pros, 10)        
+    mel = model.inference(ling, ling_lengths, spk, pros, 10)        
     mel = mel.transpose(1,2)
     return mel
 

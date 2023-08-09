@@ -39,6 +39,7 @@ frames_per_step: !!int 4
 
 # decoder params
 decoder_params: 
+    out_dim: 80
     prosodic_rep_type: continuous
     prosodic_net:
         hidden_dim: 256

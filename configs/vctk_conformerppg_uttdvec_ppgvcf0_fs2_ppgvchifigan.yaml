@@ -37,6 +37,7 @@ max_utt_duration: !!float 10.0 # max utterance duration (seconds)
 
 # decoder params
 decoder_params: 
+    out_dim: 80
     max_len: 1000
     max_seq_len: 1000
     spk_emb_dim: 256

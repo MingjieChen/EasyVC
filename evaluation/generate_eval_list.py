@@ -21,10 +21,12 @@ if __name__ == '__main__':
     parser.add_argument('--eval_list_out_path', type = str)
     # task setup
     
-    n_samples_per_trg_speaker = parser.add_argument('--n_samples_per_trg_speaker', type = int)
-    n_eval_speakers = parser.add_argument('--n_eval_speakers', type = int)
-    n_samples_per_src_speaker = parser.add_argument('--n_samples_per_src_speaker', type = int)
     
+    parser.add_argument('--n_samples_per_trg_speaker', type = int)
+    parser.add_argument('--n_eval_speakers', type = int)
+    parser.add_argument('--n_samples_per_src_speaker', type = int)
+    parser.add_argument('--src_speakers', type = str, nargs = '+', default = None)
+    parser.add_argument('--trg_speakers', type = str, nargs = '+', default = None)
     
     args = parser.parse_args()
     # load in all speakers in eval set
@@ -76,26 +78,47 @@ if __name__ == '__main__':
     selected_trg_metas = {}
 
     # sample spk metas
-    for spk in selected_speakers:
+    if args.src_speakers is None:
+        src_speakers = selected_speakers[:]
+    else:
+        src_speakers = args.src_speakers[:]    
+    if args.trg_speakers is None:
+        trg_speakers = selected_speakers[:]    
+    else:
+        trg_speakers = args.trg_speakers[:]
+        
+            
+    for spk in src_speakers:
         print(spk)
         selected_src_metas[spk] = []
-        selected_trg_metas[spk] = []
+        #selected_trg_metas[spk] = []
         _spk_metas = spk2wavs[spk]
         _src_spk_metas_idxs = random.sample(range(0,len(_spk_metas)), k = int(args.n_samples_per_src_speaker))
-        _trg_spk_metas_idxs = random.sample(range(0,len(_spk_metas)), k = int(args.n_samples_per_trg_speaker))
+        #_trg_spk_metas_idxs = random.sample(range(0,len(_spk_metas)), k = int(args.n_samples_per_trg_speaker))
         _selected_src_spk_metas = [ _spk_metas[_i] for _i in _src_spk_metas_idxs]
-        _selected_trg_spk_metas = [ _spk_metas[_i] for _i in _trg_spk_metas_idxs]
+        #_selected_trg_spk_metas = [ _spk_metas[_i] for _i in _trg_spk_metas_idxs]
         selected_src_metas[spk].extend(_selected_src_spk_metas)
+        #selected_trg_metas[spk].extend(_selected_trg_spk_metas)
+        #print(f'spk {spk}| src: {len(_selected_src_spk_metas)}, trg: {len(_selected_trg_spk_metas)}')
+        print(f'spk {spk}| src: {len(_selected_src_spk_metas)}')
+    
+    for spk in trg_speakers:
+        print(spk)
+        selected_trg_metas[spk] = []
+        _spk_metas = spk2wavs[spk]
+        _trg_spk_metas_idxs = random.sample(range(0,len(_spk_metas)), k = int(args.n_samples_per_trg_speaker))
+        _selected_trg_spk_metas = [ _spk_metas[_i] for _i in _trg_spk_metas_idxs]
         selected_trg_metas[spk].extend(_selected_trg_spk_metas)
-        print(f'spk {spk}| src: {len(_selected_src_spk_metas)}, trg: {len(_selected_trg_spk_metas)}')
+        print(f'spk {spk}| trg: {len(_selected_trg_spk_metas)}')
+            
    
         
     # produce eval list
     if args.task == 'vc':
-        for src_spk in selected_speakers:
+        for src_spk in src_speakers:
             src_metas = selected_src_metas[src_spk]
             for _meta in src_metas:
-                for trg_spk in selected_speakers:
+                for trg_spk in trg_speakers:
                     if src_spk != trg_spk:
                         trg_metas = selected_trg_metas[trg_spk]
                         trg_wavs = [_trg_meta['wav_path'] for _trg_meta in trg_metas]

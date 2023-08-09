@@ -50,6 +50,9 @@ wav_dir=$root/$eval_wav_dir
 out_csv=$root/$exp_dir/evaluation_${eval_dataset}/utmos_${task}_${epochs}.csv
 conda=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7
 conda_env=voicemos
+export PATH=/share/mini1/sw/std/cuda/cuda11.1/bin:\$PATH
+export CUDA_HOME=/share/mini1/sw/std/cuda/cuda11.1/
+export LD_LIBRARY_PATH=/share/mini1/sw/std/python/anaconda3-2019.07/v3.7/envs/StyleSpeech/lib:/share/mini1/sw/std/cuda/cuda11.1/lib64:\$LD_LIBRARY_PATH
 source \$conda/bin/activate \$conda_env
 
 cd evaluation/UTMOS-demo/
@@ -58,7 +61,7 @@ python predict.py --mode predict_dir --inp_dir \$wav_dir --bs 1 --out_path \$out
 
 EOF
 
-    submitjob -m 20000 -M2 $utmos_log $utmos_job
+    submitjob -M2 $utmos_log $utmos_job
     echo "utmos job submited, see ${utmos_log}"
 fi
 
@@ -92,7 +95,7 @@ python evaluation/new_speechbrain_asr.py  evaluation/transformer_asr.yaml  \
         --device=cpu
 EOF
                             
-    submitjob -n $n_asr_jobs -m 20000 -M2 -o -l hostname="!node20&!node21&!node23&!node24&!node26&!node27&!node28&!node29" -eo  $asr_log $asr_job
+    submitjob -n $n_asr_jobs  -M2 -o -l hostname="!node20&!node21&!node23&!node24&!node26&!node27&!node28&!node29" -eo  $asr_log $asr_job
     echo "asr job submited, see ${asr_log}"
         
 fi       
@@ -116,7 +119,7 @@ python3 evaluation/speechbrain_asr_wer.py \
         --decoding_output_filename token.txt \
         --wer_output_path $root/$exp_dir/evaluation_${eval_dataset}/asr_out_${task}_${epochs}/wer.all.txt
 EOF
-    submitjob -m 10000 -o -l hostname="!node20&!node21&!node23&!node24&!node26&!node27&!node28&!node29" -eo $log $job        
+    submitjob -o -l hostname="!node20&!node21&!node23&!node24&!node26&!node27&!node28&!node29" -eo $log $job        
     echo "asr score job submited, see logs in $log"
 fi     
 
@@ -156,7 +159,8 @@ python3 evaluation/speechbrain_asv.py \
                 
 
 EOF
-    submitjob  -g1 -m 20000 -M2 -o -l gputype="GeForceGTXTITANX|GeForceGTX1080Ti" -eo $asv_log $asv_job
+    #submitjob  -g1 -M2 -o gputype="GeForceGTXTITANX|GeForceGTX1080Ti|GeForceRTX3060" -eo $asv_log $asv_job
+    submitjob  -g1 -M2 -o gputype="GeForceGTX1080Ti" -eo $asv_log $asv_job
     echo "asv job submited, see ${asv_log}"
 
 fi    
