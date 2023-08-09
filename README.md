@@ -215,7 +215,7 @@ python inference.py \
 | `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1VGwR2sI-hFqveSFoahlj42-bt83NUiW4?usp=share_link) |  
 | `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1-0e9wTUwKvD62o11iWy2P8_lG7jYu4M9?usp=share_link) |
 | `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |  
-| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](hhttps://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |
+| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |
 | `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1yHoZjhytgy3oExw-Qukng689mWanVgql?usp=share_link) |  
 | `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/173jytBMyi0auU3eYPNi3Mdj47SeV38LE?usp=share_link) |
 
