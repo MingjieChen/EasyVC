@@ -33,6 +33,26 @@ create a conda env
 conda create --name torch_1.9 --file requirements.txt
 ```
 
+# Pretrained Models
+
+| Model         | Link          |
+| ------------- | ------------- |
+| `libritts_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
+| `libritts_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
+| `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
+| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive]() |  
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive]() |
+
+
+
+# Quick use
+
+```
+
+```
 
 
 # Working progress
