@@ -38,10 +38,22 @@ conda create --name torch_1.9 --file requirements.txt
 
 # Quick use
 
-```
+Prepare repository
 
 ```
+git clone https://github.com/MingjieChen/EasyVC.git
+cd EasyVC
+```
 
+Download VQWav2vec if you want to use it as linguistic encoder
+
+```
+cd ling_encoder/vqwav2vec
+wget https://dl.fbaipublicfiles.com/fairseq/wav2vec/vq-wav2vec_kmeans.pt
+cd ../..
+```
+
+Download model checkpoint and config from [Pretrained Models](# Pretrained Models ) 
 
 # Working progress
 
