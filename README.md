@@ -1,7 +1,7 @@
 # **EasyVC**
 
 
-[[**demo**](https://mingjiechen.github.io/easyvc/index.html)] [[**Model Weights**]](https://drive.google.com/drive/folders/1Ts4WF2rwWDMNFnTkSl8I1RmEqdAH48HV?usp=share_link)
+[[**demo**](https://mingjiechen.github.io/easyvc/index.html)] [[**Model Weights**](https://drive.google.com/drive/folders/1Ts4WF2rwWDMNFnTkSl8I1RmEqdAH48HV?usp=share_link)]
 
 ***
 
