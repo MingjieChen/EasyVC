@@ -1,7 +1,7 @@
 # **EasyVC**
 
 
-[[demo](https://mingjiechen.github.io/easyvc/index.html)]
+[[**demo**](https://mingjiechen.github.io/easyvc/index.html)] [[**Model Weights**]](https://drive.google.com/drive/folders/1Ts4WF2rwWDMNFnTkSl8I1RmEqdAH48HV?usp=share_link)
 
 ***
 
@@ -53,7 +53,35 @@ wget https://dl.fbaipublicfiles.com/fairseq/wav2vec/vq-wav2vec_kmeans.pt
 cd ../..
 ```
 
-Download model checkpoint and config from [Pretrained Models](# Pretrained Models ) 
+Download model checkpoint and config from **Pretrained Models**.
+
+Run inference, e.g.
+```
+python3 easy_inference.py \
+     --model_ckpt model.pth \
+     --model_config model.yaml \
+     --source_wav source.wav \
+     --target_wav_list target.1.wav target.2.wav target.3.wav \
+     --output_wav_path output.wav
+```
+
+
+# Pretrained Models
+
+Voice Conversion systems are denoted as a format of `${training_dataset}_${linguistic_encoder}_${speaker_encoder}_${prosodic_encoder}_${decoder}_${vocoder}`
+
+
+| Model         | Link          |
+| ------------- | ------------- |
+| `libritts_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1DJpMXcWvgb_w1FhUnNBfEKbsDcByhWm7?usp=share_link) |  
+| `libritts_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1SJQLqwV8QL20NClj5-jZQuRKOLgnKbi7?usp=share_link) |
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1VGwR2sI-hFqveSFoahlj42-bt83NUiW4?usp=share_link) |  
+| `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1-0e9wTUwKvD62o11iWy2P8_lG7jYu4M9?usp=share_link) |
+| `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |  
+| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1yHoZjhytgy3oExw-Qukng689mWanVgql?usp=share_link) |  
+| `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/173jytBMyi0auU3eYPNi3Mdj47SeV38LE?usp=share_link) |
+
 
 # Working progress
 
@@ -218,18 +246,6 @@ python inference.py \
 ./submit_evaluation.sh
 ```
 
-# Pretrained Models
-
-| Model         | Link          |
-| ------------- | ------------- |
-| `libritts_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1DJpMXcWvgb_w1FhUnNBfEKbsDcByhWm7?usp=share_link) |  
-| `libritts_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1SJQLqwV8QL20NClj5-jZQuRKOLgnKbi7?usp=share_link) |
-| `libritts_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1VGwR2sI-hFqveSFoahlj42-bt83NUiW4?usp=share_link) |  
-| `libritts_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1-0e9wTUwKvD62o11iWy2P8_lG7jYu4M9?usp=share_link) |
-| `vctk_conformerppg_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |  
-| `vctk_conformerppg_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1K8AyxmGWyo6skMqxIqgmAxLIS0CnU-SD?usp=share_link) |
-| `vctk_vqwav2vec_uttdvec_ppgvcf0_fs2_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/1yHoZjhytgy3oExw-Qukng689mWanVgql?usp=share_link) |  
-| `vctk_vqwav2vec_uttdvec_ppgvcf0_tacoar_ppgvchifigan` | [Google Drive](https://drive.google.com/drive/folders/173jytBMyi0auU3eYPNi3Mdj47SeV38LE?usp=share_link) |
 
 
 # Authors
