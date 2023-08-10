@@ -43,6 +43,7 @@ Prepare repository
 ```
 git clone https://github.com/MingjieChen/EasyVC.git
 cd EasyVC
+conda activate torch_1.9
 ```
 
 Download VQWav2vec if you want to use it as linguistic encoder
